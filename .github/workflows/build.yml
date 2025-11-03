@@ -1,0 +1,156 @@
+name: Build All Firmware
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-stm32-ministepper:
+    name: Build STM32 Mini Stepper (G071)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup ARM GCC toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.3.Rel1'
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+
+      - name: Configure CMake
+        working-directory: firmware
+        run: |
+          mkdir -p build/ministepper-g071
+          cd build/ministepper-g071
+          cmake ../.. -G Ninja -DPROJECT=tsumikoro-ministepper -DMCU=STM32G071 -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build firmware
+        working-directory: firmware/build/ministepper-g071
+        run: ninja
+
+      - name: Display build info
+        working-directory: firmware/build/ministepper-g071
+        run: |
+          ls -lh tsumikoro-ministepper.*
+          arm-none-eabi-size tsumikoro-ministepper.elf
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ministepper-firmware
+          path: |
+            firmware/build/ministepper-g071/tsumikoro-ministepper.elf
+            firmware/build/ministepper-g071/tsumikoro-ministepper.bin
+            firmware/build/ministepper-g071/tsumikoro-ministepper.hex
+          retention-days: 30
+
+  build-stm32-servo:
+    name: Build STM32 Servo (G030)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup ARM GCC toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.3.Rel1'
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+
+      - name: Configure CMake
+        working-directory: firmware
+        run: |
+          mkdir -p build/servo-g030
+          cd build/servo-g030
+          cmake ../.. -G Ninja -DPROJECT=tsumikoro-servo -DMCU=STM32G030 -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build firmware
+        working-directory: firmware/build/servo-g030
+        run: ninja
+
+      - name: Display build info
+        working-directory: firmware/build/servo-g030
+        run: |
+          ls -lh tsumikoro-servo.*
+          arm-none-eabi-size tsumikoro-servo.elf
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: servo-firmware
+          path: |
+            firmware/build/servo-g030/tsumikoro-servo.elf
+            firmware/build/servo-g030/tsumikoro-servo.bin
+            firmware/build/servo-g030/tsumikoro-servo.hex
+          retention-days: 30
+
+  build-esp32-bridge:
+    name: Build ESP32 Bridge (S3)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: firmware/tsumikoro-bridge
+        run: uv sync
+
+      - name: Create test secrets
+        working-directory: firmware/tsumikoro-bridge/esphome
+        run: |
+          cat > secrets.yaml << 'EOF'
+          # CI build secrets
+          wifi_ssid: "TestWiFi"
+          wifi_password: "testpassword123"
+          api_encryption_key: "NGktUgKgLcuX/DAceUzzGMLTQiViSbh4vih3uvIdI/s="
+          ota_password: "testota123"
+          ap_password: "testap123"
+          EOF
+
+      - name: Validate ESPHome config
+        working-directory: firmware/tsumikoro-bridge
+        run: uv run esphome config esphome/tsumikoro-bridge.yaml
+
+      - name: Build firmware
+        working-directory: firmware/tsumikoro-bridge
+        run: uv run esphome compile esphome/tsumikoro-bridge.yaml
+
+      - name: Display build info
+        working-directory: firmware/tsumikoro-bridge
+        run: |
+          find esphome/.esphome/build -name "*.bin" -exec ls -lh {} \;
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-bridge-firmware
+          path: |
+            firmware/tsumikoro-bridge/esphome/.esphome/build/tsumikoro-bridge/.pioenvs/tsumikoro-bridge/firmware.bin
+            firmware/tsumikoro-bridge/esphome/.esphome/build/tsumikoro-bridge/.pioenvs/tsumikoro-bridge/bootloader.bin
+            firmware/tsumikoro-bridge/esphome/.esphome/build/tsumikoro-bridge/.pioenvs/tsumikoro-bridge/partitions.bin
+          retention-days: 30
