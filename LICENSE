@@ -1,0 +1,47 @@
+# Tsumikoro License
+
+This repository contains both firmware/software and hardware design files, each under different licenses appropriate to their domain.
+
+## Firmware and Software
+
+All firmware and software code (including but not limited to files in the `firmware/` directory) is licensed under the **Apache License 2.0**.
+
+See [firmware/LICENSE](firmware/LICENSE) for the full license text.
+
+## Hardware Designs
+
+All hardware design files, including:
+- 3D models (CAD files, STL, STEP, etc.)
+- PCB designs (schematics, layouts, Gerber files)
+- Mechanical drawings
+- Assembly instructions
+
+are licensed under the **CERN Open Hardware Licence Version 2 - Permissive (CERN-OHL-P v2)**.
+
+The full license text is available at: https://ohwr.org/cern_ohl_p_v2.txt
+
+---
+
+## Quick Summary
+
+### Firmware (Apache 2.0)
+- ✅ Commercial use allowed
+- ✅ Modification allowed
+- ✅ Distribution allowed
+- ✅ Patent use allowed
+- ⚠️ Must include copyright notice
+- ⚠️ Must include license text
+- ⚠️ Must state changes made
+
+### Hardware (CERN-OHL-P v2)
+- ✅ Commercial use allowed
+- ✅ Modification allowed
+- ✅ Distribution allowed
+- ✅ Patent use allowed
+- ⚠️ Must include copyright notice
+- ⚠️ Must include license text
+- ⚠️ Must document modifications
+
+---
+
+Copyright (c) 2025-2025 Yann Ramin

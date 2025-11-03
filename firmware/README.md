@@ -21,28 +21,35 @@ STM32G0-based firmware for Tsumikoro motor controller projects.
 
 ```
 firmware/
-├── CMakeLists.txt              # Top-level build configuration
-├── cmake/                      # Build system configuration
+├── CMakeLists.txt              # Top-level build configuration (STM32 only)
+├── cmake/                      # Build system configuration (STM32)
 │   ├── arm-none-eabi.cmake    # ARM GCC toolchain
 │   ├── stm32g071.cmake        # STM32G071 MCU configuration
 │   └── stm32g030.cmake        # STM32G030 MCU configuration
-├── common/                     # Shared libraries and code
+├── common/                     # Shared STM32 libraries and code
 │   ├── CMakeLists.txt         # Common library build config
 │   ├── STM32CubeG0/           # ST HAL/LL drivers (submodule)
 │   └── templates/             # MCU-specific project templates
 │       └── stm32g071cbu6/     # STM32G071CBU6 template
+├── shared/                     # Shared protocol definitions (C/C++)
+│   └── tsumikoro_protocol.h   # Communication protocol (ESP32 + STM32)
 ├── tsumikoro-ministepper/     # Mini stepper (STM32G071G8U6)
 │   ├── src/                   # Source files
 │   ├── inc/                   # Header files
 │   ├── startup/               # Startup assembly
 │   ├── linker/                # Linker scripts
 │   └── CMakeLists.txt         # Project build config
-└── tsumikoro-servo/           # Servo controller (STM32G030F6P6)
-    ├── src/                   # Source files
-    ├── inc/                   # Header files
-    ├── startup/               # Startup assembly
-    ├── linker/                # Linker scripts
-    └── CMakeLists.txt         # Project build config
+├── tsumikoro-servo/           # Servo controller (STM32G030F6P6)
+│   ├── src/                   # Source files
+│   ├── inc/                   # Header files
+│   ├── startup/               # Startup assembly
+│   ├── linker/                # Linker scripts
+│   └── CMakeLists.txt         # Project build config
+└── tsumikoro-bridge/          # ESP32/ESP32-S3 network bridge (ESPHome)
+    ├── esphome/               # ESPHome configuration
+    ├── components/            # Custom ESPHome components
+    ├── Makefile               # Build system (uses uv)
+    └── pyproject.toml         # Python dependencies
 ```
 
 ## Prerequisites
@@ -281,7 +288,15 @@ Your program is too large for the target MCU. Either:
 
 ## License
 
+This firmware is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for the full license text.
+
+### Third-Party Components
+
 This project uses ST's STM32CubeG0 HAL library, which is licensed under BSD-3-Clause.
+
+### Copyright
+
+Copyright (c) 2025-2025 Yann Ramin
 
 ## Resources
 

@@ -1,0 +1,296 @@
+# Tsumikoro Bridge
+
+ESP32/ESP32-S3 based network bridge for Tsumikoro motor controllers, built with ESPHome.
+
+## Overview
+
+The Tsumikoro Bridge provides WiFi connectivity and network control for STM32-based motor controllers (tsumikoro-ministepper and tsumikoro-servo). It acts as a UART-to-WiFi bridge with Home Assistant integration.
+
+## Hardware
+
+**Supported Platforms:**
+- ESP32 (any variant)
+- ESP32-S3 (recommended)
+
+**Minimum Requirements:**
+- ESP32 with at least 4MB Flash
+- UART pins for motor controller communication
+- WiFi connectivity
+
+## Features
+
+- 🌐 WiFi connectivity with fallback AP
+- 🏠 Native Home Assistant integration via ESPHome API
+- 🔄 OTA (Over-The-Air) firmware updates
+- 📡 UART communication with motor controllers
+- 🔍 Real-time status monitoring
+- 🌐 Web interface for status and control
+- 📦 Shared protocol with STM32 firmware
+
+## Project Structure
+
+```
+firmware/tsumikoro-bridge/
+├── pyproject.toml          # Python dependencies (uv)
+├── Makefile                # Build system
+├── esphome/
+│   ├── tsumikoro-bridge.yaml    # ESPHome configuration
+│   └── secrets.yaml.example     # Secrets template
+└── components/
+    └── tsumikoro_bridge/        # Custom ESPHome component
+        ├── __init__.py
+        ├── tsumikoro_bridge.h
+        └── tsumikoro_bridge.cpp
+
+Note: Shared protocol definitions are in ../shared/tsumikoro_protocol.h
+```
+
+## Setup
+
+### Prerequisites
+
+**Install uv (Python package manager):**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Required tools:**
+- Python 3.11 or newer
+- uv package manager
+- USB-to-Serial driver (for initial flashing)
+
+### Initial Configuration
+
+1. **Install dependencies:**
+   ```bash
+   cd tsumikoro-bridge
+   make setup
+   ```
+
+2. **Configure secrets:**
+   ```bash
+   cd esphome
+   cp secrets.yaml.example secrets.yaml
+   # Edit secrets.yaml with your credentials
+   ```
+
+3. **Generate API encryption key:**
+   ```bash
+   make generate-key
+   # Copy the generated key to secrets.yaml
+   ```
+
+4. **Edit configuration:**
+   Edit `esphome/tsumikoro-bridge.yaml` to:
+   - Select your ESP32 board (esp32dev, esp32-s3-devkitc-1, etc.)
+   - Configure UART pins for your hardware
+   - Adjust settings as needed
+
+## Building and Flashing
+
+### Initial Flash (USB)
+
+```bash
+# Validate configuration
+make validate
+
+# Build firmware
+make build
+
+# Upload via USB (first time)
+make upload
+```
+
+### OTA Updates (After Initial Flash)
+
+```bash
+# Build and upload over WiFi
+make upload-ota
+```
+
+### View Logs
+
+```bash
+make logs
+```
+
+### ESPHome Dashboard
+
+```bash
+make dashboard
+# Open http://localhost:6052 in your browser
+```
+
+## Configuration
+
+### UART Pins
+
+Default configuration in `esphome/tsumikoro-bridge.yaml`:
+```yaml
+tsumikoro_bridge:
+  - platform: tsumikoro_bridge
+    tx_pin: GPIO17  # TX to motor controller RX
+    rx_pin: GPIO16  # RX from motor controller TX
+    baud_rate: 115200
+```
+
+### Board Selection
+
+For **ESP32**:
+```yaml
+esp32:
+  board: esp32dev
+```
+
+For **ESP32-S3**:
+```yaml
+esp32:
+  board: esp32-s3-devkitc-1
+```
+
+## Protocol
+
+The bridge uses a shared protocol defined in `../shared/tsumikoro_protocol.h`, which is also used by the STM32 firmware projects.
+
+### Packet Format
+
+```
+[START(0xAA)][ID][CMD][LEN][DATA...][CHECKSUM][END(0x55)]
+```
+
+### Commands
+
+| Command | Value | Description |
+|---------|-------|-------------|
+| SET_SPEED | 0x01 | Set motor speed |
+| GET_STATUS | 0x02 | Request status |
+| STOP | 0x03 | Emergency stop |
+| RESET | 0x04 | Reset controller |
+| SET_POSITION | 0x05 | Set target position (stepper) |
+
+See `../shared/tsumikoro_protocol.h` for complete protocol specification.
+
+## Home Assistant Integration
+
+Once flashed and connected to WiFi, the bridge will automatically appear in Home Assistant (if you have the ESPHome integration installed).
+
+### Automatic Discovery
+
+1. Go to **Settings** → **Devices & Services**
+2. Look for "Tsumikoro Bridge" in discovered devices
+3. Click **Configure** and enter your API encryption key
+
+### Manual Configuration
+
+```yaml
+# configuration.yaml
+esphome:
+  tsumikoro_bridge:
+    host: tsumikoro-bridge.local
+    password: !secret esphome_api_key
+```
+
+## Development
+
+### Custom Component Structure
+
+The `tsumikoro_bridge` custom component is written in C++ and integrates with ESPHome's component system:
+
+- `__init__.py`: ESPHome component registration
+- `tsumikoro_bridge.h`: Component header
+- `tsumikoro_bridge.cpp`: Implementation
+
+### Shared Code
+
+Protocol definitions are shared with STM32 firmware via `../shared/`:
+- Located in `firmware/shared/` directory
+- Can be included in both ESP32 and STM32 projects
+- Platform-independent C code
+- No symlinks required - ESPHome includes directly via relative path
+
+### Adding Custom Functionality
+
+1. Edit `components/tsumikoro_bridge/tsumikoro_bridge.cpp`
+2. Add your custom logic
+3. Rebuild: `make build`
+4. Upload: `make upload-ota`
+
+## Troubleshooting
+
+### "uv: command not found"
+
+Install uv:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.bashrc  # or restart terminal
+```
+
+### "secrets.yaml not found"
+
+```bash
+cd esphome
+cp secrets.yaml.example secrets.yaml
+# Edit with your credentials
+```
+
+### Upload fails
+
+**Initial flash must be via USB:**
+```bash
+make upload
+```
+
+**For OTA updates**, ensure:
+- Device is on same network
+- Correct OTA password in secrets.yaml
+
+### Connection issues
+
+Check WiFi credentials in `secrets.yaml` and ensure:
+- Correct SSID and password
+- 2.4GHz WiFi (ESP32 doesn't support 5GHz)
+- Good signal strength
+
+## Advanced Configuration
+
+### Web Server
+
+Enable web server for status page:
+```yaml
+web_server:
+  port: 80
+  # Access at http://tsumikoro-bridge.local
+```
+
+### Logging
+
+Adjust log level:
+```yaml
+logger:
+  level: DEBUG  # VERBOSE, DEBUG, INFO, WARN, ERROR
+```
+
+### Status LED
+
+Configure status LED pin:
+```yaml
+status_led:
+  pin: GPIO2  # Built-in LED on most boards
+```
+
+## License
+
+This project is licensed under the Apache License 2.0.
+
+See [../firmware/LICENSE](../firmware/LICENSE) for details.
+
+## Resources
+
+- [ESPHome Documentation](https://esphome.io/)
+- [ESP32 Documentation](https://docs.espressif.com/projects/esp-idf/)
+- [uv Package Manager](https://github.com/astral-sh/uv)
+- [STM32 Firmware](../firmware/)
+
+---
+
+Copyright (c) 2025-2025 Yann Ramin

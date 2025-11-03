@@ -1,0 +1,66 @@
+esphome:
+  name: tsumikoro-bridge
+  friendly_name: Tsumikoro Bridge
+  platformio_options:
+    board_build.flash_mode: dio
+  # Include shared C code from firmware projects
+  includes:
+    - ../../shared/
+
+# ESP32 or ESP32-S3 configuration
+esp32:
+  board: esp32-s3-devkitc-1  # Change to esp32dev for regular ESP32
+  framework:
+    type: arduino
+    version: recommended
+
+# Enable logging
+logger:
+  level: DEBUG
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+# Enable OTA updates
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+# WiFi configuration
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Tsumikoro-Bridge Fallback"
+    password: !secret ap_password
+
+captive_portal:
+
+# Web server for status
+web_server:
+  port: 80
+
+# Custom component for motor bridge functionality
+external_components:
+  - source:
+      type: local
+      path: ../components
+
+# Status LED
+status_led:
+  pin: GPIO2
+
+# UART for motor controller communication
+uart:
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  baud_rate: 115200
+
+# Motor bridge configuration
+# Custom component for communicating with motor controllers
+tsumikoro_bridge:
+  id: motor_bridge

@@ -1,0 +1,25 @@
+[project]
+name = "tsumikoro-bridge"
+version = "0.1.0"
+description = "ESPHome-based bridge controller for Tsumikoro motor control"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "esphome>=2024.11.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = []
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
