@@ -1,0 +1,60 @@
+# Dependabot configuration for tsumikoro
+# Automatically updates dependencies across the repository
+
+version: 2
+updates:
+  # Update Git submodules (STM32CubeG0)
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    labels:
+      - "dependencies"
+      - "submodules"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    open-pull-requests-limit: 5
+
+  # Update GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    open-pull-requests-limit: 5
+
+  # Update Python dependencies for ESP32 bridge (ESPHome)
+  - package-ecosystem: "pip"
+    directory: "/firmware/tsumikoro-bridge"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    labels:
+      - "dependencies"
+      - "python"
+      - "esphome"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    open-pull-requests-limit: 10
+    # Group ESPHome and related packages together
+    groups:
+      esphome:
+        patterns:
+          - "esphome*"
+          - "aioesphomeapi"
+      development:
+        patterns:
+          - "ruff"
+          - "pytest*"
