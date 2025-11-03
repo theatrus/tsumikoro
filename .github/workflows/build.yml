@@ -40,17 +40,17 @@ jobs:
       - name: Display build info
         working-directory: firmware/build/ministepper-g071
         run: |
-          ls -lh tsumikoro-ministepper.*
-          arm-none-eabi-size tsumikoro-ministepper.elf
+          ls -lh tsumikoro-ministepper/tsumikoro-ministepper.*
+          arm-none-eabi-size tsumikoro-ministepper/tsumikoro-ministepper.elf
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ministepper-firmware
           path: |
-            firmware/build/ministepper-g071/tsumikoro-ministepper.elf
-            firmware/build/ministepper-g071/tsumikoro-ministepper.bin
-            firmware/build/ministepper-g071/tsumikoro-ministepper.hex
+            firmware/build/ministepper-g071/tsumikoro-ministepper/tsumikoro-ministepper.elf
+            firmware/build/ministepper-g071/tsumikoro-ministepper/tsumikoro-ministepper.bin
+            firmware/build/ministepper-g071/tsumikoro-ministepper/tsumikoro-ministepper.hex
           retention-days: 30
 
   build-stm32-servo:
@@ -85,17 +85,17 @@ jobs:
       - name: Display build info
         working-directory: firmware/build/servo-g030
         run: |
-          ls -lh tsumikoro-servo.*
-          arm-none-eabi-size tsumikoro-servo.elf
+          ls -lh tsumikoro-servo/tsumikoro-servo.*
+          arm-none-eabi-size tsumikoro-servo/tsumikoro-servo.elf
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: servo-firmware
           path: |
-            firmware/build/servo-g030/tsumikoro-servo.elf
-            firmware/build/servo-g030/tsumikoro-servo.bin
-            firmware/build/servo-g030/tsumikoro-servo.hex
+            firmware/build/servo-g030/tsumikoro-servo/tsumikoro-servo.elf
+            firmware/build/servo-g030/tsumikoro-servo/tsumikoro-servo.bin
+            firmware/build/servo-g030/tsumikoro-servo/tsumikoro-servo.hex
           retention-days: 30
 
   build-esp32-bridge:
@@ -116,9 +116,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Setup and install dependencies
         working-directory: firmware/tsumikoro-bridge
-        run: uv sync
+        run: make recreate-venv
 
       - name: Create test secrets
         working-directory: firmware/tsumikoro-bridge/esphome
