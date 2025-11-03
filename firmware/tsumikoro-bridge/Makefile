@@ -29,11 +29,6 @@ help:
 # Create venv with pip support (needed for PlatformIO)
 $(VENV_DIR):
 	@echo "Creating virtual environment with pip support..."
-	@if ! command -v uv &> /dev/null; then \
-		echo "Error: uv is not installed"; \
-		echo "Install with: curl -LsSf https://astral.sh/uv/install.sh | sh"; \
-		exit 1; \
-	fi
 	uv venv --seed
 
 # Recreate venv from scratch
