@@ -5,7 +5,7 @@ description = "ESPHome-based bridge controller for Tsumikoro motor control"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "esphome>=2024.11.0",
+    "esphome==2025.10.3",
 ]
 
 [dependency-groups]
