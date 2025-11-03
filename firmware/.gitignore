@@ -1,0 +1,36 @@
+# Build directories
+build/
+cmake-build-*/
+
+# Build outputs
+*.elf
+*.hex
+*.bin
+*.map
+*.o
+*.d
+*.a
+*.so
+
+# IDE directories
+.vscode/
+.idea/
+*.code-workspace
+
+# Debug files
+*.log
+*.dmp
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!cmake/*.cmake
+
+# Backup files
+*~
+*.bak
+*.swp
+*.swo
