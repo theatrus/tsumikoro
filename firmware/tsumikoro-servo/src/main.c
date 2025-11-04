@@ -356,7 +356,7 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
                 uint8_t idx = 1;
                 uint8_t success_count = 0;
 
-                for (uint8_t i = 0; i < count && idx + 2 < packet->data_len; i++) {
+                for (uint8_t i = 0; i < count && idx + 3 <= packet->data_len; i++) {
                     uint8_t channel = packet->data[idx];
                     uint16_t position = ((uint16_t)packet->data[idx + 1] << 8) |
                                        ((uint16_t)packet->data[idx + 2]);

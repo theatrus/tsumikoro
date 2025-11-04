@@ -172,9 +172,6 @@ static void servo_pwm_update_channel(servo_channel_t *channel)
     uint16_t pulse_us = servo_pwm_position_to_pulse(channel);
 
     /* Update compare value (CCR) - this is in microseconds at 1MHz timer clock */
-    LL_TIM_OC_SetCompareCH1(channel->timer, pulse_us);
-
-    /* Handle different channels */
     switch (channel->channel) {
         case LL_TIM_CHANNEL_CH1:
             LL_TIM_OC_SetCompareCH1(channel->timer, pulse_us);
