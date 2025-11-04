@@ -4,11 +4,18 @@ Open-source motor controller projects based on STM32G0 microcontrollers with ESP
 
 ## Projects
 
-| Project | Description | MCU | Framework | Status |
-|---------|-------------|-----|-----------|--------|
-| **tsumikoro-ministepper** | Mini stepper motor controller | STM32G071G8U6 | STM32 HAL | 🚧 In Development |
-| **tsumikoro-servo** | Servo motor controller | STM32G030F6P6TR | STM32 HAL | 🚧 In Development |
-| **tsumikoro-bridge** | WiFi/Network bridge | ESP32/ESP32-S3 | ESPHome | 🚧 In Development |
+| Project | Description | MCU | Flash/RAM | Framework | Status |
+|---------|-------------|-----|-----------|-----------|--------|
+| **tsumikoro-servo** | 6-channel servo + H-bridge motor controller | STM32G030F6P6TR | 32KB/8KB | STM32 LL | ✅ Functional (PR #9) |
+| **tsumikoro-ministepper** | Mini stepper motor controller | STM32G071G8U6 | 64KB/36KB | STM32 HAL | 🚧 In Development |
+| **tsumikoro-bridge** | WiFi/Network bridge (RS-485 bus) | ESP32/ESP32-S3 | 4MB+ | ESPHome | ✅ Functional (Merged) |
+
+### Recent Updates
+
+- **2025-11**: Multi-drop RS-485 bus protocol implemented with ESP32 HAL
+- **2025-11**: Servo controller: 6 PWM channels + H-bridge motor driver (89% Flash usage)
+- **2025-11**: ESP32 bridge with Home Assistant integration
+- **2025-11**: Unified build system with top-level Makefile
 
 ## Repository Structure
 
@@ -29,39 +36,110 @@ tsumikoro/
 
 ## Quick Start
 
-### STM32 Firmware Development
+### Prerequisites
 
-See [firmware/README.md](firmware/README.md) for complete build instructions.
+**For STM32 builds:**
+- ARM GCC toolchain: `arm-none-eabi-gcc`
+- CMake 3.20 or newer
+- Make or Ninja build tool
 
-```bash
-cd firmware
-git submodule update --init --recursive
+**For ESP32 bridge:**
+- Python 3.10+
+- uv (Python package manager)
 
-# Build tsumikoro-ministepper
-mkdir -p build/ministepper-g071
-cd build/ministepper-g071
-cmake ../.. -DPROJECT=tsumikoro-ministepper -DMCU=STM32G071 -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
-```
+See [firmware/README.md](firmware/README.md) for detailed installation instructions.
 
-### ESP32 Bridge Development
-
-See [firmware/tsumikoro-bridge/README.md](firmware/tsumikoro-bridge/README.md) for complete setup and build instructions.
+### Build All Projects
 
 ```bash
-cd firmware/tsumikoro-bridge
-
-# Setup with uv
+# First-time setup
 make setup
 
-# Configure secrets
+# Build everything
+make build
+
+# Or build individual projects
+make build-servo       # STM32G030 servo controller
+make build-ministepper # STM32G071 stepper controller
+make build-bridge      # ESP32 network bridge
+
+# Clean all builds
+make clean
+
+# View all available targets
+make help
+```
+
+### Individual Project Builds
+
+**Servo Controller (STM32G030):**
+```bash
+make build-servo
+# Output: firmware/build/servo-g030/tsumikoro-servo.elf
+```
+
+**Ministepper (STM32G071):**
+```bash
+make build-ministepper
+# Output: firmware/build/ministepper-g071/tsumikoro-ministepper.elf
+```
+
+**ESP32 Bridge:**
+```bash
+# First time setup
+cd firmware/tsumikoro-bridge
+make setup
 cp esphome/secrets.yaml.example esphome/secrets.yaml
 # Edit secrets.yaml with your WiFi credentials
 
-# Build and flash
+# Build and upload
 make build
 make upload
 ```
+
+## Key Features
+
+### Tsumikoro Bus Protocol
+
+Multi-drop RS-485 serial bus protocol for reliable motor controller communication:
+
+- **Frame Format**: `[START][ID][CMD_HI][CMD_LO][LEN][DATA][CRC8][END]`
+- **Packet Size**: 7-71 bytes (0-64 bytes data payload)
+- **Addressing**: Controller (0x00) + up to 239 peripherals (0x01-0xEF)
+- **Error Detection**: CRC8 checksum with frame markers
+- **Command Ranges**:
+  - `0x0000-0x0FFF`: Generic commands (ping, version, status)
+  - `0x2000-0x2FFF`: Stepper motor commands
+  - `0x3000-0x3FFF`: Servo motor commands
+  - `0x4000-0x4FFF`: DC motor/H-bridge commands
+
+### Servo Controller Features
+
+**Hardware Capabilities:**
+- 6 independent servo channels (50Hz PWM, 1-2ms pulse width)
+- H-bridge motor driver (20kHz PWM speed control)
+- 4 direction modes: FORWARD, REVERSE, BRAKE, COAST
+- 0-180° servo position range (0.1° resolution)
+
+**Control Features:**
+- Smooth position transitions with configurable speed
+- Per-channel calibration (500-2500µs pulse widths)
+- Multi-servo synchronized movement
+- Emergency stop function
+- Hardware ID pins for device enumeration
+
+**Resource Efficient:**
+- Flash: 29.3KB / 32KB (89.42%)
+- RAM: 2.2KB / 8KB (26.86%)
+- Zero CPU overhead for PWM (hardware timers)
+
+### ESP32 Bridge Features
+
+- WiFi 802.11 b/g/n connectivity
+- Home Assistant integration via ESPHome
+- RS-485 bus communication with motor controllers
+- Custom ESPHome components for Tsumikoro protocol
+- OTA firmware updates
 
 ## Hardware
 

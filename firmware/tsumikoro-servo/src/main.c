@@ -10,6 +10,10 @@
 #include "stm32g0xx_hal.h"
 #include "tsumikoro_bus.h"
 #include "tsumikoro_hal_stm32.h"
+#include "tsumikoro_flash_config.h"
+#include "servo_pwm.h"
+#include "motor_hbridge.h"
+#include "limit_switch.h"
 #include <string.h>
 
 /* Configuration */
@@ -34,6 +38,7 @@
 /* Private variables */
 static tsumikoro_bus_handle_t g_bus_handle = NULL;
 static tsumikoro_hal_handle_t g_hal_handle = NULL;
+static tsumikoro_config_t g_config = {0};  /**< Device configuration */
 
 /* STM32 HAL configuration */
 static const tsumikoro_hal_stm32_config_t g_stm32_config = {
@@ -51,20 +56,7 @@ static const tsumikoro_hal_stm32_config_t g_stm32_config = {
     .dma_rx_irq = BUS_DMA_RX_IRQn
 };
 
-/* Servo state */
-typedef struct {
-    int16_t current_position;    /**< Current position (0-1800 = 0-180 degrees * 10) */
-    int16_t target_position;     /**< Target position */
-    bool moving;                 /**< Servo is moving */
-    uint16_t speed;              /**< Movement speed */
-} servo_state_t;
-
-static servo_state_t g_servo_state = {
-    .current_position = 900,  /* Start at 90 degrees */
-    .target_position = 900,
-    .moving = false,
-    .speed = 100
-};
+/* Servo state - moved to servo_pwm module */
 
 /* Private function prototypes */
 void SystemClock_Config(void);
@@ -74,6 +66,11 @@ static void UART_Init(void);
 static void Bus_Init(void);
 static void Servo_Init(void);
 static void Servo_Process(void);
+static void Motor_Init(void);
+static void LimitSwitch_Init(void);
+static uint8_t Read_Hardware_ID(void);
+static void Config_Init(void);
+static void Config_Load_Servo_Calibration(void);
 
 /* Bus callback functions */
 static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data);
@@ -91,8 +88,11 @@ int main(void)
 
     /* Initialize peripherals */
     GPIO_Init();
+    Config_Init();  /* Initialize configuration (must be after GPIO_Init for hardware ID) */
     UART_Init();
     Servo_Init();
+    Motor_Init();
+    LimitSwitch_Init();
     Bus_Init();
 
     /* Main loop - bare-metal polling */
@@ -188,14 +188,10 @@ static void Bus_Init(void)
  */
 static void Servo_Init(void)
 {
-    /* TODO: Initialize servo PWM output */
-    /* - Configure TIM for PWM generation */
-    /* - Set up 50Hz PWM signal */
-    /* - Configure duty cycle for position control */
-
-    g_servo_state.current_position = 900;
-    g_servo_state.target_position = 900;
-    g_servo_state.moving = false;
+    /* Initialize servo PWM system using LL drivers */
+    if (!servo_pwm_init()) {
+        Error_Handler();
+    }
 }
 
 /**
@@ -203,19 +199,29 @@ static void Servo_Init(void)
  */
 static void Servo_Process(void)
 {
-    /* TODO: Implement servo position control */
-    /* - Update PWM duty cycle based on position */
-    /* - Implement smooth movement */
+    /* Process servo movement - updates PWM outputs */
+    servo_pwm_process();
+}
 
-    if (g_servo_state.moving) {
-        /* Simple incremental movement toward target */
-        if (g_servo_state.current_position < g_servo_state.target_position) {
-            g_servo_state.current_position++;
-        } else if (g_servo_state.current_position > g_servo_state.target_position) {
-            g_servo_state.current_position--;
-        } else {
-            g_servo_state.moving = false;
-        }
+/**
+ * @brief Motor H-bridge initialization
+ */
+static void Motor_Init(void)
+{
+    /* Initialize H-bridge motor driver using LL drivers */
+    if (!motor_hbridge_init()) {
+        Error_Handler();
+    }
+}
+
+/**
+ * @brief Limit switch initialization
+ */
+static void LimitSwitch_Init(void)
+{
+    /* Initialize limit switch input using LL drivers */
+    if (!limit_switch_init()) {
+        Error_Handler();
     }
 }
 
@@ -260,55 +266,257 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
             break;
 
         case TSUMIKORO_CMD_GET_STATUS:
-            /* Return servo status */
-            response.data[0] = g_servo_state.moving ? 0x01 : 0x00;
-            response.data[1] = (uint8_t)(g_servo_state.current_position >> 8);
-            response.data[2] = (uint8_t)(g_servo_state.current_position);
-            response.data_len = 3;
+            /* Return general device status (not servo-specific) */
+            response.data[0] = 0x00;  /* Status: OK */
+            response.data[1] = servo_pwm_get_channel_count();  /* Number of servo channels */
+            response.data_len = 2;
+            break;
+
+        case TSUMIKORO_CMD_GET_LIMIT_SWITCH:
+            /* Get limit switch state
+             * Response: [triggered, raw_state] */
+            response.data[0] = limit_switch_is_triggered() ? 0x01 : 0x00;
+            response.data[1] = limit_switch_get_raw_state() ? 0x01 : 0x00;
+            response.data_len = 2;
             break;
 
         case TSUMIKORO_CMD_SERVO_SET_POSITION:
-            /* Set servo position (0-1800 = 0-180 degrees * 10) */
-            if (packet->data_len >= 2) {
-                g_servo_state.target_position =
-                    ((int16_t)packet->data[0] << 8) |
-                    ((int16_t)packet->data[1]);
+            /* Set servo position (0-1800 = 0-180 degrees * 10)
+             * Data: [channel_index, position_hi, position_lo] */
+            if (packet->data_len >= 3) {
+                uint8_t channel = packet->data[0];
+                uint16_t position = ((uint16_t)packet->data[1] << 8) |
+                                   ((uint16_t)packet->data[2]);
 
-                /* Clamp to valid range */
-                if (g_servo_state.target_position < 0) {
-                    g_servo_state.target_position = 0;
-                } else if (g_servo_state.target_position > 1800) {
-                    g_servo_state.target_position = 1800;
+                if (servo_pwm_set_position(channel, position)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid channel/position */
                 }
-
-                g_servo_state.moving = true;
-
-                /* Acknowledge */
-                response.data[0] = 0x00;  /* Success */
                 response.data_len = 1;
             } else {
-                response.data[0] = 0xFF;  /* Error */
+                response.data[0] = 0xFF;  /* Error - invalid length */
                 response.data_len = 1;
             }
             break;
 
         case TSUMIKORO_CMD_SERVO_GET_POSITION:
-            /* Get current servo position */
-            response.data[0] = (uint8_t)(g_servo_state.current_position >> 8);
-            response.data[1] = (uint8_t)(g_servo_state.current_position);
-            response.data_len = 2;
+            /* Get current servo position
+             * Data: [channel_index] */
+            if (packet->data_len >= 1) {
+                uint8_t channel = packet->data[0];
+                uint16_t position = servo_pwm_get_position(channel);
+                response.data[0] = (uint8_t)(position >> 8);
+                response.data[1] = (uint8_t)(position);
+                response.data_len = 2;
+            } else {
+                response.data[0] = 0xFF;  /* Error - missing channel index */
+                response.data_len = 1;
+            }
             break;
 
         case TSUMIKORO_CMD_SERVO_SET_SPEED:
-            /* Set servo movement speed */
-            if (packet->data_len >= 2) {
-                g_servo_state.speed =
-                    ((uint16_t)packet->data[0] << 8) |
-                    ((uint16_t)packet->data[1]);
-                response.data[0] = 0x00;  /* Success */
+            /* Set servo movement speed
+             * Data: [channel_index, speed_hi, speed_lo] */
+            if (packet->data_len >= 3) {
+                uint8_t channel = packet->data[0];
+                uint16_t speed = ((uint16_t)packet->data[1] << 8) |
+                                ((uint16_t)packet->data[2]);
+
+                if (servo_pwm_set_speed(channel, speed)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid channel */
+                }
                 response.data_len = 1;
             } else {
-                response.data[0] = 0xFF;  /* Error */
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_SERVO_CALIBRATE:
+            /* Calibrate servo endpoints
+             * Data: [channel_index, min_pulse_hi, min_pulse_lo, max_pulse_hi, max_pulse_lo] */
+            if (packet->data_len >= 5) {
+                uint8_t channel = packet->data[0];
+                uint16_t min_pulse_us = ((uint16_t)packet->data[1] << 8) |
+                                       ((uint16_t)packet->data[2]);
+                uint16_t max_pulse_us = ((uint16_t)packet->data[3] << 8) |
+                                       ((uint16_t)packet->data[4]);
+
+                if (servo_pwm_set_calibration(channel, min_pulse_us, max_pulse_us)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid parameters */
+                }
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_SERVO_ENABLE:
+            /* Enable/disable servo output
+             * Data: [channel_index, enable (0=disable, 1=enable)] */
+            if (packet->data_len >= 2) {
+                uint8_t channel = packet->data[0];
+                bool enable = (packet->data[1] != 0);
+
+                if (servo_pwm_enable(channel, enable)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid channel */
+                }
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_SERVO_SET_MULTI:
+            /* Set multiple servo positions
+             * Data: [count, ch0_idx, pos0_hi, pos0_lo, ch1_idx, pos1_hi, pos1_lo, ...] */
+            if (packet->data_len >= 1) {
+                uint8_t count = packet->data[0];
+                uint8_t idx = 1;
+                uint8_t success_count = 0;
+
+                for (uint8_t i = 0; i < count && idx + 3 <= packet->data_len; i++) {
+                    uint8_t channel = packet->data[idx];
+                    uint16_t position = ((uint16_t)packet->data[idx + 1] << 8) |
+                                       ((uint16_t)packet->data[idx + 2]);
+                    idx += 3;
+
+                    if (servo_pwm_set_position(channel, position)) {
+                        success_count++;
+                    }
+                }
+
+                response.data[0] = success_count;  /* Number of successful updates */
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0x00;  /* No servos updated */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_SERVO_GET_STATUS:
+            /* Get servo channel status
+             * Data: [channel_index]
+             * Response: [enabled, moving, current_pos_hi, current_pos_lo, target_pos_hi, target_pos_lo] */
+            if (packet->data_len >= 1) {
+                uint8_t channel = packet->data[0];
+
+                if (channel < servo_pwm_get_channel_count()) {
+                    uint16_t current_pos = servo_pwm_get_position(channel);
+                    uint16_t target_pos = servo_pwm_get_target_position(channel);
+                    bool moving = servo_pwm_is_moving(channel);
+
+                    response.data[0] = 0x01;  /* Enabled (assume enabled if valid channel) */
+                    response.data[1] = moving ? 0x01 : 0x00;
+                    response.data[2] = (uint8_t)(current_pos >> 8);
+                    response.data[3] = (uint8_t)(current_pos);
+                    response.data[4] = (uint8_t)(target_pos >> 8);
+                    response.data[5] = (uint8_t)(target_pos);
+                    response.data_len = 6;
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid channel */
+                    response.data_len = 1;
+                }
+            } else {
+                response.data[0] = 0xFF;  /* Error - missing channel index */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_SET:
+            /* Set motor speed and direction
+             * Data: [speed_hi, speed_lo, direction] */
+            if (packet->data_len >= 3) {
+                uint16_t speed = ((uint16_t)packet->data[0] << 8) |
+                                ((uint16_t)packet->data[1]);
+                motor_direction_t direction = (motor_direction_t)packet->data[2];
+
+                if (motor_hbridge_set(speed, direction)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid parameters */
+                }
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_GET_SPEED:
+            /* Get current motor speed
+             * Response: [speed_hi, speed_lo] */
+            {
+                uint16_t speed = motor_hbridge_get_speed();
+                response.data[0] = (uint8_t)(speed >> 8);
+                response.data[1] = (uint8_t)(speed);
+                response.data_len = 2;
+            }
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_GET_DIRECTION:
+            /* Get current motor direction
+             * Response: [direction] */
+            response.data[0] = (uint8_t)motor_hbridge_get_direction();
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_ENABLE:
+            /* Enable/disable motor output
+             * Data: [enable (0=disable, 1=enable)] */
+            if (packet->data_len >= 1) {
+                bool enable = (packet->data[0] != 0);
+
+                if (motor_hbridge_enable(enable)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error */
+                }
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_ESTOP:
+            /* Emergency stop (brake) */
+            motor_hbridge_emergency_stop();
+            response.data[0] = 0x00;  /* Success */
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_SAVE_CONFIG:
+            /* Save current configuration to flash
+             * Response: [status] (0x00=success, 0xFF=error) */
+            {
+                tsumikoro_flash_status_t status = tsumikoro_flash_config_save(&g_config);
+                response.data[0] = (status == TSUMIKORO_FLASH_OK) ? 0x00 : 0xFF;
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_LOAD_CONFIG:
+            /* Load configuration from flash
+             * Response: [status] (0x00=success, 0xFF=error) */
+            {
+                tsumikoro_flash_status_t status = tsumikoro_flash_config_load(&g_config);
+                if (status == TSUMIKORO_FLASH_OK) {
+                    /* Apply loaded configuration to hardware */
+                    Config_Load_Servo_Calibration();
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error */
+                }
                 response.data_len = 1;
             }
             break;
@@ -360,6 +568,76 @@ void SystemClock_Config(void)
     {
         Error_Handler();
     }
+}
+
+/**
+ * @brief Read hardware ID from PB7/PB8 pins
+ *
+ * Hardware ID is a 2-bit value (0-3) determined by:
+ * - PB7: Bit 0
+ * - PB8: Bit 1
+ *
+ * Pins are configured with pull-ups, so:
+ * - Open/High = 1
+ * - To GND = 0
+ *
+ * @return Hardware ID (0-3)
+ */
+static uint8_t Read_Hardware_ID(void)
+{
+    uint8_t hw_id = 0;
+
+    /* Read PB7 (bit 0) */
+    if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_7) == GPIO_PIN_SET) {
+        hw_id |= 0x01;
+    }
+
+    /* Read PB8 (bit 1) */
+    if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8) == GPIO_PIN_SET) {
+        hw_id |= 0x02;
+    }
+
+    return hw_id;
+}
+
+/**
+ * @brief Load servo calibration from config and apply to hardware
+ */
+static void Config_Load_Servo_Calibration(void)
+{
+    for (uint8_t i = 0; i < g_config.servo_count && i < servo_pwm_get_channel_count(); i++) {
+        servo_pwm_set_calibration(i,
+                                   g_config.servo_cal[i].min_pulse_us,
+                                   g_config.servo_cal[i].max_pulse_us);
+    }
+}
+
+/**
+ * @brief Initialize flash configuration
+ *
+ * Attempts to load configuration from flash. If not found or invalid,
+ * initializes with defaults using hardware ID.
+ */
+static void Config_Init(void)
+{
+    /* Initialize flash config library */
+    tsumikoro_flash_config_init();
+
+    /* Try to load existing configuration */
+    tsumikoro_flash_status_t status = tsumikoro_flash_config_load(&g_config);
+
+    if (status != TSUMIKORO_FLASH_OK) {
+        /* No valid config found - initialize with defaults */
+        uint8_t hw_id = Read_Hardware_ID();
+        uint8_t device_id = DEVICE_ID + hw_id;  /* Base ID + hardware offset */
+
+        tsumikoro_flash_config_init_defaults(&g_config, device_id, hw_id);
+
+        /* Note: Don't auto-save on first boot. Let user explicitly save via command. */
+    }
+
+    /* Apply servo calibration to hardware */
+    Config_Load_Servo_Calibration();
 }
 
 /**

@@ -6,10 +6,10 @@ STM32G0-based firmware for Tsumikoro motor controller projects.
 
 ### Current Projects
 
-| Project | MCU | Flash | RAM | Package | Description |
-|---------|-----|-------|-----|---------|-------------|
-| **tsumikoro-ministepper** | STM32G071G8U6 | 64KB | 36KB | UFQFPN28 | Mini stepper motor controller |
-| **tsumikoro-servo** | STM32G030F6P6TR | 32KB | 8KB | TSSOP20 | Servo motor controller |
+| Project | MCU | Flash | RAM | Package | Status | Description |
+|---------|-----|-------|-----|---------|--------|-------------|
+| **tsumikoro-servo** | STM32G030F6P6TR | 32KB | 8KB | TSSOP20 | ✅ Functional | 6-channel servo + H-bridge motor controller |
+| **tsumikoro-ministepper** | STM32G071G8U6 | 64KB | 36KB | UFQFPN28 | 🚧 Development | Mini stepper motor controller |
 
 ### Supported MCUs
 
@@ -51,6 +51,73 @@ firmware/
     ├── Makefile               # Build system (uses uv)
     └── pyproject.toml         # Python dependencies
 ```
+
+## Project Details
+
+### Tsumikoro-Servo (STM32G030F6P6)
+
+**Status**: ✅ Functional (PR #9)
+
+6-channel PWM servo controller with H-bridge motor driver optimized for the STM32G030F6P6 TSSOP20 package.
+
+**Features:**
+- 6 independent servo channels (50Hz PWM, 1-2ms pulse width)
+- H-bridge motor driver (20kHz PWM speed control)
+- 4 direction modes: FORWARD, REVERSE, BRAKE, COAST
+- Hardware ID support (2-bit = 4 unique addresses)
+- Multi-drop RS-485 bus communication
+- Resource efficient: 89.4% Flash (29.3KB), 26.9% RAM (2.2KB)
+
+**Pin Allocation:**
+
+```
+STM32G030F6P6 TSSOP20
+============================
+
+                    ┌─────────────┐
+  PB7 (HW ID 0)   ──│1   •    20│── PA14 (SWCLK)
+  PB8 (HW ID 1)   ──│2        19│── PA13 (SWDIO)
+  PB9 (Motor IN2) ──│3        18│── PA12 (Motor IN1)
+ NRST             ──│4        17│── PA11 (Motor PWM)
+ VDDA             ──│5        16│── PA8/PB0/PB1/PB2*
+  PA0 (Servo 0)   ──│6        15│── PA7 (Servo 5)
+  PA1 (RS485 DE)  ──│7        14│── PA6 (Servo 4)
+  PA2 (Servo 1)   ──│8        13│── PA5 (LED)
+  GND             ──│9        12│── PA4 (Servo 3)
+  VDD             ──│10       11│── PA3 (Servo 2)
+                    └─────────────┘
+
+*Bonded pins - only one can be used
+```
+
+**Resource Allocation:**
+
+| Resource | Usage |
+|----------|-------|
+| Servo Channels | PA0, PA2, PA3, PA4, PA6, PA7 |
+| Motor Control | PA11 (PWM), PA12 (IN1), PB9 (IN2) |
+| Hardware ID | PB7, PB8 (2-bit input) |
+| Bus Communication | PA1 (DE), PA9 (TX), PA10 (RX) |
+| Debug | PA13 (SWDIO), PA14 (SWCLK) |
+| Status | PA5 (LED) |
+| Available | Pin 16 (PA8/PB0/PB1/PB2 bonded) |
+
+**Timers:**
+- TIM1: Motor PWM (20kHz)
+- TIM3: Servos 0, 1, 2
+- TIM14: Servo 3
+- TIM16: Servo 4
+- TIM17: Servo 5
+
+All timers allocated - no expansion possible.
+
+See [tsumikoro-servo/README.md](tsumikoro-servo/README.md) for complete documentation.
+
+### Tsumikoro-Ministepper (STM32G071G8U6)
+
+**Status**: 🚧 In Development
+
+Mini stepper motor controller (details coming soon).
 
 ## Prerequisites
 

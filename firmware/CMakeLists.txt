@@ -10,6 +10,17 @@ if(NOT DEFINED MCU)
     message(FATAL_ERROR "MCU must be specified. Use -DMCU=STM32G071 or -DMCU=STM32G030")
 endif()
 
+# Optional debug mode - set via command line: -DENABLE_DEBUG_DEFINES=ON
+# Default: OFF (uses -DNDEBUG, disables assert() and debug code)
+# When ON: Uses -DDEBUG instead (enables assert() and debug code)
+option(ENABLE_DEBUG_DEFINES "Enable debug defines (-DDEBUG instead of -DNDEBUG)" OFF)
+
+if(ENABLE_DEBUG_DEFINES)
+    message(STATUS "Debug defines enabled: -DDEBUG (assert and debug code active)")
+else()
+    message(STATUS "Debug defines disabled: -DNDEBUG (assert and debug code removed)")
+endif()
+
 # Setup toolchain
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cmake/arm-none-eabi.cmake)
 

@@ -111,6 +111,23 @@ extern "C" {
 #define TSUMIKORO_CMD_SERVO_SET_SPEED     0x3003  /**< Set servo movement speed */
 #define TSUMIKORO_CMD_SERVO_SET_RANGE     0x3004  /**< Set servo angle range */
 #define TSUMIKORO_CMD_SERVO_CALIBRATE     0x3005  /**< Calibrate servo endpoints */
+#define TSUMIKORO_CMD_SERVO_ENABLE        0x3006  /**< Enable/disable servo output */
+#define TSUMIKORO_CMD_SERVO_SET_MULTI     0x3007  /**< Set multiple servo positions */
+#define TSUMIKORO_CMD_SERVO_GET_STATUS    0x3008  /**< Get servo channel status */
+
+/**
+ * @brief DC motor (H-bridge) commands (0x4000-0x4FFF)
+ */
+#define TSUMIKORO_CMD_DCMOTOR_SET         0x4001  /**< Set motor speed and direction */
+#define TSUMIKORO_CMD_DCMOTOR_GET_SPEED   0x4002  /**< Get current motor speed */
+#define TSUMIKORO_CMD_DCMOTOR_GET_DIRECTION 0x4003 /**< Get current motor direction */
+#define TSUMIKORO_CMD_DCMOTOR_ENABLE      0x4004  /**< Enable/disable motor output */
+#define TSUMIKORO_CMD_DCMOTOR_ESTOP       0x4005  /**< Emergency stop (brake) */
+
+/**
+ * @brief Sensor/Input commands (0x1000-0x1FFF)
+ */
+#define TSUMIKORO_CMD_GET_LIMIT_SWITCH    0x1001  /**< Get limit switch state */
 
 /**
  * @brief Status codes

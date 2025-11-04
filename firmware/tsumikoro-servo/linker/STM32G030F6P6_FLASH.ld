@@ -37,6 +37,10 @@ MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 8K
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 32K
+
+  /* Note: Last 2KB page (Page 15, 0x08007800-0x08007FFF) reserved for
+   * persistent configuration storage. Do not place code/data there.
+   * See tsumikoro_flash_config library for details. */
 }
 
 /* Sections */
