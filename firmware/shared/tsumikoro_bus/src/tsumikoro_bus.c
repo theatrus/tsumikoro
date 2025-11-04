@@ -36,6 +36,19 @@ typedef struct {
 } tsumikoro_pending_cmd_t;
 
 /**
+ * @brief Context structure for blocking command callback
+ *
+ * Used to capture async callback results for blocking API.
+ * Avoids GNU C nested function extension for C11 compatibility.
+ */
+typedef struct {
+    volatile tsumikoro_cmd_status_t *result;      /**< Result status pointer */
+    volatile tsumikoro_packet_t *temp_response;   /**< Temporary response storage */
+    volatile bool *done;                          /**< Completion flag */
+    tsumikoro_packet_t *response;                 /**< User's response buffer (may be NULL) */
+} tsumikoro_blocking_callback_ctx_t;
+
+/**
  * @brief Bus handler internal state
  */
 typedef struct {
@@ -68,6 +81,25 @@ typedef struct {
 } tsumikoro_bus_t;
 
 /* ========== Internal Helper Functions ========== */
+
+/**
+ * @brief Blocking callback for synchronous command execution
+ *
+ * Standard C11-compliant callback that uses context structure instead of
+ * GNU C nested functions.
+ */
+static void bus_blocking_callback(tsumikoro_cmd_status_t status,
+                                  const tsumikoro_packet_t *resp,
+                                  void *user_data)
+{
+    tsumikoro_blocking_callback_ctx_t *ctx = (tsumikoro_blocking_callback_ctx_t *)user_data;
+
+    *(ctx->result) = status;
+    if (resp && ctx->response) {
+        *(ctx->temp_response) = *resp;
+    }
+    *(ctx->done) = true;
+}
 
 /**
  * @brief Change bus state
@@ -508,26 +540,21 @@ tsumikoro_cmd_status_t tsumikoro_bus_send_command_blocking(tsumikoro_bus_handle_
         timeout_ms = bus->config.response_timeout_ms;
     }
 
-    // Send command asynchronously
+    // Send command asynchronously using context struct for C11 compatibility
     volatile tsumikoro_cmd_status_t result = TSUMIKORO_CMD_STATUS_PENDING;
     volatile tsumikoro_packet_t temp_response;
     volatile bool done = false;
 
-    // Callback to capture result
-    void blocking_callback(tsumikoro_cmd_status_t status,
-                          const tsumikoro_packet_t *resp,
-                          void *user_data)
-    {
-        (void)user_data;
-        result = status;
-        if (resp && response) {
-            temp_response = *resp;
-        }
-        done = true;
-    }
+    // Setup blocking callback context
+    tsumikoro_blocking_callback_ctx_t cb_ctx = {
+        .result = &result,
+        .temp_response = &temp_response,
+        .done = &done,
+        .response = response
+    };
 
     tsumikoro_status_t send_status = tsumikoro_bus_send_command_async(handle, packet,
-                                                                       blocking_callback, NULL);
+                                                                       bus_blocking_callback, &cb_ctx);
     if (send_status != TSUMIKORO_STATUS_OK) {
         return TSUMIKORO_CMD_STATUS_FAILED;
     }

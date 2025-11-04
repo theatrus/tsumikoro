@@ -148,7 +148,7 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
     if (device->use_dma) {
         // TX DMA
         device->dma_tx_handle.Instance = stm32_config->dma_tx;
-        device->dma_tx_handle.Init.Request = DMA_REQUEST_USART1_TX; // Adjust per UART
+        device->dma_tx_handle.Init.Request = stm32_config->dma_tx_request;
         device->dma_tx_handle.Init.Direction = DMA_MEMORY_TO_PERIPH;
         device->dma_tx_handle.Init.PeriphInc = DMA_PINC_DISABLE;
         device->dma_tx_handle.Init.MemInc = DMA_MINC_ENABLE;
@@ -166,7 +166,7 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
 
         // RX DMA
         device->dma_rx_handle.Instance = stm32_config->dma_rx;
-        device->dma_rx_handle.Init.Request = DMA_REQUEST_USART1_RX; // Adjust per UART
+        device->dma_rx_handle.Init.Request = stm32_config->dma_rx_request;
         device->dma_rx_handle.Init.Direction = DMA_PERIPH_TO_MEMORY;
         device->dma_rx_handle.Init.PeriphInc = DMA_PINC_DISABLE;
         device->dma_rx_handle.Init.MemInc = DMA_MINC_ENABLE;

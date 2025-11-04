@@ -28,6 +28,8 @@ typedef struct {
     USART_TypeDef *uart_instance;     /**< UART instance (e.g., USART1, USART2) */
     DMA_Channel_TypeDef *dma_tx;      /**< DMA channel for TX (optional, can be NULL) */
     DMA_Channel_TypeDef *dma_rx;      /**< DMA channel for RX (optional, can be NULL) */
+    uint32_t dma_tx_request;          /**< DMA request for TX (e.g., DMA_REQUEST_USART1_TX) */
+    uint32_t dma_rx_request;          /**< DMA request for RX (e.g., DMA_REQUEST_USART1_RX) */
     GPIO_TypeDef *de_port;            /**< GPIO port for DE (Driver Enable) pin */
     uint16_t de_pin;                  /**< GPIO pin for DE (Driver Enable) */
     GPIO_TypeDef *re_port;            /**< GPIO port for RE (Receive Enable) pin (optional) */

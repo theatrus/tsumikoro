@@ -34,6 +34,22 @@
 static tsumikoro_bus_handle_t g_bus_handle = NULL;
 static tsumikoro_hal_handle_t g_hal_handle = NULL;
 
+/* STM32 HAL configuration - shared between UART_Init and Bus_Init */
+static const tsumikoro_hal_stm32_config_t g_stm32_config = {
+    .uart_instance = BUS_UART,
+    .dma_tx = BUS_DMA_TX,
+    .dma_rx = BUS_DMA_RX,
+    .dma_tx_request = DMA_REQUEST_USART1_TX,
+    .dma_rx_request = DMA_REQUEST_USART1_RX,
+    .de_port = BUS_DE_PORT,
+    .de_pin = BUS_DE_PIN,
+    .re_port = BUS_RE_PORT,
+    .re_pin = BUS_RE_PIN,
+    .uart_irq = BUS_UART_IRQn,
+    .dma_tx_irq = BUS_DMA_TX_IRQn,
+    .dma_rx_irq = BUS_DMA_RX_IRQn
+};
+
 /* Stepper state */
 typedef struct {
     int32_t current_position;
@@ -135,22 +151,8 @@ static void UART_Init(void)
     __HAL_RCC_USART1_CLK_ENABLE();
     __HAL_RCC_DMA1_CLK_ENABLE();
 
-    /* Configure STM32-specific platform data */
-    static const tsumikoro_hal_stm32_config_t stm32_config = {
-        .uart_instance = BUS_UART,
-        .dma_tx = BUS_DMA_TX,
-        .dma_rx = BUS_DMA_RX,
-        .de_port = BUS_DE_PORT,
-        .de_pin = BUS_DE_PIN,
-        .re_port = BUS_RE_PORT,
-        .re_pin = BUS_RE_PIN,
-        .uart_irq = BUS_UART_IRQn,
-        .dma_tx_irq = BUS_DMA_TX_IRQn,
-        .dma_rx_irq = BUS_DMA_RX_IRQn
-    };
-
     /* Initialize UART peripheral (must be called before HAL init) */
-    if (!tsumikoro_hal_stm32_init_peripheral(&stm32_config, BUS_BAUD_RATE)) {
+    if (!tsumikoro_hal_stm32_init_peripheral(&g_stm32_config, BUS_BAUD_RATE)) {
         Error_Handler();
     }
 }
@@ -160,27 +162,13 @@ static void UART_Init(void)
  */
 static void Bus_Init(void)
 {
-    /* Configure STM32-specific platform data */
-    static const tsumikoro_hal_stm32_config_t stm32_config = {
-        .uart_instance = BUS_UART,
-        .dma_tx = BUS_DMA_TX,
-        .dma_rx = BUS_DMA_RX,
-        .de_port = BUS_DE_PORT,
-        .de_pin = BUS_DE_PIN,
-        .re_port = BUS_RE_PORT,
-        .re_pin = BUS_RE_PIN,
-        .uart_irq = BUS_UART_IRQn,
-        .dma_tx_irq = BUS_DMA_TX_IRQn,
-        .dma_rx_irq = BUS_DMA_RX_IRQn
-    };
-
     /* HAL configuration */
     tsumikoro_hal_config_t hal_config = {
         .baud_rate = BUS_BAUD_RATE,
         .device_id = DEVICE_ID,
         .is_controller = false,  /* This is a peripheral device */
         .turnaround_delay_bytes = TURNAROUND_DELAY_BYTES,
-        .platform_data = (void *)&stm32_config
+        .platform_data = (void *)&g_stm32_config
     };
 
     /* Initialize HAL */
