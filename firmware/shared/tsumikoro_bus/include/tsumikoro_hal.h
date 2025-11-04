@@ -49,6 +49,7 @@ typedef struct {
     uint32_t baud_rate;            /**< Baud rate (e.g., 1000000 for 1Mbaud) */
     uint8_t device_id;             /**< This device's ID */
     bool is_controller;            /**< True if controller, false if peripheral */
+    uint32_t turnaround_delay_bytes; /**< Bus turnaround delay in byte intervals (0 = no delay) */
     void *platform_data;           /**< Platform-specific configuration */
 } tsumikoro_hal_config_t;
 

@@ -28,6 +28,8 @@ typedef struct {
     uint8_t device_id;
     bool is_controller;
     bool tx_enabled;
+    uint32_t baud_rate;
+    uint32_t turnaround_delay_bytes;
     tsumikoro_hal_rx_callback_t rx_callback;
     void *user_data;
 
@@ -57,6 +59,7 @@ typedef struct tsumikoro_mock_bus {
 
     // Time simulation
     uint32_t current_time_ms;
+    uint32_t last_bus_activity_time_ms;  // Last time any activity occurred on bus
 
     // Statistics
     tsumikoro_mock_bus_stats_t stats;
@@ -131,6 +134,8 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
 
     device->device_id = config->device_id;
     device->is_controller = config->is_controller;
+    device->baud_rate = config->baud_rate;
+    device->turnaround_delay_bytes = config->turnaround_delay_bytes;
     device->rx_callback = rx_callback;
     device->user_data = user_data;
     device->tx_enabled = false;
@@ -290,9 +295,45 @@ tsumikoro_hal_status_t tsumikoro_hal_receive(tsumikoro_hal_handle_t handle,
 
 bool tsumikoro_hal_is_bus_idle(tsumikoro_hal_handle_t handle)
 {
-    (void)handle;
-    // In mock implementation, always return true (no real contention)
-    return true;
+    if (handle == NULL) {
+        return true;
+    }
+
+    tsumikoro_mock_device_t *device = (tsumikoro_mock_device_t *)handle;
+    tsumikoro_mock_bus_t *bus = device->bus;
+
+    if (bus == NULL) {
+        return true;
+    }
+
+    // Bus is busy if packet is actively being transmitted
+    if (bus->bus_active || bus->bus_buffer_len > 0) {
+        return false;
+    }
+
+    // If no turnaround delay configured, bus is idle
+    if (device->turnaround_delay_bytes == 0) {
+        return true;
+    }
+
+    // Calculate turnaround delay in milliseconds
+    // Using 10 bits per byte (1 start + 8 data + 1 stop)
+    // byte_time_us = (10 * 1000000) / baud_rate
+    // turnaround_delay_us = byte_time_us * turnaround_delay_bytes
+    // Convert to milliseconds (round up)
+    uint32_t byte_time_us = (10 * 1000000) / device->baud_rate;
+    uint32_t turnaround_delay_us = byte_time_us * device->turnaround_delay_bytes;
+    uint32_t turnaround_delay_ms = (turnaround_delay_us + 999) / 1000;
+
+    // Check if enough time has passed since last activity
+    uint32_t time_since_activity = g_simulated_time_ms - bus->last_bus_activity_time_ms;
+
+    bool is_idle = time_since_activity >= turnaround_delay_ms;
+
+    HAL_DEBUG("Bus idle check: time_since=%ums, required=%ums, idle=%s\n",
+              time_since_activity, turnaround_delay_ms, is_idle ? "yes" : "no");
+
+    return is_idle;
 }
 
 void tsumikoro_hal_enable_tx(tsumikoro_hal_handle_t handle)
@@ -384,6 +425,9 @@ void tsumikoro_mock_bus_process(tsumikoro_mock_bus_handle_t bus, uint32_t time_a
                 }
             }
         }
+
+        // Update last activity time after packet delivery completes
+        bus->last_bus_activity_time_ms = g_simulated_time_ms;
     }
 }
 

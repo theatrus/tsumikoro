@@ -86,6 +86,7 @@ static void test_bus_init_deinit(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t hal = tsumikoro_mock_create_device(mock_bus, &hal_config, NULL, NULL);
@@ -117,6 +118,7 @@ static void test_send_command_no_response(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t hal = tsumikoro_mock_create_device(mock_bus, &hal_config, NULL, NULL);
@@ -165,6 +167,7 @@ static void test_statistics(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t hal = tsumikoro_mock_create_device(mock_bus, &hal_config, NULL, NULL);
@@ -235,6 +238,7 @@ static void test_unsolicited_messages(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller_hal = tsumikoro_mock_create_device(
@@ -245,6 +249,7 @@ static void test_unsolicited_messages(void)
         .baud_rate = 1000000,
         .device_id = 0x01,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t peripheral_hal = tsumikoro_mock_create_device(
@@ -308,6 +313,7 @@ static void test_blocking_send_with_response(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller_hal = tsumikoro_mock_create_device(
@@ -322,6 +328,7 @@ static void test_blocking_send_with_response(void)
         .baud_rate = 1000000,
         .device_id = 0x01,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     responder.hal = tsumikoro_mock_create_device(
@@ -370,6 +377,7 @@ static void test_blocking_send_timeout(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller_hal = tsumikoro_mock_create_device(
@@ -448,6 +456,7 @@ static void test_async_send_with_response(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller_hal = tsumikoro_mock_create_device(
@@ -462,6 +471,7 @@ static void test_async_send_with_response(void)
         .baud_rate = 1000000,
         .device_id = 0x01,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     responder.hal = tsumikoro_mock_create_device(
@@ -502,6 +512,78 @@ static void test_async_send_with_response(void)
     tsumikoro_mock_bus_destroy(mock_bus);
 }
 
+static void test_turnaround_delay(void)
+{
+    printf("  Testing bus turnaround delay...\n");
+
+    // Create mock bus
+    tsumikoro_mock_bus_handle_t mock_bus = tsumikoro_mock_bus_create();
+
+    // Test 1: With turnaround delay of 3 bytes at 1Mbaud
+    // At 1Mbaud with 10 bits/byte, 1 byte = 10us, so 3 bytes = 30us ~= 1ms (rounded up)
+    tsumikoro_hal_config_t hal_config_with_delay = {
+        .baud_rate = 1000000,
+        .device_id = 0x00,
+        .is_controller = true,
+        .turnaround_delay_bytes = 3,
+        .platform_data = NULL
+    };
+    tsumikoro_hal_handle_t hal_with_delay = tsumikoro_mock_create_device(
+        mock_bus, &hal_config_with_delay, NULL, NULL);
+
+    // Initially, bus should be idle (no activity yet)
+    TEST_ASSERT(tsumikoro_hal_is_bus_idle(hal_with_delay),
+                "Bus should be idle before any activity");
+
+    // Transmit a packet
+    uint8_t test_data[] = {0xAA, 0x01, 0x00, 0x05, 0x00, 0xBB, 0x55};
+    tsumikoro_hal_transmit(hal_with_delay, test_data, sizeof(test_data));
+
+    // Process the transmission
+    tsumikoro_mock_bus_process(mock_bus, 0);
+
+    // Immediately after transmission, bus should NOT be idle (turnaround delay not elapsed)
+    bool idle_immediately = tsumikoro_hal_is_bus_idle(hal_with_delay);
+    TEST_ASSERT(!idle_immediately,
+                "Bus should NOT be idle immediately after transmission");
+
+    // Advance time by less than turnaround delay
+    tsumikoro_mock_bus_process(mock_bus, 0);  // Still at same time
+    TEST_ASSERT(!tsumikoro_hal_is_bus_idle(hal_with_delay),
+                "Bus should still not be idle before turnaround delay");
+
+    // Advance time past turnaround delay (need at least 1ms)
+    tsumikoro_mock_bus_process(mock_bus, 1);
+    TEST_ASSERT(tsumikoro_hal_is_bus_idle(hal_with_delay),
+                "Bus should be idle after turnaround delay elapsed");
+
+    // Test 2: With no turnaround delay (0 bytes)
+    tsumikoro_hal_config_t hal_config_no_delay = {
+        .baud_rate = 1000000,
+        .device_id = 0x01,
+        .is_controller = false,
+        .turnaround_delay_bytes = 0,
+        .platform_data = NULL
+    };
+    tsumikoro_hal_handle_t hal_no_delay = tsumikoro_mock_create_device(
+        mock_bus, &hal_config_no_delay, NULL, NULL);
+
+    // Transmit a packet
+    tsumikoro_hal_transmit(hal_no_delay, test_data, sizeof(test_data));
+
+    // Process the transmission
+    tsumikoro_mock_bus_process(mock_bus, 0);
+
+    // With no turnaround delay, bus should be idle immediately
+    TEST_ASSERT(tsumikoro_hal_is_bus_idle(hal_no_delay),
+                "Bus should be idle immediately with turnaround_delay_bytes=0");
+
+    // Cleanup
+    tsumikoro_hal_deinit(hal_with_delay);
+    tsumikoro_hal_deinit(hal_no_delay);
+    tsumikoro_mock_bus_destroy(mock_bus);
+}
+
 /* ========== Main Test Runner ========== */
 
 int main(void)
@@ -515,6 +597,7 @@ int main(void)
     test_send_command_no_response();
     test_statistics();
     test_unsolicited_messages();
+    test_turnaround_delay();
     printf("\n");
 
     // Advanced tests with auto-responder

@@ -60,6 +60,7 @@ static void test_controller_to_peripheral_ping(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller = tsumikoro_mock_create_device(
@@ -72,6 +73,7 @@ static void test_controller_to_peripheral_ping(void)
         .baud_rate = 1000000,
         .device_id = 0x01,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t peripheral = tsumikoro_mock_create_device(
@@ -126,6 +128,7 @@ static void test_peripheral_to_controller_response(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller = tsumikoro_mock_create_device(
@@ -138,6 +141,7 @@ static void test_peripheral_to_controller_response(void)
         .baud_rate = 1000000,
         .device_id = 0x01,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t peripheral = tsumikoro_mock_create_device(
@@ -191,6 +195,7 @@ static void test_multiple_peripherals(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller = tsumikoro_mock_create_device(
@@ -203,6 +208,7 @@ static void test_multiple_peripherals(void)
         .baud_rate = 1000000,
         .device_id = 0x01,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t peripheral1 = tsumikoro_mock_create_device(
@@ -215,6 +221,7 @@ static void test_multiple_peripherals(void)
         .baud_rate = 1000000,
         .device_id = 0x02,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t peripheral2 = tsumikoro_mock_create_device(
@@ -291,6 +298,7 @@ static void test_crc_error_detection(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller = tsumikoro_mock_create_device(
@@ -303,6 +311,7 @@ static void test_crc_error_detection(void)
         .baud_rate = 1000000,
         .device_id = 0x01,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t peripheral = tsumikoro_mock_create_device(
@@ -357,6 +366,7 @@ static void test_packet_drop(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller = tsumikoro_mock_create_device(
@@ -369,6 +379,7 @@ static void test_packet_drop(void)
         .baud_rate = 1000000,
         .device_id = 0x01,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t peripheral = tsumikoro_mock_create_device(
@@ -427,6 +438,7 @@ static void test_bus_statistics(void)
         .baud_rate = 1000000,
         .device_id = 0x00,
         .is_controller = true,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t controller = tsumikoro_mock_create_device(
@@ -439,6 +451,7 @@ static void test_bus_statistics(void)
         .baud_rate = 1000000,
         .device_id = 0x01,
         .is_controller = false,
+        .turnaround_delay_bytes = 0,
         .platform_data = NULL
     };
     tsumikoro_hal_handle_t peripheral = tsumikoro_mock_create_device(
