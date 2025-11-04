@@ -24,9 +24,21 @@ target_include_directories(stm32g0_hal PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
 )
 
+# Explicitly disable FreeRTOS in tsumikoro_bus (use bare-metal polling mode)
+set(TSUMIKORO_BUS_USE_RTOS OFF CACHE BOOL "Disable FreeRTOS in bus protocol" FORCE)
+
+# Add tsumikoro_bus library in bare-metal mode
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/tsumikoro_bus ${CMAKE_CURRENT_BINARY_DIR}/tsumikoro_bus)
+
+# tsumikoro_bus needs HAL config for its STM32 HAL implementation
+target_include_directories(tsumikoro_bus PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+)
+
 # Link libraries
 target_link_libraries(${PROJECT_NAME}.elf
     stm32g0_hal
+    tsumikoro_bus
 )
 
 # Include directories

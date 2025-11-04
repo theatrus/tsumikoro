@@ -27,5 +27,6 @@ set(CMAKE_EXE_LINKER_FLAGS_INIT "${MCU_FLAGS} -specs=nano.specs -specs=nosys.spe
 # MCU-specific definitions
 add_compile_definitions(
     ${MCU_LINE}
+    ${MCU_FAMILY}
     USE_HAL_DRIVER
 )

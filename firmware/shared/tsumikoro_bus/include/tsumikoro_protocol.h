@@ -104,6 +104,15 @@ extern "C" {
 #define TSUMIKORO_CMD_STEPPER_GET_POSITION 0x200B  /**< Get current position */
 
 /**
+ * @brief Servo motor commands (0x3000-0x3FFF)
+ */
+#define TSUMIKORO_CMD_SERVO_SET_POSITION  0x3001  /**< Set servo position (0-1800 = 0-180 degrees * 10) */
+#define TSUMIKORO_CMD_SERVO_GET_POSITION  0x3002  /**< Get current servo position */
+#define TSUMIKORO_CMD_SERVO_SET_SPEED     0x3003  /**< Set servo movement speed */
+#define TSUMIKORO_CMD_SERVO_SET_RANGE     0x3004  /**< Set servo angle range */
+#define TSUMIKORO_CMD_SERVO_CALIBRATE     0x3005  /**< Calibrate servo endpoints */
+
+/**
  * @brief Status codes
  */
 typedef enum {

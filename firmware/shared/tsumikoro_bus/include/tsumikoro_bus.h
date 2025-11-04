@@ -233,6 +233,28 @@ void tsumikoro_bus_get_stats(tsumikoro_bus_handle_t handle,
  */
 void tsumikoro_bus_reset_stats(tsumikoro_bus_handle_t handle);
 
+#if TSUMIKORO_BUS_USE_RTOS
+/**
+ * @brief Get HAL RX callback for RTOS mode
+ *
+ * In RTOS mode, applications must register this callback with the HAL
+ * after calling tsumikoro_bus_init() by re-initializing the HAL with
+ * this callback and the bus handle as user_data.
+ *
+ * Example:
+ * @code
+ *   tsumikoro_bus_handle_t bus = tsumikoro_bus_init(...);
+ *   tsumikoro_hal_rx_callback_t rx_cb = tsumikoro_bus_get_hal_rx_callback();
+ *   // Re-init HAL with RX callback
+ *   tsumikoro_hal_deinit(hal);
+ *   hal = tsumikoro_hal_init(&hal_config, rx_cb, bus);
+ * @endcode
+ *
+ * @return HAL RX callback function pointer
+ */
+tsumikoro_hal_rx_callback_t tsumikoro_bus_get_hal_rx_callback(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

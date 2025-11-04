@@ -11,6 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if TSUMIKORO_BUS_USE_RTOS
+#include "tsumikoro_rtos.h"
+#endif
+
 /* Debug logging (define TSUMIKORO_BUS_DEBUG to enable) */
 #ifdef TSUMIKORO_BUS_DEBUG
 #include <stdio.h>
@@ -48,6 +52,38 @@ typedef struct {
     tsumikoro_packet_t *response;                 /**< User's response buffer (may be NULL) */
 } tsumikoro_blocking_callback_ctx_t;
 
+#if TSUMIKORO_BUS_USE_RTOS
+/**
+ * @brief RX message for RX thread queue
+ */
+typedef struct {
+    uint8_t data[TSUMIKORO_MAX_PACKET_LEN];  /**< Received data */
+    size_t len;                               /**< Number of bytes */
+} tsumikoro_rx_msg_t;
+
+/**
+ * @brief TX request message for TX thread queue
+ */
+typedef struct {
+    uint8_t data[TSUMIKORO_MAX_PACKET_LEN];  /**< Data to transmit */
+    size_t len;                               /**< Number of bytes */
+} tsumikoro_tx_msg_t;
+
+/**
+ * @brief Handler event message for handler thread
+ */
+typedef enum {
+    TSUMIKORO_HANDLER_EVENT_RX_PACKET,      /**< RX packet decoded */
+    TSUMIKORO_HANDLER_EVENT_TX_COMPLETE,    /**< TX completed */
+    TSUMIKORO_HANDLER_EVENT_TIMEOUT,        /**< Timeout occurred */
+} tsumikoro_handler_event_type_t;
+
+typedef struct {
+    tsumikoro_handler_event_type_t type;     /**< Event type */
+    tsumikoro_packet_t packet;                /**< Associated packet (if applicable) */
+} tsumikoro_handler_event_t;
+#endif
+
 /**
  * @brief Bus handler internal state
  */
@@ -78,6 +114,17 @@ typedef struct {
 
     // Statistics
     tsumikoro_bus_stats_t stats;
+
+#if TSUMIKORO_BUS_USE_RTOS
+    // RTOS resources
+    tsumikoro_queue_t rx_queue;          /**< RX data queue (ISR -> RX thread) */
+    tsumikoro_queue_t tx_queue;          /**< TX request queue (Handler -> TX thread) */
+    tsumikoro_queue_t handler_queue;     /**< Handler event queue (RX/TX threads -> Handler thread) */
+    tsumikoro_thread_t rx_thread;        /**< RX processing thread */
+    tsumikoro_thread_t tx_thread;        /**< TX processing thread */
+    tsumikoro_thread_t handler_thread;   /**< Command handler thread */
+    tsumikoro_semaphore_t blocking_sem;  /**< Semaphore for blocking commands */
+#endif
 } tsumikoro_bus_t;
 
 /* ========== Internal Helper Functions ========== */
@@ -185,6 +232,25 @@ static tsumikoro_status_t bus_transmit_pending(tsumikoro_bus_t *bus)
         return TSUMIKORO_STATUS_ERROR;
     }
 
+#if TSUMIKORO_BUS_USE_RTOS
+    // In RTOS mode, post to TX thread queue
+    tsumikoro_tx_msg_t tx_msg;
+    memcpy(tx_msg.data, tx_buffer, tx_len);
+    tx_msg.len = tx_len;
+
+    if (!tsumikoro_queue_send(bus->tx_queue, &tx_msg, 100)) {
+        BUS_DEBUG("TX queue send failed\n");
+        return TSUMIKORO_STATUS_ERROR;
+    }
+
+    // Update state
+    bus->pending_cmd.send_time_ms = tsumikoro_hal_get_time_ms();
+    bus->stats.commands_sent++;
+    bus_set_state(bus, TSUMIKORO_BUS_STATE_TRANSMITTING);
+
+#else
+    // Bare-metal mode: transmit directly via HAL
+
     // Store transmitted packet for echo detection (RS-485 receives own transmission)
     memcpy(bus->last_tx_buffer, tx_buffer, tx_len);
     bus->last_tx_len = tx_len;
@@ -211,6 +277,7 @@ static tsumikoro_status_t bus_transmit_pending(tsumikoro_bus_t *bus)
         // No response expected, complete immediately
         bus_complete_command(bus, TSUMIKORO_CMD_STATUS_SUCCESS, NULL);
     }
+#endif
 
     return TSUMIKORO_STATUS_OK;
 }
@@ -422,6 +489,307 @@ static void bus_process_state_machine(tsumikoro_bus_t *bus)
     }
 }
 
+#if TSUMIKORO_BUS_USE_RTOS
+/* ========== RTOS Implementation ========== */
+
+/**
+ * @brief HAL RX callback for RTOS mode (called from ISR)
+ *
+ * Posts received data to RX queue for processing by RX thread.
+ */
+static void bus_hal_rx_callback(const uint8_t *data, size_t len, void *user_data)
+{
+    tsumikoro_bus_t *bus = (tsumikoro_bus_t *)user_data;
+
+    if (!bus || !data || len == 0 || len > TSUMIKORO_MAX_PACKET_LEN) {
+        return;
+    }
+
+    // Create RX message
+    tsumikoro_rx_msg_t rx_msg;
+    memcpy(rx_msg.data, data, len);
+    rx_msg.len = len;
+
+    // Post to RX queue (non-blocking from ISR)
+    tsumikoro_queue_send_from_isr(bus->rx_queue, &rx_msg);
+}
+
+/**
+ * @brief RX thread function
+ *
+ * Waits for RX data from ISR, decodes packets, and posts events to handler thread.
+ */
+static void bus_rx_thread(void *arg)
+{
+    tsumikoro_bus_t *bus = (tsumikoro_bus_t *)arg;
+
+    BUS_DEBUG("RX thread started\n");
+
+    while (1) {
+        tsumikoro_rx_msg_t rx_msg;
+
+        // Block waiting for RX data
+        if (!tsumikoro_queue_receive(bus->rx_queue, &rx_msg, UINT32_MAX)) {
+            continue;
+        }
+
+        BUS_DEBUG("RX thread: received %zu bytes\n", rx_msg.len);
+
+        // Check for TX echo
+        if (bus->expecting_tx_echo &&
+            rx_msg.len == bus->last_tx_len &&
+            memcmp(rx_msg.data, bus->last_tx_buffer, rx_msg.len) == 0) {
+            BUS_DEBUG("RX thread: ignoring TX echo\n");
+            bus->expecting_tx_echo = false;
+            continue;
+        }
+
+        // If we expected an echo but got something different, that's a collision
+        if (bus->expecting_tx_echo) {
+            BUS_DEBUG("RX thread: collision detected!\n");
+            bus->expecting_tx_echo = false;
+            // TODO: Handle collision
+        }
+
+        // Decode packet
+        tsumikoro_packet_t rx_packet;
+        tsumikoro_status_t status = tsumikoro_packet_decode(rx_msg.data,
+                                                             rx_msg.len,
+                                                             &rx_packet);
+
+        if (status != TSUMIKORO_STATUS_OK) {
+            BUS_DEBUG("RX thread: decode failed, status=%d\n", status);
+            if (status == TSUMIKORO_STATUS_CRC_ERROR) {
+                bus->stats.crc_errors++;
+            }
+            continue;
+        }
+
+        BUS_DEBUG("RX thread: decoded packet, cmd=0x%04X\n", rx_packet.command);
+
+        // Post to handler thread
+        tsumikoro_handler_event_t event;
+        event.type = TSUMIKORO_HANDLER_EVENT_RX_PACKET;
+        event.packet = rx_packet;
+        tsumikoro_queue_send(bus->handler_queue, &event, UINT32_MAX);
+    }
+}
+
+/**
+ * @brief TX thread function
+ *
+ * Waits for TX requests from handler thread and transmits data via HAL.
+ */
+static void bus_tx_thread(void *arg)
+{
+    tsumikoro_bus_t *bus = (tsumikoro_bus_t *)arg;
+
+    BUS_DEBUG("TX thread started\n");
+
+    while (1) {
+        tsumikoro_tx_msg_t tx_msg;
+
+        // Block waiting for TX request
+        if (!tsumikoro_queue_receive(bus->tx_queue, &tx_msg, UINT32_MAX)) {
+            continue;
+        }
+
+        BUS_DEBUG("TX thread: transmitting %zu bytes\n", tx_msg.len);
+
+        // Wait for bus idle (with timeout)
+        uint32_t start_time = tsumikoro_hal_get_time_ms();
+        while (!tsumikoro_hal_is_bus_idle(bus->hal)) {
+            if (tsumikoro_hal_get_time_ms() - start_time >= bus->config.bus_idle_timeout_ms) {
+                BUS_DEBUG("TX thread: bus idle timeout\n");
+                // Notify handler of timeout
+                tsumikoro_handler_event_t event;
+                event.type = TSUMIKORO_HANDLER_EVENT_TIMEOUT;
+                tsumikoro_queue_send(bus->handler_queue, &event, 0);
+                goto skip_tx;
+            }
+            tsumikoro_thread_sleep_ms(1);
+        }
+
+        // Transmit
+        tsumikoro_hal_status_t hal_status = tsumikoro_hal_transmit(bus->hal, tx_msg.data, tx_msg.len);
+
+        if (hal_status == TSUMIKORO_HAL_OK) {
+            // Save last TX for echo detection
+            memcpy(bus->last_tx_buffer, tx_msg.data, tx_msg.len);
+            bus->last_tx_len = tx_msg.len;
+            bus->expecting_tx_echo = true;
+
+            BUS_DEBUG("TX thread: transmission complete\n");
+
+            // Notify handler of TX completion
+            tsumikoro_handler_event_t event;
+            event.type = TSUMIKORO_HANDLER_EVENT_TX_COMPLETE;
+            tsumikoro_queue_send(bus->handler_queue, &event, 0);
+        } else {
+            BUS_DEBUG("TX thread: HAL transmit failed, status=%d\n", hal_status);
+        }
+
+skip_tx:
+        (void)0;  // Label target
+    }
+}
+
+/**
+ * @brief Handler thread function
+ *
+ * Processes decoded RX packets, manages state machine, executes callbacks.
+ */
+static void bus_handler_thread(void *arg)
+{
+    tsumikoro_bus_t *bus = (tsumikoro_bus_t *)arg;
+
+    BUS_DEBUG("Handler thread started\n");
+
+    while (1) {
+        tsumikoro_handler_event_t event;
+
+        // Block waiting for events
+        if (!tsumikoro_queue_receive(bus->handler_queue, &event, UINT32_MAX)) {
+            continue;
+        }
+
+        switch (event.type) {
+            case TSUMIKORO_HANDLER_EVENT_RX_PACKET:
+                BUS_DEBUG("Handler: RX packet event\n");
+
+                // Check if this is a response to pending command
+                if (bus->pending_cmd.active && bus->pending_cmd.expects_response) {
+                    if (bus->state == TSUMIKORO_BUS_STATE_WAITING_RESPONSE) {
+                        // Check for NAK
+                        if (event.packet.data_len > 0 && event.packet.data[0] == TSUMIKORO_STATUS_NAK) {
+                            if (bus->config.auto_retry) {
+                                bus_retry_command(bus);
+                            } else {
+                                bus_complete_command(bus, TSUMIKORO_CMD_STATUS_NAK, &event.packet);
+                            }
+                        } else {
+                            // Success
+                            bus_complete_command(bus, TSUMIKORO_CMD_STATUS_SUCCESS, &event.packet);
+                        }
+                        break;
+                    }
+                }
+
+                // Unsolicited message - call callback
+                if (bus->unsolicited_callback) {
+                    BUS_DEBUG("Handler: calling unsolicited callback\n");
+                    bus->unsolicited_callback(&event.packet, bus->unsolicited_user_data);
+                }
+                bus->stats.unsolicited_messages++;
+                break;
+
+            case TSUMIKORO_HANDLER_EVENT_TX_COMPLETE:
+                BUS_DEBUG("Handler: TX complete event\n");
+                if (bus->pending_cmd.expects_response) {
+                    bus_set_state(bus, TSUMIKORO_BUS_STATE_WAITING_RESPONSE);
+                } else {
+                    bus_complete_command(bus, TSUMIKORO_CMD_STATUS_SUCCESS, NULL);
+                }
+                break;
+
+            case TSUMIKORO_HANDLER_EVENT_TIMEOUT:
+                BUS_DEBUG("Handler: timeout event\n");
+                if (bus->config.auto_retry) {
+                    bus_retry_command(bus);
+                } else {
+                    bus_complete_command(bus, TSUMIKORO_CMD_STATUS_TIMEOUT, NULL);
+                }
+                break;
+        }
+
+        // TODO: Add timeout checking for response timeout
+    }
+}
+
+/**
+ * @brief Initialize RTOS resources
+ */
+static bool bus_rtos_init(tsumikoro_bus_t *bus)
+{
+    // Create queues
+    bus->rx_queue = tsumikoro_queue_create(8, sizeof(tsumikoro_rx_msg_t));
+    if (!bus->rx_queue) goto error;
+
+    bus->tx_queue = tsumikoro_queue_create(4, sizeof(tsumikoro_tx_msg_t));
+    if (!bus->tx_queue) goto error;
+
+    bus->handler_queue = tsumikoro_queue_create(8, sizeof(tsumikoro_handler_event_t));
+    if (!bus->handler_queue) goto error;
+
+    // Create semaphore
+    bus->blocking_sem = tsumikoro_semaphore_create_binary();
+    if (!bus->blocking_sem) goto error;
+
+    // Create threads
+    tsumikoro_thread_config_t thread_config;
+
+    // RX thread (high priority)
+    thread_config.name = "bus_rx";
+    thread_config.function = bus_rx_thread;
+    thread_config.argument = bus;
+    thread_config.stack_size = 2048;
+    thread_config.priority = TSUMIKORO_THREAD_PRIORITY_HIGH;
+    bus->rx_thread = tsumikoro_thread_create(&thread_config);
+    if (!bus->rx_thread) goto error;
+
+    // TX thread (high priority)
+    thread_config.name = "bus_tx";
+    thread_config.function = bus_tx_thread;
+    thread_config.argument = bus;
+    thread_config.stack_size = 2048;
+    thread_config.priority = TSUMIKORO_THREAD_PRIORITY_HIGH;
+    bus->tx_thread = tsumikoro_thread_create(&thread_config);
+    if (!bus->tx_thread) goto error;
+
+    // Handler thread (normal priority)
+    thread_config.name = "bus_handler";
+    thread_config.function = bus_handler_thread;
+    thread_config.argument = bus;
+    thread_config.stack_size = 3072;
+    thread_config.priority = TSUMIKORO_THREAD_PRIORITY_NORMAL;
+    bus->handler_thread = tsumikoro_thread_create(&thread_config);
+    if (!bus->handler_thread) goto error;
+
+    BUS_DEBUG("RTOS resources initialized\n");
+    return true;
+
+error:
+    // Cleanup on error
+    if (bus->rx_queue) tsumikoro_queue_delete(bus->rx_queue);
+    if (bus->tx_queue) tsumikoro_queue_delete(bus->tx_queue);
+    if (bus->handler_queue) tsumikoro_queue_delete(bus->handler_queue);
+    if (bus->blocking_sem) tsumikoro_semaphore_delete(bus->blocking_sem);
+    return false;
+}
+
+/**
+ * @brief Cleanup RTOS resources
+ */
+static void bus_rtos_deinit(tsumikoro_bus_t *bus)
+{
+    // Delete threads
+    if (bus->rx_thread) tsumikoro_thread_delete(bus->rx_thread);
+    if (bus->tx_thread) tsumikoro_thread_delete(bus->tx_thread);
+    if (bus->handler_thread) tsumikoro_thread_delete(bus->handler_thread);
+
+    // Delete queues
+    if (bus->rx_queue) tsumikoro_queue_delete(bus->rx_queue);
+    if (bus->tx_queue) tsumikoro_queue_delete(bus->tx_queue);
+    if (bus->handler_queue) tsumikoro_queue_delete(bus->handler_queue);
+
+    // Delete semaphore
+    if (bus->blocking_sem) tsumikoro_semaphore_delete(bus->blocking_sem);
+
+    BUS_DEBUG("RTOS resources cleaned up\n");
+}
+
+#endif /* TSUMIKORO_BUS_USE_RTOS */
+
 /* ========== Public API ========== */
 
 tsumikoro_bus_handle_t tsumikoro_bus_init(tsumikoro_hal_handle_t hal_handle,
@@ -456,12 +824,32 @@ tsumikoro_bus_handle_t tsumikoro_bus_init(tsumikoro_hal_handle_t hal_handle,
     bus->state_enter_time_ms = tsumikoro_hal_get_time_ms();
     bus->last_process_time_ms = bus->state_enter_time_ms;
 
+#if TSUMIKORO_BUS_USE_RTOS
+    // Initialize RTOS resources
+    if (!bus_rtos_init(bus)) {
+        free(bus);
+        return NULL;
+    }
+
+    // Note: In RTOS mode, the HAL must be re-initialized with RX callback.
+    // The application should call tsumikoro_hal_init() again with
+    // bus_hal_rx_callback as the RX callback and bus as user_data.
+    // This can't be done here because HAL init requires platform config.
+    BUS_DEBUG("Bus initialized in RTOS mode\n");
+#else
+    BUS_DEBUG("Bus initialized in bare-metal mode\n");
+#endif
+
     return (tsumikoro_bus_handle_t)bus;
 }
 
 void tsumikoro_bus_deinit(tsumikoro_bus_handle_t handle)
 {
     if (handle) {
+#if TSUMIKORO_BUS_USE_RTOS
+        tsumikoro_bus_t *bus = (tsumikoro_bus_t *)handle;
+        bus_rtos_deinit(bus);
+#endif
         free(handle);
     }
 }
@@ -589,10 +977,16 @@ void tsumikoro_bus_process(tsumikoro_bus_handle_t handle)
         return;
     }
 
+#if TSUMIKORO_BUS_USE_RTOS
+    // In RTOS mode, threads handle all processing - no need to call this
+    (void)handle;
+#else
+    // Bare-metal mode: process state machine
     tsumikoro_bus_t *bus = (tsumikoro_bus_t *)handle;
     bus->last_process_time_ms = tsumikoro_hal_get_time_ms();
 
     bus_process_state_machine(bus);
+#endif
 }
 
 tsumikoro_bus_state_t tsumikoro_bus_get_state(tsumikoro_bus_handle_t handle)
@@ -648,3 +1042,10 @@ void tsumikoro_bus_reset_stats(tsumikoro_bus_handle_t handle)
     tsumikoro_bus_t *bus = (tsumikoro_bus_t *)handle;
     memset(&bus->stats, 0, sizeof(bus->stats));
 }
+
+#if TSUMIKORO_BUS_USE_RTOS
+tsumikoro_hal_rx_callback_t tsumikoro_bus_get_hal_rx_callback(void)
+{
+    return bus_hal_rx_callback;
+}
+#endif

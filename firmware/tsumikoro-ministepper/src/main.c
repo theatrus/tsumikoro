@@ -2,13 +2,16 @@
  * @file main.c
  * @brief Tsumikoro ministepper controller with bus communication
  *
- * Example showing how to use the Tsumikoro bus protocol on STM32G071.
- * This peripheral device responds to commands from the bus controller.
+ * Example showing how to use the Tsumikoro bus protocol on STM32G071
+ * with FreeRTOS threading. This peripheral device responds to commands
+ * from the bus controller using interrupt-driven RTOS message passing.
  */
 
 #include "stm32g0xx_hal.h"
 #include "tsumikoro_bus.h"
 #include "tsumikoro_hal_stm32.h"
+#include "FreeRTOS.h"
+#include "task.h"
 #include <string.h>
 
 /* Configuration */
@@ -80,6 +83,33 @@ static void Stepper_Process(void);
 static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data);
 
 /**
+ * @brief Main application task (FreeRTOS)
+ *
+ * This task handles stepper motor control. The bus protocol is handled
+ * by dedicated threads created by tsumikoro_bus_init().
+ */
+static void MainTask(void *argument)
+{
+    (void)argument;
+
+    /* Initialize peripherals (HAL already initialized) */
+    GPIO_Init();
+    UART_Init();
+    Stepper_Init();
+    Bus_Init();
+
+    /* Main stepper control loop */
+    while (1)
+    {
+        /* Process stepper motor control */
+        Stepper_Process();
+
+        /* Yield to other tasks every 10ms */
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+/**
  * @brief The application entry point.
  */
 int main(void)
@@ -90,27 +120,27 @@ int main(void)
     /* Configure the system clock */
     SystemClock_Config();
 
-    /* Initialize peripherals */
-    GPIO_Init();
-    UART_Init();
-    Stepper_Init();
-    Bus_Init();
+    /* Create main application task */
+    BaseType_t result = xTaskCreate(
+        MainTask,
+        "Main",
+        256,  /* Stack size in words */
+        NULL,
+        tskIDLE_PRIORITY + 1,
+        NULL
+    );
 
-    /* Main loop */
-    uint32_t last_process_time = HAL_GetTick();
+    if (result != pdPASS) {
+        Error_Handler();
+    }
+
+    /* Start the FreeRTOS scheduler */
+    vTaskStartScheduler();
+
+    /* Should never reach here */
     while (1)
     {
-        /* Process bus protocol (should be called regularly, ~1-10ms) */
-        if (HAL_GetTick() - last_process_time >= 1) {
-            tsumikoro_bus_process(g_bus_handle);
-            last_process_time = HAL_GetTick();
-        }
-
-        /* Process stepper motor control */
-        Stepper_Process();
-
-        /* Optional: Enter low-power mode between processing */
-        // __WFI();
+        Error_Handler();
     }
 }
 
@@ -171,7 +201,7 @@ static void Bus_Init(void)
         .platform_data = (void *)&g_stm32_config
     };
 
-    /* Initialize HAL */
+    /* Initialize HAL (initially without RX callback) */
     g_hal_handle = tsumikoro_hal_init(&hal_config, NULL, NULL);
     if (g_hal_handle == NULL) {
         Error_Handler();
@@ -181,12 +211,22 @@ static void Bus_Init(void)
     tsumikoro_bus_config_t bus_config = TSUMIKORO_BUS_DEFAULT_CONFIG();
     bus_config.response_timeout_ms = 50;   /* Respond within 50ms */
 
-    /* Initialize bus handler */
+    /* Initialize bus handler (creates RTOS threads) */
     g_bus_handle = tsumikoro_bus_init(g_hal_handle, &bus_config,
                                        bus_unsolicited_callback, NULL);
     if (g_bus_handle == NULL) {
         Error_Handler();
     }
+
+#if TSUMIKORO_BUS_USE_RTOS
+    /* In RTOS mode, re-initialize HAL with RX callback for interrupt-driven operation */
+    tsumikoro_hal_deinit(g_hal_handle);
+    tsumikoro_hal_rx_callback_t rx_callback = tsumikoro_bus_get_hal_rx_callback();
+    g_hal_handle = tsumikoro_hal_init(&hal_config, rx_callback, g_bus_handle);
+    if (g_hal_handle == NULL) {
+        Error_Handler();
+    }
+#endif
 }
 
 /**
@@ -410,3 +450,21 @@ void assert_failed(uint8_t *file, uint32_t line)
     (void)line;
 }
 #endif /* USE_FULL_ASSERT */
+
+/**
+ * @brief FreeRTOS stack overflow hook
+ */
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
+{
+    (void)xTask;
+    (void)pcTaskName;
+    Error_Handler();
+}
+
+/**
+ * @brief FreeRTOS malloc failed hook
+ */
+void vApplicationMallocFailedHook(void)
+{
+    Error_Handler();
+}
