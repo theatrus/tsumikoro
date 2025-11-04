@@ -1,9 +1,9 @@
 # Tsumikoro Multi-Drop Serial Bus Library
 
-## Design Document v0.5
+## Design Document v0.6
 
 **Status**: Draft - Design Phase
-**Last Updated**: 2025-11-03
+**Last Updated**: 2025-11-04
 **Author**: Tsumikoro Project
 **Copyright**: 2025-2025 Yann Ramin
 **License**: Apache-2.0
@@ -774,6 +774,9 @@ Commands use **16-bit identifiers** (0x0000-0xFFFF) divided by functional class:
 | CMD_SAVE_CONFIG | 0x0008 | Save configuration to flash | ACK |
 | CMD_LOAD_CONFIG | 0x0009 | Load configuration from flash | ACK |
 | CMD_GET_STATUS | 0x000A | Get device status | Status structure |
+| CMD_ID_ASSIGN_START | 0x000B | Start hardware ID assignment (OPTIONAL) | Broadcast (no response) |
+| CMD_ID_ASSIGN_ACK | 0x000C | Peripheral acknowledges assigned ID (OPTIONAL) | Controller receives ACK |
+| CMD_ID_ASSIGN_COMPLETE | 0x000D | ID assignment complete (OPTIONAL) | Broadcast (no response) |
 
 **Sensor Commands** (0x1000-0x1FFF): Sensor devices
 
@@ -1582,6 +1585,304 @@ uint8_t tsumikoro_bus_scan_detailed(
     return found_count;
 }
 ```
+
+#### 4.7.9 Hardware-Assisted ID Assignment (OPTIONAL)
+
+For applications requiring automatic ID assignment without manual configuration, an optional hardware daisy-chain signal can be used to sequentially assign device IDs.
+
+**Feature Status**: OPTIONAL - Requires additional hardware GPIO connections
+
+##### Hardware Setup
+
+A dedicated GPIO signal is daisy-chained between peripherals:
+
+```
+Controller                  Peripheral #1           Peripheral #2           Peripheral #3
+┌─────────┐                ┌──────────┐            ┌──────────┐            ┌──────────┐
+│         │                │          │            │          │            │          │
+│  ESP32  │  ID_CHAIN_OUT  │  STM32   │ ID_CHAIN   │  STM32   │ ID_CHAIN   │  STM32   │
+│  Bridge ├───────────────>│ Motor #1 ├──────────>│ Motor #2 ├──────────>│ Motor #3 │
+│         │   (GPIO HIGH)  │          │            │          │            │          │
+│         │                │ ID_IN    │ ID_OUT     │ ID_IN    │ ID_OUT     │ ID_IN    │
+│         │   RS-485 Bus   │          │            │          │            │          │
+│         ├────────────────┤──────────┤────────────┤──────────┤────────────┤──────────┤
+└─────────┘                └──────────┘            └──────────┘            └──────────┘
+```
+
+**Signal Characteristics**:
+- **ID_CHAIN_OUT** (controller): GPIO output, set HIGH to start assignment
+- **ID_IN** (peripheral): GPIO input, detects when this device should assign its ID
+- **ID_OUT** (peripheral): GPIO output, passes signal to next device after assignment
+
+**Default State**:
+- All ID_OUT signals are LOW until device assigns its ID
+- Controller ID_CHAIN_OUT is LOW during normal operation
+
+##### Assignment Protocol
+
+**Step-by-step sequence**:
+
+1. Controller broadcasts `CMD_ID_ASSIGN_START` (0x000B)
+2. All peripherals enter ID assignment mode, waiting for ID_IN = HIGH
+3. Controller sets ID_CHAIN_OUT = HIGH
+4. First peripheral (sees ID_IN = HIGH):
+   - Assigns itself ID = 0x01
+   - Saves ID to flash/EEPROM
+   - Sets ID_OUT = HIGH (propagates to next device)
+   - Sends acknowledgment to controller
+5. Second peripheral (now sees ID_IN = HIGH):
+   - Assigns itself ID = 0x02
+   - Saves ID to flash/EEPROM
+   - Sets ID_OUT = HIGH
+   - Sends acknowledgment
+6. Process continues down the chain
+7. Controller waits for timeout (no more ACKs = assignment complete)
+8. Controller broadcasts `CMD_ID_ASSIGN_COMPLETE` (0x000D)
+9. All peripherals exit assignment mode, ID_OUT signals remain HIGH
+
+##### Command Definitions
+
+Add to Generic Commands (0x0000-0x0FFF):
+
+| Command | Value | Description | Response |
+|---------|-------|-------------|----------|
+| CMD_ID_ASSIGN_START | 0x000B | Start hardware ID assignment | Broadcast (no response) |
+| CMD_ID_ASSIGN_ACK | 0x000C | Peripheral acknowledges assigned ID | Controller receives ACK |
+| CMD_ID_ASSIGN_COMPLETE | 0x000D | Assignment complete | Broadcast (no response) |
+
+##### Controller-Side Implementation
+
+```c
+/**
+ * @brief Perform hardware-assisted ID assignment
+ * @param bus Bus handle
+ * @param chain_out_gpio GPIO pin for ID_CHAIN_OUT signal
+ * @param timeout_per_device Timeout to wait for each device (default: 100ms)
+ * @return Number of devices assigned
+ */
+uint8_t tsumikoro_bus_hardware_id_assign(
+    tsumikoro_bus_handle_t bus,
+    gpio_num_t chain_out_gpio,
+    uint32_t timeout_per_device
+) {
+    uint8_t assigned_count = 0;
+
+    TSUMIKORO_LOG_INFO("Starting hardware ID assignment...");
+
+    // Set ID_CHAIN_OUT to LOW initially
+    gpio_set_level(chain_out_gpio, 0);
+    delay_ms(10);
+
+    // Broadcast ID_ASSIGN_START command
+    tsumikoro_bus_send_command(
+        bus,
+        0xFF,           // Broadcast
+        0x000B,         // CMD_ID_ASSIGN_START
+        NULL,
+        0,
+        0
+    );
+
+    // Wait for all devices to enter assignment mode
+    delay_ms(50);
+
+    // Assert ID_CHAIN_OUT = HIGH to start assignment
+    gpio_set_level(chain_out_gpio, 1);
+    TSUMIKORO_LOG_DEBUG("ID_CHAIN_OUT asserted HIGH");
+
+    // Listen for ACKs from each peripheral
+    uint32_t last_ack_time = get_time_ms();
+
+    while ((get_time_ms() - last_ack_time) < timeout_per_device) {
+        tsumikoro_packet_t response;
+
+        if (tsumikoro_bus_receive_packet(bus, &response, 10) == STATUS_OK) {
+            if (response.command == 0x000C) {  // CMD_ID_ASSIGN_ACK
+                uint8_t assigned_id = response.controller_id;
+                assigned_count++;
+                last_ack_time = get_time_ms();
+
+                TSUMIKORO_LOG_INFO("Device assigned ID 0x%02X (%d devices total)",
+                    assigned_id, assigned_count);
+            }
+        }
+    }
+
+    // Broadcast assignment complete
+    tsumikoro_bus_send_command(
+        bus,
+        0xFF,           // Broadcast
+        0x000D,         // CMD_ID_ASSIGN_COMPLETE
+        NULL,
+        0,
+        0
+    );
+
+    TSUMIKORO_LOG_INFO("Hardware ID assignment complete: %d devices assigned",
+        assigned_count);
+
+    return assigned_count;
+}
+```
+
+##### Peripheral-Side Implementation
+
+```c
+// Global state for ID assignment
+static volatile bool id_assignment_mode = false;
+static gpio_num_t id_in_gpio;
+static gpio_num_t id_out_gpio;
+
+/**
+ * @brief Handler for CMD_ID_ASSIGN_START (0x000B)
+ */
+uint8_t handle_id_assign_start(
+    uint16_t cmd,
+    const uint8_t *request_data,
+    uint8_t request_len,
+    uint8_t *response_data,
+    uint8_t *response_len
+) {
+    // Enter ID assignment mode
+    id_assignment_mode = true;
+
+    // Ensure ID_OUT is LOW initially
+    gpio_set_level(id_out_gpio, 0);
+
+    TSUMIKORO_LOG_INFO("Entered ID assignment mode");
+
+    // Start background task to monitor ID_IN
+    xTaskCreate(id_assignment_task, "id_assign", 2048, NULL, 5, NULL);
+
+    return STATUS_OK;  // Broadcast, no response sent
+}
+
+/**
+ * @brief Background task to monitor ID_IN signal
+ */
+void id_assignment_task(void *param) {
+    uint8_t next_id = 0x01;
+
+    while (id_assignment_mode) {
+        // Check if ID_IN is HIGH
+        if (gpio_get_level(id_in_gpio) == 1) {
+            // This is our turn to assign ID
+
+            // Calculate next available ID (could be 0x01, 0x02, etc.)
+            // In simple case, we can count chain position or use stored value
+            uint8_t my_id = next_id++;
+
+            // Save ID to persistent storage
+            save_device_id_to_flash(my_id);
+
+            // Update runtime device ID
+            g_device_id = my_id;
+
+            TSUMIKORO_LOG_INFO("Assigned ID: 0x%02X", my_id);
+
+            // Assert ID_OUT = HIGH to propagate to next device
+            gpio_set_level(id_out_gpio, 1);
+
+            // Send ACK to controller
+            uint8_t ack_data[1] = { my_id };
+            tsumikoro_bus_send_command(
+                bus,
+                0x00,       // To controller
+                0x000C,     // CMD_ID_ASSIGN_ACK
+                ack_data,
+                1,
+                20
+            );
+
+            // Exit task (assignment complete for this device)
+            break;
+        }
+
+        delay_ms(10);
+    }
+
+    vTaskDelete(NULL);
+}
+
+/**
+ * @brief Handler for CMD_ID_ASSIGN_COMPLETE (0x000D)
+ */
+uint8_t handle_id_assign_complete(
+    uint16_t cmd,
+    const uint8_t *request_data,
+    uint8_t request_len,
+    uint8_t *response_data,
+    uint8_t *response_len
+) {
+    // Exit ID assignment mode
+    id_assignment_mode = false;
+
+    TSUMIKORO_LOG_INFO("ID assignment complete, my ID: 0x%02X", g_device_id);
+
+    return STATUS_OK;  // Broadcast, no response sent
+}
+```
+
+##### Hardware Requirements
+
+**Per Peripheral Device**:
+- 2x GPIO pins (ID_IN, ID_OUT)
+- Pull-down resistor on ID_IN (10kΩ recommended)
+- No additional components required
+
+**Controller**:
+- 1x GPIO pin (ID_CHAIN_OUT)
+
+**Wiring**:
+- Use twisted pair or shielded cable for ID_CHAIN signal
+- Keep signal length reasonable (<5m recommended)
+- 3.3V or 5V logic levels (consistent across all devices)
+
+##### Advantages
+
+- **Zero configuration**: Peripherals automatically assigned sequential IDs
+- **Physical order**: ID assignment follows physical cable order
+- **Repeatable**: Consistent ID assignment after power cycle (stored in flash)
+- **No conflicts**: Guaranteed unique IDs
+- **Simple wiring**: Single additional signal wire
+
+##### Limitations
+
+- **Requires additional GPIO**: 2 pins per peripheral, 1 on controller
+- **Physical wiring**: Daisy-chain must match desired ID order
+- **Not hot-plug**: Assignment typically done during initial setup
+- **Hardware dependency**: Not available on all platforms
+
+##### Configuration
+
+Enable in HAL platform config:
+
+```c
+// Platform-specific configuration
+typedef struct {
+    // ... existing fields ...
+
+    // Optional: Hardware ID assignment
+    bool enable_hw_id_assign;      // Enable hardware ID assignment feature
+    gpio_num_t id_in_gpio;         // GPIO for ID_IN (peripheral only)
+    gpio_num_t id_out_gpio;        // GPIO for ID_OUT (peripheral only)
+    gpio_num_t id_chain_out_gpio;  // GPIO for ID_CHAIN_OUT (controller only)
+} tsumikoro_platform_config_t;
+```
+
+##### Alternative: Simple Sequential Assignment
+
+For simpler cases without daisy-chain hardware, peripherals can assign themselves based on their position in the response queue:
+
+```c
+// Controller broadcasts: "Who wants ID 0x01?"
+// First peripheral to respond gets ID 0x01
+// Controller broadcasts: "Who wants ID 0x02?"
+// Next peripheral responds and gets ID 0x02
+// ... continues until no more responses
+```
+
+This software-only approach requires no additional hardware but is less deterministic due to potential timing variations.
 
 ---
 
