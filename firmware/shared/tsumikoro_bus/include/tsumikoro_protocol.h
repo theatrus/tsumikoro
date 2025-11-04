@@ -116,6 +116,15 @@ extern "C" {
 #define TSUMIKORO_CMD_SERVO_GET_STATUS    0x3008  /**< Get servo channel status */
 
 /**
+ * @brief DC motor (H-bridge) commands (0x4000-0x4FFF)
+ */
+#define TSUMIKORO_CMD_DCMOTOR_SET         0x4001  /**< Set motor speed and direction */
+#define TSUMIKORO_CMD_DCMOTOR_GET_SPEED   0x4002  /**< Get current motor speed */
+#define TSUMIKORO_CMD_DCMOTOR_GET_DIRECTION 0x4003 /**< Get current motor direction */
+#define TSUMIKORO_CMD_DCMOTOR_ENABLE      0x4004  /**< Enable/disable motor output */
+#define TSUMIKORO_CMD_DCMOTOR_ESTOP       0x4005  /**< Emergency stop (brake) */
+
+/**
  * @brief Status codes
  */
 typedef enum {

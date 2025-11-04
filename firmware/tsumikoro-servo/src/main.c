@@ -11,6 +11,7 @@
 #include "tsumikoro_bus.h"
 #include "tsumikoro_hal_stm32.h"
 #include "servo_pwm.h"
+#include "motor_hbridge.h"
 #include <string.h>
 
 /* Configuration */
@@ -62,6 +63,7 @@ static void UART_Init(void);
 static void Bus_Init(void);
 static void Servo_Init(void);
 static void Servo_Process(void);
+static void Motor_Init(void);
 
 /* Bus callback functions */
 static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data);
@@ -81,6 +83,7 @@ int main(void)
     GPIO_Init();
     UART_Init();
     Servo_Init();
+    Motor_Init();
     Bus_Init();
 
     /* Main loop - bare-metal polling */
@@ -189,6 +192,17 @@ static void Servo_Process(void)
 {
     /* Process servo movement - updates PWM outputs */
     servo_pwm_process();
+}
+
+/**
+ * @brief Motor H-bridge initialization
+ */
+static void Motor_Init(void)
+{
+    /* Initialize H-bridge motor driver using LL drivers */
+    if (!motor_hbridge_init()) {
+        Error_Handler();
+    }
 }
 
 /**
@@ -388,6 +402,69 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
                 response.data[0] = 0xFF;  /* Error - missing channel index */
                 response.data_len = 1;
             }
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_SET:
+            /* Set motor speed and direction
+             * Data: [speed_hi, speed_lo, direction] */
+            if (packet->data_len >= 3) {
+                uint16_t speed = ((uint16_t)packet->data[0] << 8) |
+                                ((uint16_t)packet->data[1]);
+                motor_direction_t direction = (motor_direction_t)packet->data[2];
+
+                if (motor_hbridge_set(speed, direction)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid parameters */
+                }
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_GET_SPEED:
+            /* Get current motor speed
+             * Response: [speed_hi, speed_lo] */
+            {
+                uint16_t speed = motor_hbridge_get_speed();
+                response.data[0] = (uint8_t)(speed >> 8);
+                response.data[1] = (uint8_t)(speed);
+                response.data_len = 2;
+            }
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_GET_DIRECTION:
+            /* Get current motor direction
+             * Response: [direction] */
+            response.data[0] = (uint8_t)motor_hbridge_get_direction();
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_ENABLE:
+            /* Enable/disable motor output
+             * Data: [enable (0=disable, 1=enable)] */
+            if (packet->data_len >= 1) {
+                bool enable = (packet->data[0] != 0);
+
+                if (motor_hbridge_enable(enable)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error */
+                }
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_DCMOTOR_ESTOP:
+            /* Emergency stop (brake) */
+            motor_hbridge_emergency_stop();
+            response.data[0] = 0x00;  /* Success */
+            response.data_len = 1;
             break;
 
         default:
