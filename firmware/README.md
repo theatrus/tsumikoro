@@ -74,18 +74,18 @@ firmware/
 STM32G030F6P6 TSSOP20
 ============================
 
-         ┌─────────────┐
-  PB7 ──│1   •    20│── PA14 (SWCLK)
-  PB8 ──│2        19│── PA13 (SWDIO)
-  PB9 ──│3        18│── PA12 (Motor IN1)
- NRST ──│4        17│── PA11 (Motor PWM)
- VDDA ──│5        16│── PA8/PB0/PB1/PB2*
-  PA0 ──│6        15│── PA7 (Servo 5)
-  PA1 ──│7        14│── PA6 (Servo 4)
-  PA2 ──│8        13│── PA5 (LED)
-  GND ──│9        12│── PA4 (Servo 3)
-  VDD ──│10       11│── PA3 (Servo 2)
-         └─────────────┘
+                    ┌─────────────┐
+  PB7 (HW ID 0)   ──│1   •    20│── PA14 (SWCLK)
+  PB8 (HW ID 1)   ──│2        19│── PA13 (SWDIO)
+  PB9 (Motor IN2) ──│3        18│── PA12 (Motor IN1)
+ NRST             ──│4        17│── PA11 (Motor PWM)
+ VDDA             ──│5        16│── PA8/PB0/PB1/PB2*
+  PA0 (Servo 0)   ──│6        15│── PA7 (Servo 5)
+  PA1 (RS485 DE)  ──│7        14│── PA6 (Servo 4)
+  PA2 (Servo 1)   ──│8        13│── PA5 (LED)
+  GND             ──│9        12│── PA4 (Servo 3)
+  VDD             ──│10       11│── PA3 (Servo 2)
+                    └─────────────┘
 
 *Bonded pins - only one can be used
 ```
