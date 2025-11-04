@@ -85,7 +85,7 @@ test: all
 	@echo ""
 	@./test_integration
 	@echo ""
-	@echo "Note: Bus handler tests (test_bus_handler) require timing refinement"
+	@./test_bus_handler
 	@echo ""
 	@echo "========================================="
 	@echo "All test suites completed"
