@@ -194,13 +194,18 @@ static void servo_pwm_update_channel(servo_channel_t *channel)
 bool servo_pwm_init(void)
 {
     /* Initialize servo channels with configuration
-     * Based on our pin mapping plan:
-     * Channel 0: PA0 - TIM3_CH1
-     * Channel 1: PA2 - TIM3_CH3
-     * Channel 2: PA3 - TIM3_CH4
-     * Channel 3: PA4 - TIM14_CH1
-     * Channel 4: PA6 - TIM16_CH1
-     * Channel 5: PA7 - TIM17_CH1
+     * Pin mapping (STM32G030F6P6 TSSOP20):
+     * Channel 0: PA0 - TIM3_CH1 (AF1)
+     * Channel 1: PA2 - TIM3_CH3 (AF1)
+     * Channel 2: PA3 - TIM3_CH4 (AF1)
+     * Channel 3: PA4 - TIM14_CH1 (AF4)
+     *
+     * Reserved pins:
+     * - PA6, PA7: Hardware ID generation (inputs with pull-up/down)
+     * - PA13, PA14: SWD (SWDIO, SWCLK) - DO NOT USE
+     * - PA9, PA10: USART1 (bus communication)
+     * - PA1: RS-485 DE
+     * - PA5: Status LED
      */
 
     memset(g_servo_channels, 0, sizeof(g_servo_channels));
@@ -257,37 +262,9 @@ bool servo_pwm_init(void)
     g_servo_channels[3].speed = 10;
     g_servo_channels[3].enabled = false;
 
-    /* Channel 4: PA6 - TIM16_CH1 (AF5) */
-    g_servo_channels[4].timer = TIM16;
-    g_servo_channels[4].channel = LL_TIM_CHANNEL_CH1;
-    g_servo_channels[4].gpio_port = GPIOA;
-    g_servo_channels[4].gpio_pin = LL_GPIO_PIN_6;
-    g_servo_channels[4].gpio_af = LL_GPIO_AF_5;
-    g_servo_channels[4].min_pulse_us = SERVO_DEFAULT_MIN_PULSE_US;
-    g_servo_channels[4].max_pulse_us = SERVO_DEFAULT_MAX_PULSE_US;
-    g_servo_channels[4].current_position = 900;
-    g_servo_channels[4].target_position = 900;
-    g_servo_channels[4].speed = 10;
-    g_servo_channels[4].enabled = false;
-
-    /* Channel 5: PA7 - TIM17_CH1 (AF5) */
-    g_servo_channels[5].timer = TIM17;
-    g_servo_channels[5].channel = LL_TIM_CHANNEL_CH1;
-    g_servo_channels[5].gpio_port = GPIOA;
-    g_servo_channels[5].gpio_pin = LL_GPIO_PIN_7;
-    g_servo_channels[5].gpio_af = LL_GPIO_AF_5;
-    g_servo_channels[5].min_pulse_us = SERVO_DEFAULT_MIN_PULSE_US;
-    g_servo_channels[5].max_pulse_us = SERVO_DEFAULT_MAX_PULSE_US;
-    g_servo_channels[5].current_position = 900;
-    g_servo_channels[5].target_position = 900;
-    g_servo_channels[5].speed = 10;
-    g_servo_channels[5].enabled = false;
-
     /* Initialize timers (unique timers only) */
     servo_pwm_init_timer(TIM3);   /* Used by channels 0, 1, 2 */
     servo_pwm_init_timer(TIM14);  /* Used by channel 3 */
-    servo_pwm_init_timer(TIM16);  /* Used by channel 4 */
-    servo_pwm_init_timer(TIM17);  /* Used by channel 5 */
 
     /* Initialize channels and GPIO pins */
     for (uint8_t i = 0; i < SERVO_MAX_CHANNELS; i++) {
@@ -300,14 +277,10 @@ bool servo_pwm_init(void)
     /* Enable timers */
     LL_TIM_EnableCounter(TIM3);
     LL_TIM_EnableCounter(TIM14);
-    LL_TIM_EnableCounter(TIM16);
-    LL_TIM_EnableCounter(TIM17);
 
     /* Generate update event to load values */
     LL_TIM_GenerateEvent_UPDATE(TIM3);
     LL_TIM_GenerateEvent_UPDATE(TIM14);
-    LL_TIM_GenerateEvent_UPDATE(TIM16);
-    LL_TIM_GenerateEvent_UPDATE(TIM17);
 
     return true;
 }

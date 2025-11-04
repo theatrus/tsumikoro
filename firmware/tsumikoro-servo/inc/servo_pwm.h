@@ -24,7 +24,7 @@
 #define SERVO_DEFAULT_MAX_PULSE_US  2000    /**< Default maximum pulse width (2ms = 180°) */
 #define SERVO_DEFAULT_CENTER_US     1500    /**< Default center position (1.5ms = 90°) */
 
-#define SERVO_MAX_CHANNELS          6       /**< Maximum number of servo channels */
+#define SERVO_MAX_CHANNELS          4       /**< Maximum number of servo channels (PA6/PA7 reserved for ID) */
 
 /* Position range: 0-1800 represents 0-180 degrees (tenths of degrees) */
 #define SERVO_MIN_POSITION          0
