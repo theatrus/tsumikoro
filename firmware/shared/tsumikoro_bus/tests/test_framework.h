@@ -17,18 +17,22 @@
 #define COLOR_RED     "\x1b[31m"
 #define COLOR_GREEN   "\x1b[32m"
 #define COLOR_YELLOW  "\x1b[33m"
+#define COLOR_BOLD    "\x1b[1m"
 #define COLOR_RESET   "\x1b[0m"
 
 /* Test statistics */
+static int g_assertions_run = 0;
+static int g_assertions_passed = 0;
 static int test_total = 0;
 static int test_passed = 0;
 static int test_failed = 0;
-static const char *current_test_name = NULL;
+static const char *current_test_name __attribute__((unused)) = NULL;
 
 /* Test assertion macro */
 #define TEST_ASSERT(condition, message) \
     do { \
         test_total++; \
+        g_assertions_run++; \
         if (!(condition)) { \
             test_failed++; \
             printf(COLOR_RED "  [FAIL] " COLOR_RESET "%s:%d: %s\n", \
@@ -36,6 +40,7 @@ static const char *current_test_name = NULL;
             printf("         Condition: %s\n", #condition); \
         } else { \
             test_passed++; \
+            g_assertions_passed++; \
         } \
     } while (0)
 
@@ -43,6 +48,7 @@ static const char *current_test_name = NULL;
 #define TEST_ASSERT_MSG(condition, fmt, ...) \
     do { \
         test_total++; \
+        g_assertions_run++; \
         if (!(condition)) { \
             test_failed++; \
             printf(COLOR_RED "  [FAIL] " COLOR_RESET "%s:%d: ", \
@@ -52,6 +58,7 @@ static const char *current_test_name = NULL;
             printf("         Condition: %s\n", #condition); \
         } else { \
             test_passed++; \
+            g_assertions_passed++; \
         } \
     } while (0)
 
@@ -64,6 +71,7 @@ static const char *current_test_name = NULL;
 #define TEST_ASSERT_EQUAL_BYTES(expected, actual, len) \
     do { \
         test_total++; \
+        g_assertions_run++; \
         if (memcmp((expected), (actual), (len)) != 0) { \
             test_failed++; \
             printf(COLOR_RED "  [FAIL] " COLOR_RESET "%s:%d: Byte arrays differ\n", \
@@ -80,6 +88,7 @@ static const char *current_test_name = NULL;
             printf("\n"); \
         } else { \
             test_passed++; \
+            g_assertions_passed++; \
         } \
     } while (0)
 

@@ -6,6 +6,7 @@ build/
 # Test executables (Unix)
 test_crc8
 test_protocol
+test_integration
 
 # Keep the Makefile (override parent .gitignore)
 !Makefile
