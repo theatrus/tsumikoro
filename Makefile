@@ -61,7 +61,7 @@ build-servo:
 	@echo "========================================"
 	@mkdir -p $(SERVO_BUILD_DIR)
 	@cd $(SERVO_BUILD_DIR) && \
-		cmake ../../.. -DPROJECT=$(SERVO_PROJECT) -DMCU=$(SERVO_MCU) && \
+		cmake ../.. -DPROJECT=$(SERVO_PROJECT) -DMCU=$(SERVO_MCU) && \
 		make -j$$(nproc)
 	@echo ""
 	@echo "✅ Servo controller built successfully"
@@ -75,7 +75,7 @@ build-ministepper:
 	@echo "========================================"
 	@mkdir -p $(MINISTEPPER_BUILD_DIR)
 	@cd $(MINISTEPPER_BUILD_DIR) && \
-		cmake ../../.. -DPROJECT=$(MINISTEPPER_PROJECT) -DMCU=$(MINISTEPPER_MCU) && \
+		cmake ../.. -DPROJECT=$(MINISTEPPER_PROJECT) -DMCU=$(MINISTEPPER_MCU) && \
 		make -j$$(nproc)
 	@echo ""
 	@echo "✅ Ministepper built successfully"
@@ -140,7 +140,7 @@ test-bus-handler:
 	@echo "Running bus protocol unit tests..."
 	@mkdir -p $(BUILD_DIR)/tests
 	@cd $(BUILD_DIR)/tests && \
-		cmake ../../.. -DPROJECT=tests && \
+		cmake ../.. -DPROJECT=tests && \
 		make && \
 		./test_bus_handler && \
 		./test_crc8 && \
