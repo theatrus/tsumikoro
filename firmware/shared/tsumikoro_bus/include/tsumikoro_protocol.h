@@ -89,6 +89,21 @@ extern "C" {
 #define TSUMIKORO_CMD_RANGE_CUSTOM_MAX    0xFFFF  /**< Custom commands end */
 
 /**
+ * @brief Stepper motor commands (0x2000-0x2FFF)
+ */
+#define TSUMIKORO_CMD_STEPPER_MOVE        0x2001  /**< Move to absolute position */
+#define TSUMIKORO_CMD_STEPPER_MOVE_REL    0x2002  /**< Move relative position */
+#define TSUMIKORO_CMD_STEPPER_STOP        0x2003  /**< Stop stepper motor */
+#define TSUMIKORO_CMD_STEPPER_SET_SPEED   0x2004  /**< Set max speed */
+#define TSUMIKORO_CMD_STEPPER_SET_ACCEL   0x2005  /**< Set acceleration */
+#define TSUMIKORO_CMD_STEPPER_HOME        0x2006  /**< Home the stepper */
+#define TSUMIKORO_CMD_STEPPER_ENABLE      0x2007  /**< Enable motor */
+#define TSUMIKORO_CMD_STEPPER_DISABLE     0x2008  /**< Disable motor */
+#define TSUMIKORO_CMD_STEPPER_SET_CURRENT 0x2009  /**< Set motor current */
+#define TSUMIKORO_CMD_STEPPER_SET_MICROSTEP 0x200A /**< Set microstepping */
+#define TSUMIKORO_CMD_STEPPER_GET_POSITION 0x200B  /**< Get current position */
+
+/**
  * @brief Status codes
  */
 typedef enum {
