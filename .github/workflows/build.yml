@@ -8,6 +8,30 @@ on:
   workflow_dispatch:
 
 jobs:
+  test-protocol:
+    name: Test Tsumikoro Bus Protocol
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install GCC
+        run: sudo apt-get update && sudo apt-get install -y gcc make
+
+      - name: Build and run tests
+        working-directory: firmware/shared/tsumikoro_bus/tests
+        run: make test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: protocol-test-results
+          path: firmware/shared/tsumikoro_bus/tests/*.log
+          retention-days: 7
+          if-no-files-found: ignore
+
   build-stm32-ministepper:
     name: Build STM32 Mini Stepper (G071)
     runs-on: ubuntu-latest

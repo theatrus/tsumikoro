@@ -1,0 +1,13 @@
+# Test build artifacts
+build/
+*.o
+*.exe
+
+# Test executables (Unix)
+test_crc8
+test_protocol
+test_integration
+test_bus_handler
+
+# Keep the Makefile (override parent .gitignore)
+!Makefile

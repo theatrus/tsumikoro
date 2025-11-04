@@ -34,6 +34,7 @@ target_include_directories(stm32g0_hal PUBLIC
 
 # Allow projects to add their HAL config directory
 # Projects should use: target_include_directories(stm32g0_hal PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc)
+# Then add tsumikoro_bus after setting HAL config
 
 # Common utilities library (if needed)
 # add_library(tsumikoro_common STATIC

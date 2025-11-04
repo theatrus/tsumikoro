@@ -1,13 +1,82 @@
 /**
  * @file main.c
- * @brief Main application for tsumikoro-servo
+ * @brief Tsumikoro servo controller with bus communication (bare-metal)
+ *
+ * Example showing bare-metal bus protocol usage on STM32G030.
+ * This peripheral device responds to commands from the bus controller
+ * using polling mode (no RTOS, minimal RAM footprint).
  */
 
 #include "stm32g0xx_hal.h"
+#include "tsumikoro_bus.h"
+#include "tsumikoro_hal_stm32.h"
+#include <string.h>
+
+/* Configuration */
+#define DEVICE_ID               0x02        /**< This device's bus ID (peripheral) */
+#define BUS_BAUD_RATE           1000000     /**< 1 Mbaud */
+#define TURNAROUND_DELAY_BYTES  3           /**< 3 byte intervals turnaround delay */
+
+/* UART configuration (adjust for your hardware) */
+#define BUS_UART                USART1
+#define BUS_UART_IRQn           USART1_IRQn
+#define BUS_DMA_TX              DMA1_Channel1
+#define BUS_DMA_RX              DMA1_Channel2
+#define BUS_DMA_TX_IRQn         DMA1_Channel1_IRQn
+#define BUS_DMA_RX_IRQn         DMA1_Channel2_3_IRQn
+
+/* GPIO for RS-485 transceiver control */
+#define BUS_DE_PORT             GPIOA
+#define BUS_DE_PIN              GPIO_PIN_1
+#define BUS_RE_PORT             NULL
+#define BUS_RE_PIN              0
+
+/* Private variables */
+static tsumikoro_bus_handle_t g_bus_handle = NULL;
+static tsumikoro_hal_handle_t g_hal_handle = NULL;
+
+/* STM32 HAL configuration */
+static const tsumikoro_hal_stm32_config_t g_stm32_config = {
+    .uart_instance = BUS_UART,
+    .dma_tx = BUS_DMA_TX,
+    .dma_rx = BUS_DMA_RX,
+    .dma_tx_request = DMA_REQUEST_USART1_TX,
+    .dma_rx_request = DMA_REQUEST_USART1_RX,
+    .de_port = BUS_DE_PORT,
+    .de_pin = BUS_DE_PIN,
+    .re_port = BUS_RE_PORT,
+    .re_pin = BUS_RE_PIN,
+    .uart_irq = BUS_UART_IRQn,
+    .dma_tx_irq = BUS_DMA_TX_IRQn,
+    .dma_rx_irq = BUS_DMA_RX_IRQn
+};
+
+/* Servo state */
+typedef struct {
+    int16_t current_position;    /**< Current position (0-1800 = 0-180 degrees * 10) */
+    int16_t target_position;     /**< Target position */
+    bool moving;                 /**< Servo is moving */
+    uint16_t speed;              /**< Movement speed */
+} servo_state_t;
+
+static servo_state_t g_servo_state = {
+    .current_position = 900,  /* Start at 90 degrees */
+    .target_position = 900,
+    .moving = false,
+    .speed = 100
+};
 
 /* Private function prototypes */
 void SystemClock_Config(void);
 static void Error_Handler(void);
+static void GPIO_Init(void);
+static void UART_Init(void);
+static void Bus_Init(void);
+static void Servo_Init(void);
+static void Servo_Process(void);
+
+/* Bus callback functions */
+static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data);
 
 /**
  * @brief The application entry point.
@@ -20,19 +89,242 @@ int main(void)
     /* Configure the system clock */
     SystemClock_Config();
 
-    /* TODO: Initialize peripherals */
+    /* Initialize peripherals */
+    GPIO_Init();
+    UART_Init();
+    Servo_Init();
+    Bus_Init();
 
-    /* Infinite loop */
+    /* Main loop - bare-metal polling */
+    uint32_t last_process_time = HAL_GetTick();
     while (1)
     {
-        /* TODO: Main application logic */
-        HAL_Delay(1000);
+        /* Process bus protocol (should be called regularly, ~1ms) */
+        if (HAL_GetTick() - last_process_time >= 1) {
+            tsumikoro_bus_process(g_bus_handle);
+            last_process_time = HAL_GetTick();
+        }
+
+        /* Process servo motor control */
+        Servo_Process();
     }
 }
 
 /**
+ * @brief GPIO initialization
+ */
+static void GPIO_Init(void)
+{
+    /* Enable GPIO clocks */
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+
+    /* Configure LED pin (example: PA5) */
+    GPIO_InitTypeDef gpio_init = {0};
+    gpio_init.Pin = GPIO_PIN_5;
+    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio_init.Pull = GPIO_NOPULL;
+    gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &gpio_init);
+
+    /* Configure UART pins (TX=PA9, RX=PA10 for USART1) */
+    gpio_init.Pin = GPIO_PIN_9 | GPIO_PIN_10;
+    gpio_init.Mode = GPIO_MODE_AF_PP;
+    gpio_init.Pull = GPIO_PULLUP;
+    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
+    gpio_init.Alternate = GPIO_AF1_USART1;
+    HAL_GPIO_Init(GPIOA, &gpio_init);
+}
+
+/**
+ * @brief UART peripheral initialization
+ */
+static void UART_Init(void)
+{
+    /* Enable clocks */
+    __HAL_RCC_USART1_CLK_ENABLE();
+    __HAL_RCC_DMA1_CLK_ENABLE();
+
+    /* Initialize UART peripheral */
+    if (!tsumikoro_hal_stm32_init_peripheral(&g_stm32_config, BUS_BAUD_RATE)) {
+        Error_Handler();
+    }
+}
+
+/**
+ * @brief Bus protocol initialization
+ */
+static void Bus_Init(void)
+{
+    /* HAL configuration */
+    tsumikoro_hal_config_t hal_config = {
+        .baud_rate = BUS_BAUD_RATE,
+        .device_id = DEVICE_ID,
+        .is_controller = false,  /* This is a peripheral device */
+        .turnaround_delay_bytes = TURNAROUND_DELAY_BYTES,
+        .platform_data = (void *)&g_stm32_config
+    };
+
+    /* Initialize HAL */
+    g_hal_handle = tsumikoro_hal_init(&hal_config, NULL, NULL);
+    if (g_hal_handle == NULL) {
+        Error_Handler();
+    }
+
+    /* Bus configuration */
+    tsumikoro_bus_config_t bus_config = TSUMIKORO_BUS_DEFAULT_CONFIG();
+    bus_config.response_timeout_ms = 50;
+
+    /* Initialize bus handler (bare-metal mode) */
+    g_bus_handle = tsumikoro_bus_init(g_hal_handle, &bus_config,
+                                       bus_unsolicited_callback, NULL);
+    if (g_bus_handle == NULL) {
+        Error_Handler();
+    }
+}
+
+/**
+ * @brief Servo motor initialization
+ */
+static void Servo_Init(void)
+{
+    /* TODO: Initialize servo PWM output */
+    /* - Configure TIM for PWM generation */
+    /* - Set up 50Hz PWM signal */
+    /* - Configure duty cycle for position control */
+
+    g_servo_state.current_position = 900;
+    g_servo_state.target_position = 900;
+    g_servo_state.moving = false;
+}
+
+/**
+ * @brief Servo motor processing
+ */
+static void Servo_Process(void)
+{
+    /* TODO: Implement servo position control */
+    /* - Update PWM duty cycle based on position */
+    /* - Implement smooth movement */
+
+    if (g_servo_state.moving) {
+        /* Simple incremental movement toward target */
+        if (g_servo_state.current_position < g_servo_state.target_position) {
+            g_servo_state.current_position++;
+        } else if (g_servo_state.current_position > g_servo_state.target_position) {
+            g_servo_state.current_position--;
+        } else {
+            g_servo_state.moving = false;
+        }
+    }
+}
+
+/**
+ * @brief Bus unsolicited message callback
+ *
+ * Called when a message is received that's addressed to this device.
+ */
+static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data)
+{
+    (void)user_data;
+
+    if (packet == NULL) {
+        return;
+    }
+
+    /* Only process commands addressed to us */
+    if (packet->device_id != DEVICE_ID) {
+        return;
+    }
+
+    /* Prepare response packet */
+    tsumikoro_packet_t response = {
+        .device_id = 0x00,  /* Send response to controller */
+        .command = packet->command,
+        .data_len = 0
+    };
+
+    /* Handle commands based on command type */
+    switch (packet->command) {
+        case TSUMIKORO_CMD_PING:
+            /* Simple ping response */
+            break;
+
+        case TSUMIKORO_CMD_GET_VERSION:
+            /* Return firmware version */
+            response.data[0] = 1;  /* Major */
+            response.data[1] = 0;  /* Minor */
+            response.data[2] = 0;  /* Patch */
+            response.data[3] = 0;  /* Reserved */
+            response.data_len = 4;
+            break;
+
+        case TSUMIKORO_CMD_GET_STATUS:
+            /* Return servo status */
+            response.data[0] = g_servo_state.moving ? 0x01 : 0x00;
+            response.data[1] = (uint8_t)(g_servo_state.current_position >> 8);
+            response.data[2] = (uint8_t)(g_servo_state.current_position);
+            response.data_len = 3;
+            break;
+
+        case TSUMIKORO_CMD_SERVO_SET_POSITION:
+            /* Set servo position (0-1800 = 0-180 degrees * 10) */
+            if (packet->data_len >= 2) {
+                g_servo_state.target_position =
+                    ((int16_t)packet->data[0] << 8) |
+                    ((int16_t)packet->data[1]);
+
+                /* Clamp to valid range */
+                if (g_servo_state.target_position < 0) {
+                    g_servo_state.target_position = 0;
+                } else if (g_servo_state.target_position > 1800) {
+                    g_servo_state.target_position = 1800;
+                }
+
+                g_servo_state.moving = true;
+
+                /* Acknowledge */
+                response.data[0] = 0x00;  /* Success */
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_SERVO_GET_POSITION:
+            /* Get current servo position */
+            response.data[0] = (uint8_t)(g_servo_state.current_position >> 8);
+            response.data[1] = (uint8_t)(g_servo_state.current_position);
+            response.data_len = 2;
+            break;
+
+        case TSUMIKORO_CMD_SERVO_SET_SPEED:
+            /* Set servo movement speed */
+            if (packet->data_len >= 2) {
+                g_servo_state.speed =
+                    ((uint16_t)packet->data[0] << 8) |
+                    ((uint16_t)packet->data[1]);
+                response.data[0] = 0x00;  /* Success */
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error */
+                response.data_len = 1;
+            }
+            break;
+
+        default:
+            /* Unknown command - don't send response */
+            return;
+    }
+
+    /* Send response */
+    tsumikoro_bus_send_no_response(g_bus_handle, &response);
+}
+
+/**
  * @brief System Clock Configuration
- * @note This is a basic configuration - adjust for your needs
+ * @note Configured for 64 MHz using HSI and PLL
  */
 void SystemClock_Config(void)
 {
@@ -51,7 +343,7 @@ void SystemClock_Config(void)
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
     RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
     RCC_OscInitStruct.PLL.PLLN = 8;
-    RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;  /* STM32G030 only has PLLR output */
+    RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
     {
         Error_Handler();
@@ -78,10 +370,34 @@ static void Error_Handler(void)
     /* Disable interrupts */
     __disable_irq();
 
-    /* Infinite loop */
+    /* Flash LED rapidly */
     while (1)
     {
+        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+        for (volatile int i = 0; i < 100000; i++);
     }
+}
+
+/**
+ * @brief Interrupt handlers
+ */
+
+/* UART interrupt handler */
+void USART1_IRQHandler(void)
+{
+    tsumikoro_hal_stm32_uart_irq_handler(g_hal_handle);
+}
+
+/* DMA TX interrupt handler */
+void DMA1_Channel1_IRQHandler(void)
+{
+    tsumikoro_hal_stm32_dma_tx_irq_handler(g_hal_handle);
+}
+
+/* DMA RX interrupt handler */
+void DMA1_Channel2_3_IRQHandler(void)
+{
+    tsumikoro_hal_stm32_dma_rx_irq_handler(g_hal_handle);
 }
 
 #ifdef USE_FULL_ASSERT

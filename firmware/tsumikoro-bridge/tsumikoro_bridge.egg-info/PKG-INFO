@@ -4,7 +4,7 @@ Version: 0.1.0
 Summary: ESPHome-based bridge controller for Tsumikoro motor control
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
-Requires-Dist: esphome>=2024.11.0
+Requires-Dist: esphome==2025.10.3
 
 # Tsumikoro Bridge
 

@@ -3,16 +3,20 @@ esphome:
   friendly_name: Tsumikoro Bridge
   platformio_options:
     board_build.flash_mode: dio
-  # Include shared C code from firmware projects
+    build_flags:
+      - -I$PROJECT_DIR/src/include
+  # Shared bus protocol integration (headers only, sources in component directory)
   includes:
-    - ../../shared/
+    - ../../shared/tsumikoro_bus/include/
 
 # ESP32 or ESP32-S3 configuration
 esp32:
   board: esp32-s3-devkitc-1  # Change to esp32dev for regular ESP32
   framework:
-    type: arduino
+    type: esp-idf
     version: recommended
+    sdkconfig_options:
+      CONFIG_FREERTOS_HZ: "1000"
 
 # Enable logging
 logger:
@@ -54,13 +58,23 @@ external_components:
 status_led:
   pin: GPIO2
 
-# UART for motor controller communication
-uart:
-  tx_pin: GPIO17
-  rx_pin: GPIO16
-  baud_rate: 115200
+# UART for Tsumikoro bus (RS-485)
+# Note: ESPHome uart is only for logging, actual bus uses ESP-IDF UART directly
+#uart:
+#  tx_pin: GPIO17
+#  rx_pin: GPIO16
+#  baud_rate: 1000000  # 1Mbaud for bus
 
-# Motor bridge configuration
-# Custom component for communicating with motor controllers
+# Tsumikoro bridge configuration
+# Custom component for bus controller functionality
 tsumikoro_bridge:
   id: motor_bridge
+  # UART pins for bus (RS-485)
+  uart_port: 1  # UART1
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  de_pin: GPIO18  # Driver Enable (RTS) for RS-485 transceiver
+  baud_rate: 1000000  # 1Mbaud
+  # Device configuration
+  device_id: 0x00  # Controller address
+  turnaround_delay: 3  # 3 byte intervals
