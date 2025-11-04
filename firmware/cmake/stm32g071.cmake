@@ -12,8 +12,15 @@ set(FLOAT_ABI "")
 set(MCU_FLAGS "${CPU} -mthumb ${FPU} ${FLOAT_ABI}")
 
 # C flags - always optimize for size with debug symbols
-# No build modes - single configuration with -Os -g
+# Single configuration: -Os -g with optional debug defines
 set(CMAKE_C_FLAGS_INIT "${MCU_FLAGS} -Wall -Wextra -fdata-sections -ffunction-sections -Os -g")
+
+# Add debug defines based on option
+if(ENABLE_DEBUG_DEFINES)
+    add_compile_definitions(DEBUG)
+else()
+    add_compile_definitions(NDEBUG)
+endif()
 
 # ASM flags
 set(CMAKE_ASM_FLAGS_INIT "${MCU_FLAGS} -x assembler-with-cpp")
