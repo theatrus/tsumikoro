@@ -266,21 +266,23 @@ void tsumikoro_hal_disable_tx(tsumikoro_hal_handle_t handle)
 
 void tsumikoro_hal_delay_us(uint32_t us)
 {
-    // Simulated delay - in real implementation would actually delay
+    // Simulated delay - no-op in mock HAL
+    // Time is controlled via tsumikoro_mock_bus_process()
     (void)us;
 }
 
+/* ========== Mock Bus Processing ========== */
+
+// Global simulated time (used by tsumikoro_hal_get_time_ms())
+// Controlled by tsumikoro_mock_bus_process()
+static uint32_t g_simulated_time_ms = 0;
+
 uint32_t tsumikoro_hal_get_time_ms(void)
 {
-    // Return simulated time
-    // In tests, time is advanced explicitly via tsumikoro_mock_bus_process()
-    // For now, return real time as fallback
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint32_t)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+    // Return simulated time controlled by tsumikoro_mock_bus_process()
+    // This allows tests to control time advancement programmatically
+    return g_simulated_time_ms;
 }
-
-/* ========== Mock Bus Processing ========== */
 
 void tsumikoro_mock_bus_process(tsumikoro_mock_bus_handle_t bus, uint32_t time_advance_ms)
 {
@@ -288,7 +290,9 @@ void tsumikoro_mock_bus_process(tsumikoro_mock_bus_handle_t bus, uint32_t time_a
         return;
     }
 
-    bus->current_time_ms += time_advance_ms;
+    // Advance global simulated time
+    g_simulated_time_ms += time_advance_ms;
+    bus->current_time_ms = g_simulated_time_ms;
 
     // Process any pending transmissions
     if (bus->bus_buffer_len > 0) {

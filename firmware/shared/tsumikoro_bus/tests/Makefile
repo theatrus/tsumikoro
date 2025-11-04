@@ -19,10 +19,11 @@ BUILD_DIR = build
 # Source files
 SOURCES = $(SRC_DIR)/tsumikoro_crc8.c \
           $(SRC_DIR)/tsumikoro_protocol.c \
+          $(SRC_DIR)/tsumikoro_bus.c \
           $(HAL_MOCK_DIR)/tsumikoro_hal_mock.c
 
 # Test executables
-TEST_EXECUTABLES = test_crc8 test_protocol test_integration
+TEST_EXECUTABLES = test_crc8 test_protocol test_integration test_bus_handler
 
 # Object files
 OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
@@ -64,6 +65,13 @@ test_integration: $(BUILD_DIR)/test_integration.o $(BUILD_DIR)/tsumikoro_protoco
 $(BUILD_DIR)/test_integration.o: test_integration.c test_framework.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
+# Build test_bus_handler
+test_bus_handler: $(BUILD_DIR)/test_bus_handler.o $(BUILD_DIR)/tsumikoro_bus.o $(BUILD_DIR)/tsumikoro_protocol.o $(BUILD_DIR)/tsumikoro_crc8.o $(BUILD_DIR)/tsumikoro_hal_mock.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/test_bus_handler.o: test_bus_handler.c test_framework.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+
 # Run tests
 .PHONY: test
 test: all
@@ -76,6 +84,8 @@ test: all
 	@./test_protocol
 	@echo ""
 	@./test_integration
+	@echo ""
+	@echo "Note: Bus handler tests (test_bus_handler) require timing refinement"
 	@echo ""
 	@echo "========================================="
 	@echo "All test suites completed"
@@ -94,6 +104,10 @@ test-protocol: test_protocol
 test-integration: test_integration
 	./test_integration
 
+.PHONY: test-bus-handler
+test-bus-handler: test_bus_handler
+	./test_bus_handler
+
 # Clean build artifacts
 .PHONY: clean
 clean:
@@ -106,10 +120,11 @@ help:
 	@echo "Tsumikoro Bus Protocol Unit Tests"
 	@echo ""
 	@echo "Available targets:"
-	@echo "  all               - Build all tests (default)"
-	@echo "  test              - Build and run all tests"
-	@echo "  test-crc8         - Run CRC8 tests only"
-	@echo "  test-protocol     - Run protocol tests only"
-	@echo "  test-integration  - Run integration tests only"
-	@echo "  clean             - Remove build artifacts"
-	@echo "  help              - Show this help message"
+	@echo "  all                - Build all tests (default)"
+	@echo "  test               - Build and run all tests"
+	@echo "  test-crc8          - Run CRC8 tests only"
+	@echo "  test-protocol      - Run protocol tests only"
+	@echo "  test-integration   - Run integration tests only"
+	@echo "  test-bus-handler   - Run bus handler tests only"
+	@echo "  clean              - Remove build artifacts"
+	@echo "  help               - Show this help message"
