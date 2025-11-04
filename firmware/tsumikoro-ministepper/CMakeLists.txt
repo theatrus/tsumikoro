@@ -24,9 +24,18 @@ target_include_directories(stm32g0_hal PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
 )
 
+# Add tsumikoro_bus library AFTER HAL config is set
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/tsumikoro_bus ${CMAKE_CURRENT_BINARY_DIR}/tsumikoro_bus)
+
+# tsumikoro_bus also needs HAL config for its STM32 HAL implementation
+target_include_directories(tsumikoro_bus PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+)
+
 # Link libraries
 target_link_libraries(${PROJECT_NAME}.elf
     stm32g0_hal
+    tsumikoro_bus
 )
 
 # Include directories
