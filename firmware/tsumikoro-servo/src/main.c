@@ -12,6 +12,7 @@
 #include "tsumikoro_hal_stm32.h"
 #include "servo_pwm.h"
 #include "motor_hbridge.h"
+#include "limit_switch.h"
 #include <string.h>
 
 /* Configuration */
@@ -64,6 +65,7 @@ static void Bus_Init(void);
 static void Servo_Init(void);
 static void Servo_Process(void);
 static void Motor_Init(void);
+static void LimitSwitch_Init(void);
 
 /* Bus callback functions */
 static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data);
@@ -84,6 +86,7 @@ int main(void)
     UART_Init();
     Servo_Init();
     Motor_Init();
+    LimitSwitch_Init();
     Bus_Init();
 
     /* Main loop - bare-metal polling */
@@ -206,6 +209,17 @@ static void Motor_Init(void)
 }
 
 /**
+ * @brief Limit switch initialization
+ */
+static void LimitSwitch_Init(void)
+{
+    /* Initialize limit switch input using LL drivers */
+    if (!limit_switch_init()) {
+        Error_Handler();
+    }
+}
+
+/**
  * @brief Bus unsolicited message callback
  *
  * Called when a message is received that's addressed to this device.
@@ -249,6 +263,14 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
             /* Return general device status (not servo-specific) */
             response.data[0] = 0x00;  /* Status: OK */
             response.data[1] = servo_pwm_get_channel_count();  /* Number of servo channels */
+            response.data_len = 2;
+            break;
+
+        case TSUMIKORO_CMD_GET_LIMIT_SWITCH:
+            /* Get limit switch state
+             * Response: [triggered, raw_state] */
+            response.data[0] = limit_switch_is_triggered() ? 0x01 : 0x00;
+            response.data[1] = limit_switch_get_raw_state() ? 0x01 : 0x00;
             response.data_len = 2;
             break;
 

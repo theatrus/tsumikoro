@@ -20,6 +20,13 @@
 - Emergency stop function with active braking
 - Independent GPIO direction control
 
+### Limit Switch Input
+- **GPIO input** on PA8 (Pin 16) with internal pull-up
+- **Active-low** configuration (switch pulls to GND when triggered)
+- Debounced reading via bus protocol
+- Both triggered state and raw pin state available
+- Useful for end-stops, safety switches, or position detection
+
 ### Communication
 - Multi-drop RS-485 bus protocol
 - Hardware ID support (2-bit = 4 unique addresses)

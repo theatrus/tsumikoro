@@ -125,6 +125,11 @@ extern "C" {
 #define TSUMIKORO_CMD_DCMOTOR_ESTOP       0x4005  /**< Emergency stop (brake) */
 
 /**
+ * @brief Sensor/Input commands (0x1000-0x1FFF)
+ */
+#define TSUMIKORO_CMD_GET_LIMIT_SWITCH    0x1001  /**< Get limit switch state */
+
+/**
  * @brief Status codes
  */
 typedef enum {
