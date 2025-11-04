@@ -3,10 +3,11 @@ esphome:
   friendly_name: Tsumikoro Bridge
   platformio_options:
     board_build.flash_mode: dio
-  # Shared bus protocol integration
+    build_flags:
+      - -I$PROJECT_DIR/src/include
+  # Shared bus protocol integration (headers only, sources in component directory)
   includes:
     - ../../shared/tsumikoro_bus/include/
-    - ../../shared/tsumikoro_bus/hal/esp32/
 
 # ESP32 or ESP32-S3 configuration
 esp32:
