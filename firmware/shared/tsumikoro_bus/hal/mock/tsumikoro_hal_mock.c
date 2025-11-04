@@ -12,6 +12,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdio.h>
+
+/* Debug logging (define TSUMIKORO_HAL_MOCK_DEBUG to enable) */
+#ifdef TSUMIKORO_HAL_MOCK_DEBUG
+#define HAL_DEBUG(...) printf("[HAL-MOCK] " __VA_ARGS__)
+#else
+#define HAL_DEBUG(...) ((void)0)
+#endif
 
 /**
  * @brief Mock device structure
@@ -45,6 +53,7 @@ typedef struct tsumikoro_mock_bus {
     uint8_t bus_buffer[TSUMIKORO_MOCK_BUS_BUFFER_SIZE];
     size_t bus_buffer_len;
     bool bus_active;
+    tsumikoro_mock_device_t *transmitting_device;  // Track who transmitted current packet
 
     // Time simulation
     uint32_t current_time_ms;
@@ -56,6 +65,16 @@ typedef struct tsumikoro_mock_bus {
     tsumikoro_mock_error_type_t pending_error;
 } tsumikoro_mock_bus_t;
 
+/* ========== Global Simulated Time ========== */
+
+// Global simulated time (used by tsumikoro_hal_get_time_ms())
+// Controlled by tsumikoro_mock_bus_process() and tsumikoro_hal_delay_us()
+static uint32_t g_simulated_time_ms = 0;
+
+// Global list of active buses (so tsumikoro_hal_delay_us() can process them)
+static tsumikoro_mock_bus_t *g_active_buses[TSUMIKORO_MOCK_MAX_DEVICES] = {0};
+static size_t g_active_bus_count = 0;
+
 /* ========== Bus Management ========== */
 
 tsumikoro_mock_bus_handle_t tsumikoro_mock_bus_create(void)
@@ -65,12 +84,28 @@ tsumikoro_mock_bus_handle_t tsumikoro_mock_bus_create(void)
         return NULL;
     }
 
+    // Add to global list
+    if (g_active_bus_count < TSUMIKORO_MOCK_MAX_DEVICES) {
+        g_active_buses[g_active_bus_count++] = bus;
+    }
+
     return bus;
 }
 
 void tsumikoro_mock_bus_destroy(tsumikoro_mock_bus_handle_t bus)
 {
     if (bus) {
+        // Remove from global list
+        for (size_t i = 0; i < g_active_bus_count; i++) {
+            if (g_active_buses[i] == bus) {
+                // Shift remaining buses down
+                for (size_t j = i; j < g_active_bus_count - 1; j++) {
+                    g_active_buses[j] = g_active_buses[j + 1];
+                }
+                g_active_buses[--g_active_bus_count] = NULL;
+                break;
+            }
+        }
         free(bus);
     }
 }
@@ -165,6 +200,7 @@ tsumikoro_hal_status_t tsumikoro_hal_transmit(tsumikoro_hal_handle_t handle,
     memcpy(bus->bus_buffer, data, len);
     bus->bus_buffer_len = len;
     bus->bus_active = true;
+    bus->transmitting_device = device;  // Track transmitting device
 
     // Update stats
     bus->stats.packets_transmitted++;
@@ -238,6 +274,17 @@ tsumikoro_hal_status_t tsumikoro_hal_receive(tsumikoro_hal_handle_t handle,
     }
 
     *received_len = to_copy;
+
+    #ifdef TSUMIKORO_HAL_MOCK_DEBUG
+    if (to_copy > 0 && to_copy < 20) {
+        HAL_DEBUG("Device 0x%02X received %zu bytes:", device->device_id, to_copy);
+        for (size_t i = 0; i < to_copy && i < 15; i++) {
+            printf(" %02X", buffer[i]);
+        }
+        printf("\n");
+    }
+    #endif
+
     return TSUMIKORO_HAL_OK;
 }
 
@@ -266,21 +313,26 @@ void tsumikoro_hal_disable_tx(tsumikoro_hal_handle_t handle)
 
 void tsumikoro_hal_delay_us(uint32_t us)
 {
-    // Simulated delay - no-op in mock HAL
-    // Time is controlled via tsumikoro_mock_bus_process()
-    (void)us;
+    // Advance simulated time when delay is called
+    // This allows blocking operations to advance time naturally
+    uint32_t ms = (us + 999) / 1000;  // Round up to milliseconds
+    if (ms > 0) {
+        g_simulated_time_ms += ms;
+
+        // Process all active buses to simulate packet delivery during delay
+        // This is critical for blocking send operations to work correctly
+        for (size_t i = 0; i < g_active_bus_count; i++) {
+            tsumikoro_mock_bus_process(g_active_buses[i], 0);  // Don't advance time again
+        }
+    }
 }
 
 /* ========== Mock Bus Processing ========== */
 
-// Global simulated time (used by tsumikoro_hal_get_time_ms())
-// Controlled by tsumikoro_mock_bus_process()
-static uint32_t g_simulated_time_ms = 0;
-
 uint32_t tsumikoro_hal_get_time_ms(void)
 {
     // Return simulated time controlled by tsumikoro_mock_bus_process()
-    // This allows tests to control time advancement programmatically
+    // and tsumikoro_hal_delay_us()
     return g_simulated_time_ms;
 }
 
@@ -296,26 +348,42 @@ void tsumikoro_mock_bus_process(tsumikoro_mock_bus_handle_t bus, uint32_t time_a
 
     // Process any pending transmissions
     if (bus->bus_buffer_len > 0) {
-        // Broadcast to all devices
+        HAL_DEBUG("Processing %zu bytes on bus, transmitter=0x%02X\n",
+                  bus->bus_buffer_len,
+                  bus->transmitting_device ? bus->transmitting_device->device_id : 0xFF);
+
+        // Copy packet data before clearing (callbacks may need to access it)
+        uint8_t packet_buffer[TSUMIKORO_MOCK_BUS_BUFFER_SIZE];
+        size_t packet_len = bus->bus_buffer_len;
+        memcpy(packet_buffer, bus->bus_buffer, packet_len);
+
+        // Clear bus BEFORE invoking callbacks so peripherals can respond immediately
+        bus->bus_buffer_len = 0;
+        bus->bus_active = false;
+        bus->transmitting_device = NULL;
+        bus->stats.packets_received += bus->device_count;
+
+        // Broadcast to ALL devices (including transmitter for collision detection)
+        // In RS-485, if RE is asserted during transmission, the device receives its own packets
+        // This allows for collision detection by comparing TX vs RX
         for (size_t i = 0; i < bus->device_count; i++) {
             tsumikoro_mock_device_t *device = bus->devices[i];
 
+            HAL_DEBUG("Delivering to device 0x%02X (callback=%s)\n",
+                      device->device_id, device->rx_callback ? "yes" : "no");
+
             if (device->rx_callback) {
                 // Deliver via callback
-                device->rx_callback(bus->bus_buffer, bus->bus_buffer_len, device->user_data);
+                device->rx_callback(packet_buffer, packet_len, device->user_data);
             } else {
                 // Store in RX buffer for polling
-                for (size_t j = 0; j < bus->bus_buffer_len && device->rx_buffer_count < TSUMIKORO_MOCK_BUS_BUFFER_SIZE; j++) {
-                    device->rx_buffer[device->rx_buffer_head] = bus->bus_buffer[j];
+                for (size_t j = 0; j < packet_len && device->rx_buffer_count < TSUMIKORO_MOCK_BUS_BUFFER_SIZE; j++) {
+                    device->rx_buffer[device->rx_buffer_head] = packet_buffer[j];
                     device->rx_buffer_head = (device->rx_buffer_head + 1) % TSUMIKORO_MOCK_BUS_BUFFER_SIZE;
                     device->rx_buffer_count++;
                 }
             }
         }
-
-        bus->stats.packets_received += bus->device_count;
-        bus->bus_buffer_len = 0;
-        bus->bus_active = false;
     }
 }
 

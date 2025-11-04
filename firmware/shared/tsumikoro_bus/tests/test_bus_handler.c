@@ -12,6 +12,66 @@
 #include <string.h>
 #include <stdio.h>
 
+/* ========== Test Helpers ========== */
+
+/**
+ * @brief Auto-responder context for peripheral devices
+ */
+typedef struct {
+    tsumikoro_mock_bus_handle_t bus;
+    tsumikoro_hal_handle_t hal;
+    uint8_t device_id;
+} auto_responder_t;
+
+/**
+ * @brief Auto-responder RX callback - automatically responds to commands
+ */
+static void auto_responder_callback(const uint8_t *data, size_t len, void *user_data)
+{
+    auto_responder_t *responder = (auto_responder_t *)user_data;
+
+    // Decode received packet
+    tsumikoro_packet_t rx_packet;
+    if (tsumikoro_packet_decode(data, len, &rx_packet) != TSUMIKORO_STATUS_OK) {
+        printf("    [AUTO-RESPONDER] Decode failed\n");
+        return;
+    }
+
+    // Only respond if addressed to us
+    if (rx_packet.device_id != responder->device_id) {
+        printf("    [AUTO-RESPONDER] Ignoring packet for device 0x%02X (we are 0x%02X)\n",
+               rx_packet.device_id, responder->device_id);
+        return;
+    }
+
+    printf("    [AUTO-RESPONDER] Received command 0x%04X for device 0x%02X, sending response\n",
+           rx_packet.command, rx_packet.device_id);
+
+    // Send automatic response
+    tsumikoro_packet_t response = {
+        .device_id = 0x00,  // Address response to controller
+        .command = rx_packet.command,  // Echo command
+        .data_len = 4
+    };
+    response.data[0] = 0xAA;
+    response.data[1] = 0xBB;
+    response.data[2] = 0xCC;
+    response.data[3] = 0xDD;
+
+    uint8_t resp_buffer[TSUMIKORO_MAX_PACKET_LEN];
+    size_t resp_len = tsumikoro_packet_encode(&response, resp_buffer, sizeof(resp_buffer));
+    printf("    [AUTO-RESPONDER] Encoded response: len=%zu, data_len=%u, data[0]=0x%02X\n",
+           resp_len, response.data_len, response.data[0]);
+    if (resp_len > 0) {
+        tsumikoro_hal_status_t tx_status = tsumikoro_hal_transmit(responder->hal, resp_buffer, resp_len);
+        printf("    [AUTO-RESPONDER] Transmit status: %d (%s)\n", tx_status,
+               tx_status == TSUMIKORO_HAL_OK ? "OK" :
+               tx_status == TSUMIKORO_HAL_BUSY ? "BUSY" : "ERROR");
+        // Don't call tsumikoro_mock_bus_process() here - that would be recursive!
+        // The test code will call it to deliver this response
+    }
+}
+
 /* ========== Basic Tests ========== */
 
 static void test_bus_init_deinit(void)
@@ -234,6 +294,214 @@ static void test_unsolicited_messages(void)
     tsumikoro_mock_bus_destroy(mock_bus);
 }
 
+/* ========== Advanced Tests ========== */
+
+static void test_blocking_send_with_response(void)
+{
+    printf("  Testing blocking send with response...\n");
+
+    // Create mock bus
+    tsumikoro_mock_bus_handle_t mock_bus = tsumikoro_mock_bus_create();
+
+    // Create controller HAL
+    tsumikoro_hal_config_t controller_config = {
+        .baud_rate = 1000000,
+        .device_id = 0x00,
+        .is_controller = true,
+        .platform_data = NULL
+    };
+    tsumikoro_hal_handle_t controller_hal = tsumikoro_mock_create_device(
+        mock_bus, &controller_config, NULL, NULL);
+
+    // Create auto-responder peripheral
+    auto_responder_t responder = {
+        .bus = mock_bus,
+        .device_id = 0x01
+    };
+    tsumikoro_hal_config_t peripheral_config = {
+        .baud_rate = 1000000,
+        .device_id = 0x01,
+        .is_controller = false,
+        .platform_data = NULL
+    };
+    responder.hal = tsumikoro_mock_create_device(
+        mock_bus, &peripheral_config, auto_responder_callback, &responder);
+
+    // Create bus handler
+    tsumikoro_bus_config_t bus_config = TSUMIKORO_BUS_DEFAULT_CONFIG();
+    tsumikoro_bus_handle_t bus = tsumikoro_bus_init(controller_hal, &bus_config, NULL, NULL);
+
+    // Send blocking command
+    tsumikoro_packet_t cmd = {
+        .device_id = 0x01,
+        .command = TSUMIKORO_CMD_GET_STATUS,
+        .data_len = 0
+    };
+
+    tsumikoro_packet_t response;
+    tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
+        bus, &cmd, &response, 200);  // 200ms timeout
+
+    // Verify success
+    TEST_ASSERT(status == TSUMIKORO_CMD_STATUS_SUCCESS, "Blocking send should succeed");
+    TEST_ASSERT(response.command == TSUMIKORO_CMD_GET_STATUS, "Response command should match");
+    TEST_ASSERT(response.data_len == 4, "Response should have 4 bytes of data");
+    TEST_ASSERT(response.data[0] == 0xAA, "Response data should match");
+
+    // Verify bus is idle after blocking send
+    TEST_ASSERT(tsumikoro_bus_is_idle(bus), "Bus should be idle after blocking send");
+
+    // Cleanup
+    tsumikoro_bus_deinit(bus);
+    tsumikoro_hal_deinit(controller_hal);
+    tsumikoro_hal_deinit(responder.hal);
+    tsumikoro_mock_bus_destroy(mock_bus);
+}
+
+static void test_blocking_send_timeout(void)
+{
+    printf("  Testing blocking send timeout...\n");
+
+    // Create mock bus
+    tsumikoro_mock_bus_handle_t mock_bus = tsumikoro_mock_bus_create();
+
+    // Create controller HAL
+    tsumikoro_hal_config_t controller_config = {
+        .baud_rate = 1000000,
+        .device_id = 0x00,
+        .is_controller = true,
+        .platform_data = NULL
+    };
+    tsumikoro_hal_handle_t controller_hal = tsumikoro_mock_create_device(
+        mock_bus, &controller_config, NULL, NULL);
+
+    // Create bus handler with short timeout for testing
+    tsumikoro_bus_config_t bus_config = {
+        .response_timeout_ms = 10,
+        .retry_count = 1,
+        .retry_delay_ms = 5,
+        .bus_idle_timeout_ms = 5,
+        .auto_retry = true
+    };
+    tsumikoro_bus_handle_t bus = tsumikoro_bus_init(controller_hal, &bus_config, NULL, NULL);
+
+    // Send blocking command (no peripheral to respond)
+    tsumikoro_packet_t cmd = {
+        .device_id = 0x01,
+        .command = TSUMIKORO_CMD_PING,
+        .data_len = 0
+    };
+
+    tsumikoro_packet_t response;
+    tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
+        bus, &cmd, &response, 50);  // 50ms total timeout
+
+    // Verify timeout
+    TEST_ASSERT(status == TSUMIKORO_CMD_STATUS_TIMEOUT, "Should timeout without response");
+
+    // Verify retries occurred
+    tsumikoro_bus_stats_t stats;
+    tsumikoro_bus_get_stats(bus, &stats);
+    TEST_ASSERT(stats.retries >= 1, "Should have retried at least once");
+    TEST_ASSERT(stats.timeouts == 1, "Should have 1 timeout");
+
+    // Verify bus is idle after timeout
+    TEST_ASSERT(tsumikoro_bus_is_idle(bus), "Bus should be idle after timeout");
+
+    // Cleanup
+    tsumikoro_bus_deinit(bus);
+    tsumikoro_hal_deinit(controller_hal);
+    tsumikoro_mock_bus_destroy(mock_bus);
+}
+
+typedef struct {
+    tsumikoro_cmd_status_t last_status;
+    tsumikoro_packet_t last_response;
+    bool callback_invoked;
+} async_test_context_t;
+
+static void async_test_callback(tsumikoro_cmd_status_t status,
+                                 const tsumikoro_packet_t *response,
+                                 void *user_data)
+{
+    async_test_context_t *ctx = (async_test_context_t *)user_data;
+    ctx->last_status = status;
+    if (response) {
+        printf("    [CALLBACK] Received response: cmd=0x%04X, data_len=%u, data[0]=0x%02X\n",
+               response->command, response->data_len, response->data_len > 0 ? response->data[0] : 0);
+        ctx->last_response = *response;
+    } else {
+        printf("    [CALLBACK] No response (status=%d)\n", status);
+    }
+    ctx->callback_invoked = true;
+}
+
+static void test_async_send_with_response(void)
+{
+    printf("  Testing async send with response...\n");
+
+    // Create mock bus
+    tsumikoro_mock_bus_handle_t mock_bus = tsumikoro_mock_bus_create();
+
+    // Create controller HAL
+    tsumikoro_hal_config_t controller_config = {
+        .baud_rate = 1000000,
+        .device_id = 0x00,
+        .is_controller = true,
+        .platform_data = NULL
+    };
+    tsumikoro_hal_handle_t controller_hal = tsumikoro_mock_create_device(
+        mock_bus, &controller_config, NULL, NULL);
+
+    // Create auto-responder peripheral
+    auto_responder_t responder = {
+        .bus = mock_bus,
+        .device_id = 0x01
+    };
+    tsumikoro_hal_config_t peripheral_config = {
+        .baud_rate = 1000000,
+        .device_id = 0x01,
+        .is_controller = false,
+        .platform_data = NULL
+    };
+    responder.hal = tsumikoro_mock_create_device(
+        mock_bus, &peripheral_config, auto_responder_callback, &responder);
+
+    // Create bus handler
+    tsumikoro_bus_config_t bus_config = TSUMIKORO_BUS_DEFAULT_CONFIG();
+    tsumikoro_bus_handle_t bus = tsumikoro_bus_init(controller_hal, &bus_config, NULL, NULL);
+
+    // Send async command
+    async_test_context_t ctx = {0};
+    tsumikoro_packet_t cmd = {
+        .device_id = 0x01,
+        .command = TSUMIKORO_CMD_GET_VERSION,
+        .data_len = 0
+    };
+
+    tsumikoro_status_t send_status = tsumikoro_bus_send_command_async(
+        bus, &cmd, async_test_callback, &ctx);
+    TEST_ASSERT(send_status == TSUMIKORO_STATUS_OK, "Async send should succeed");
+
+    // Process bus until callback is invoked
+    for (int i = 0; i < 200 && !ctx.callback_invoked; i++) {
+        tsumikoro_bus_process(bus);
+        tsumikoro_mock_bus_process(mock_bus, 1);
+    }
+
+    // Verify callback was invoked with success
+    TEST_ASSERT(ctx.callback_invoked, "Callback should be invoked");
+    TEST_ASSERT(ctx.last_status == TSUMIKORO_CMD_STATUS_SUCCESS, "Status should be SUCCESS");
+    TEST_ASSERT(ctx.last_response.command == TSUMIKORO_CMD_GET_VERSION, "Response command should match");
+    TEST_ASSERT(ctx.last_response.data_len == 4, "Response should have data");
+
+    // Cleanup
+    tsumikoro_bus_deinit(bus);
+    tsumikoro_hal_deinit(controller_hal);
+    tsumikoro_hal_deinit(responder.hal);
+    tsumikoro_mock_bus_destroy(mock_bus);
+}
+
 /* ========== Main Test Runner ========== */
 
 int main(void)
@@ -247,6 +515,13 @@ int main(void)
     test_send_command_no_response();
     test_statistics();
     test_unsolicited_messages();
+    printf("\n");
+
+    // Advanced tests with auto-responder
+    printf(COLOR_BOLD "Advanced Bus Handler Tests:\n" COLOR_RESET);
+    test_async_send_with_response();
+    test_blocking_send_with_response();
+    test_blocking_send_timeout();
     printf("\n");
 
     // Print summary

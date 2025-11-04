@@ -206,14 +206,15 @@ void tsumikoro_bus_cancel_pending(tsumikoro_bus_handle_t handle);
  * @brief Get bus statistics
  *
  * For debugging and diagnostics.
+ * Fields are volatile as they may be updated from ISR context.
  */
 typedef struct {
-    uint32_t commands_sent;         /**< Total commands sent */
-    uint32_t responses_received;    /**< Total responses received */
-    uint32_t timeouts;              /**< Total timeouts */
-    uint32_t retries;               /**< Total retries attempted */
-    uint32_t crc_errors;            /**< Total CRC errors */
-    uint32_t unsolicited_messages;  /**< Total unsolicited messages */
+    volatile uint32_t commands_sent;         /**< Total commands sent */
+    volatile uint32_t responses_received;    /**< Total responses received */
+    volatile uint32_t timeouts;              /**< Total timeouts */
+    volatile uint32_t retries;               /**< Total retries attempted */
+    volatile uint32_t crc_errors;            /**< Total CRC errors */
+    volatile uint32_t unsolicited_messages;  /**< Total unsolicited messages */
 } tsumikoro_bus_stats_t;
 
 /**

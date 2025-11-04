@@ -101,7 +101,8 @@ static void test_controller_to_peripheral_ping(void)
     TEST_ASSERT(peripheral_ctx.last_packet.command == TSUMIKORO_CMD_PING, "Wrong command in received packet");
     TEST_ASSERT(peripheral_ctx.rx_count == 1, "Peripheral RX count should be 1");
 
-    // Verify controller also received (broadcast on bus)
+    // Verify controller also received (RS-485 with RE asserted receives own transmission)
+    // This is useful for collision detection
     TEST_ASSERT(controller_ctx.packet_received, "Controller did not receive own transmission");
     TEST_ASSERT(controller_ctx.rx_count == 1, "Controller RX count should be 1");
 

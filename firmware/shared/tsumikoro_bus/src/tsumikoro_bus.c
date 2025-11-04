@@ -11,16 +11,27 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Debug logging (define TSUMIKORO_BUS_DEBUG to enable) */
+#ifdef TSUMIKORO_BUS_DEBUG
+#include <stdio.h>
+#define BUS_DEBUG(...) printf("[BUS] " __VA_ARGS__)
+#else
+#define BUS_DEBUG(...) ((void)0)
+#endif
+
 /**
  * @brief Pending command structure
+ *
+ * Fields marked volatile are accessed from both main context and ISR context
+ * (via callbacks invoked from bus_complete_command which may run in ISR).
  */
 typedef struct {
     tsumikoro_packet_t packet;           /**< Command packet */
     tsumikoro_response_callback_t callback;  /**< Response callback */
     void *user_data;                     /**< User data for callback */
     uint32_t send_time_ms;               /**< Time command was sent */
-    uint32_t retry_count;                /**< Retries attempted */
-    bool active;                         /**< Command is active */
+    volatile uint32_t retry_count;       /**< Retries attempted (volatile: read in ISR) */
+    volatile bool active;                /**< Command is active (volatile: modified in ISR) */
     bool expects_response;               /**< Expecting a response */
 } tsumikoro_pending_cmd_t;
 
@@ -30,7 +41,7 @@ typedef struct {
 typedef struct {
     tsumikoro_hal_handle_t hal;          /**< HAL handle */
     tsumikoro_bus_config_t config;       /**< Bus configuration */
-    tsumikoro_bus_state_t state;         /**< Current state */
+    volatile tsumikoro_bus_state_t state; /**< Current state (volatile: may be read in ISR) */
 
     // Callbacks
     tsumikoro_unsolicited_callback_t unsolicited_callback;
@@ -39,9 +50,14 @@ typedef struct {
     // Pending command
     tsumikoro_pending_cmd_t pending_cmd;
 
-    // RX buffer for incoming packets
-    uint8_t rx_buffer[TSUMIKORO_MAX_PACKET_LEN];
-    size_t rx_buffer_len;
+    // Last transmitted packet (for echo detection/collision detection)
+    uint8_t last_tx_buffer[TSUMIKORO_MAX_PACKET_LEN];
+    size_t last_tx_len;
+    volatile bool expecting_tx_echo;     /**< Expecting to receive our own transmission (volatile: read in ISR) */
+
+    // RX buffer for incoming packets (volatile: written by HAL RX callback in ISR context)
+    volatile uint8_t rx_buffer[TSUMIKORO_MAX_PACKET_LEN];
+    volatile size_t rx_buffer_len;
 
     // Timing
     uint32_t state_enter_time_ms;        /**< Time current state was entered */
@@ -58,6 +74,15 @@ typedef struct {
  */
 static void bus_set_state(tsumikoro_bus_t *bus, tsumikoro_bus_state_t new_state)
 {
+#ifdef TSUMIKORO_BUS_DEBUG
+    const char *state_names[] = {
+        "IDLE", "WAIT_BUS_IDLE", "TRANSMITTING",
+        "WAITING_RESPONSE", "RETRY_DELAY", "ERROR"
+    };
+    BUS_DEBUG("State: %s -> %s\n",
+              state_names[bus->state],
+              state_names[new_state]);
+#endif
     bus->state = new_state;
     bus->state_enter_time_ms = tsumikoro_hal_get_time_ms();
 }
@@ -81,6 +106,9 @@ static void bus_complete_command(tsumikoro_bus_t *bus,
     if (!bus->pending_cmd.active) {
         return;
     }
+
+    BUS_DEBUG("Command complete: cmd=0x%04X, status=%d, retry=%u\n",
+              bus->pending_cmd.packet.command, status, bus->pending_cmd.retry_count);
 
     // Update statistics
     if (status == TSUMIKORO_CMD_STATUS_SUCCESS) {
@@ -112,13 +140,23 @@ static tsumikoro_status_t bus_transmit_pending(tsumikoro_bus_t *bus)
         return TSUMIKORO_STATUS_ERROR;
     }
 
+    BUS_DEBUG("Transmitting cmd=0x%04X to device=0x%02X\n",
+              bus->pending_cmd.packet.command,
+              bus->pending_cmd.packet.device_id);
+
     // Encode packet
     uint8_t tx_buffer[TSUMIKORO_MAX_PACKET_LEN];
     size_t tx_len = tsumikoro_packet_encode(&bus->pending_cmd.packet,
                                              tx_buffer, sizeof(tx_buffer));
     if (tx_len == 0) {
+        BUS_DEBUG("Encode failed\n");
         return TSUMIKORO_STATUS_ERROR;
     }
+
+    // Store transmitted packet for echo detection (RS-485 receives own transmission)
+    memcpy(bus->last_tx_buffer, tx_buffer, tx_len);
+    bus->last_tx_len = tx_len;
+    bus->expecting_tx_echo = true;
 
     // Transmit via HAL
     tsumikoro_hal_enable_tx(bus->hal);
@@ -126,6 +164,8 @@ static tsumikoro_status_t bus_transmit_pending(tsumikoro_bus_t *bus)
     tsumikoro_hal_disable_tx(bus->hal);
 
     if (hal_status != TSUMIKORO_HAL_OK) {
+        BUS_DEBUG("Transmit failed: hal_status=%d\n", hal_status);
+        bus->expecting_tx_echo = false;
         return TSUMIKORO_STATUS_ERROR;
     }
 
@@ -155,8 +195,13 @@ static void bus_retry_command(tsumikoro_bus_t *bus)
     bus->pending_cmd.retry_count++;
     bus->stats.retries++;
 
+    BUS_DEBUG("Retry %u/%u for cmd=0x%04X\n",
+              bus->pending_cmd.retry_count, bus->config.retry_count,
+              bus->pending_cmd.packet.command);
+
     if (bus->pending_cmd.retry_count >= bus->config.retry_count) {
         // Max retries exceeded
+        BUS_DEBUG("Max retries exceeded\n");
         bus_complete_command(bus, TSUMIKORO_CMD_STATUS_TIMEOUT, NULL);
     } else {
         // Enter retry delay state
@@ -170,30 +215,65 @@ static void bus_retry_command(tsumikoro_bus_t *bus)
 static void bus_process_rx_packet(tsumikoro_bus_t *bus)
 {
     // Poll HAL for received data (if using polling mode)
+    // Use local buffer to avoid volatile qualifier issues
+    uint8_t local_rx_buffer[TSUMIKORO_MAX_PACKET_LEN];
+    size_t local_rx_len = 0;
+
     if (bus->rx_buffer_len == 0) {
         size_t received_len = 0;
         tsumikoro_hal_status_t hal_status = tsumikoro_hal_receive(
-            bus->hal, bus->rx_buffer, sizeof(bus->rx_buffer), &received_len, 0);
+            bus->hal, local_rx_buffer, sizeof(local_rx_buffer), &received_len, 0);
 
         if (hal_status == TSUMIKORO_HAL_OK && received_len > 0) {
+            // Copy to volatile buffer (memory barrier)
+            for (size_t i = 0; i < received_len; i++) {
+                bus->rx_buffer[i] = local_rx_buffer[i];
+            }
             bus->rx_buffer_len = received_len;
         }
     }
 
-    if (bus->rx_buffer_len == 0) {
+    // Snapshot volatile data to local variables (memory barrier)
+    local_rx_len = bus->rx_buffer_len;
+    if (local_rx_len == 0) {
         return;
     }
 
-    // Decode packet
+    // Copy volatile buffer to local buffer
+    for (size_t i = 0; i < local_rx_len; i++) {
+        local_rx_buffer[i] = bus->rx_buffer[i];
+    }
+
+    BUS_DEBUG("RX packet: %zu bytes\n", local_rx_len);
+
+    // Check if this is our own transmission echo (RS-485 with RE asserted)
+    if (bus->expecting_tx_echo &&
+        local_rx_len == bus->last_tx_len &&
+        memcmp(local_rx_buffer, bus->last_tx_buffer, local_rx_len) == 0) {
+        BUS_DEBUG("Ignoring TX echo\n");
+        bus->expecting_tx_echo = false;
+        bus->rx_buffer_len = 0;
+        return;
+    }
+
+    // If we expected an echo but got something different, that's a collision
+    if (bus->expecting_tx_echo) {
+        BUS_DEBUG("Collision detected! Expected echo but received different packet\n");
+        bus->expecting_tx_echo = false;
+        // TODO: Handle collision (retry transmission)
+    }
+
+    // Decode packet (using local non-volatile buffer)
     tsumikoro_packet_t rx_packet;
-    tsumikoro_status_t status = tsumikoro_packet_decode(bus->rx_buffer,
-                                                         bus->rx_buffer_len,
+    tsumikoro_status_t status = tsumikoro_packet_decode(local_rx_buffer,
+                                                         local_rx_len,
                                                          &rx_packet);
 
-    // Clear RX buffer
+    // Clear volatile RX buffer
     bus->rx_buffer_len = 0;
 
     if (status == TSUMIKORO_STATUS_CRC_ERROR) {
+        BUS_DEBUG("CRC error\n");
         // CRC error - if we're waiting for response, this might be our response
         if (bus->state == TSUMIKORO_BUS_STATE_WAITING_RESPONSE) {
             if (bus->config.auto_retry) {
@@ -206,9 +286,13 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
     }
 
     if (status != TSUMIKORO_STATUS_OK) {
+        BUS_DEBUG("Decode failed: status=%d\n", status);
         // Invalid packet - ignore
         return;
     }
+
+    BUS_DEBUG("RX decoded: cmd=0x%04X, device=0x%02X, data_len=%u\n",
+              rx_packet.command, rx_packet.device_id, rx_packet.data_len);
 
     // Check if this is a response to our pending command
     if (bus->pending_cmd.active && bus->pending_cmd.expects_response) {
@@ -220,6 +304,7 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
         if (bus->state == TSUMIKORO_BUS_STATE_WAITING_RESPONSE) {
             // Check for NAK
             if (rx_packet.data_len > 0 && rx_packet.data[0] == TSUMIKORO_STATUS_NAK) {
+                BUS_DEBUG("Received NAK\n");
                 if (bus->config.auto_retry) {
                     bus_retry_command(bus);
                 } else {
@@ -227,6 +312,7 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
                 }
             } else {
                 // Success
+                BUS_DEBUG("Response matched pending command\n");
                 bus_complete_command(bus, TSUMIKORO_CMD_STATUS_SUCCESS, &rx_packet);
             }
             return;
@@ -234,6 +320,7 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
     }
 
     // Unsolicited message
+    BUS_DEBUG("Unsolicited message\n");
     bus->stats.unsolicited_messages++;
     if (bus->unsolicited_callback) {
         bus->unsolicited_callback(&rx_packet, bus->unsolicited_user_data);
