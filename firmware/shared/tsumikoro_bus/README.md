@@ -74,7 +74,7 @@ This library supports:
 | FR-003 | DMA-based transmission and reception | MUST |
 | FR-004 | CRC8 error detection for all packets | MUST |
 | FR-005 | Platform abstraction (STM32, ESP32, Host) | MUST |
-| FR-006 | Master-slave and peer-to-peer topologies | SHOULD |
+| FR-006 | Controller-peripheral and peer-to-peer topologies | SHOULD |
 | FR-007 | Automatic retry with exponential backoff | SHOULD |
 | FR-008 | Broadcast addressing (all devices) | SHOULD |
 | FR-009 | Unit testable on host PC/Linux | MUST |
@@ -92,7 +92,7 @@ This library supports:
 | NFR-004 | Packet error rate | <0.1% | All |
 | NFR-005 | Bus utilization | >80% | All |
 | NFR-006 | Code size | <8KB | STM32 |
-| NFR-007 | Deterministic behavior | Yes | Master mode |
+| NFR-007 | Deterministic behavior | Yes | Controller mode |
 
 ### 2.3 Platform Constraints
 
@@ -100,7 +100,7 @@ This library supports:
 |----------|-------|-----|-------|-------|
 | STM32G030F6 | 32KB | 8KB | 64MHz | Smallest target, bitwise CRC8 |
 | STM32G071G8 | 64KB | 36KB | 64MHz | Table-based CRC8 |
-| ESP32-S3 | 8MB | 512KB | 240MHz | Bridge/master role |
+| ESP32-S3 | 8MB | 512KB | 240MHz | Bridge/controller role |
 | Host/Linux | N/A | N/A | N/A | Testing only |
 
 ---
@@ -186,7 +186,7 @@ firmware/shared/tsumikoro_bus/
 | Platform | Use Case | UART Interface | DMA Support | Test Support |
 |----------|----------|----------------|-------------|--------------|
 | STM32G0xx | Motor controller | HAL UART | HAL DMA | Via SWD |
-| ESP32/S3 | Bridge/Master | IDF UART | ESP-DMA | Via JTAG |
+| ESP32/S3 | Bridge/Controller | IDF UART | ESP-DMA | Via JTAG |
 | Linux/macOS | Unit testing | termios/POSIX | Simulated | Native |
 | Mock HAL | Pure unit tests | In-memory | Simulated | Native |
 
@@ -196,7 +196,7 @@ firmware/shared/tsumikoro_bus/
 
 ### 4.1 Topology Options
 
-#### Option A: Master-Slave (RECOMMENDED)
+#### Option A: Controller-Peripheral (RECOMMENDED)
 
 ```
                     RS-485 Bus (Half-Duplex)
@@ -205,16 +205,16 @@ firmware/shared/tsumikoro_bus/
 ┌───┴───┐ ┌┴────────┐ ┌──────────┐ ┌──────────┐ ┌─────┴──┐
 │ESP32  │ │ STM32   │ │  STM32   │ │  STM32   │ │ STM32  │
 │Bridge │ │ Motor 1 │ │ Motor 2  │ │ Motor 3  │ │ ...254 │
-│(Master│ │ (Slave) │ │ (Slave)  │ │ (Slave)  │ │ (Slave)│
+│(Ctrlr)│ │ (Periph)│ │ (Periph) │ │ (Periph) │ │(Periph)│
 │ID=0x00│ │ ID=0x01 │ │ ID=0x02  │ │ ID=0x03  │ │        │
 └───────┘ └─────────┘ └──────────┘ └──────────┘ └────────┘
 ```
 
 **Characteristics**:
-- ESP32 bridge acts as master (ID=0x00)
-- STM32 motor controllers are slaves (ID=0x01-0xFE)
-- Master initiates all transactions
-- Slaves only transmit when queried
+- ESP32 bridge acts as controller (ID=0x00)
+- STM32 motor controllers are peripherals (ID=0x01-0xFE)
+- Controller initiates all transactions
+- Peripherals only transmit when queried
 - Deterministic timing (polling-based)
 - Simple collision avoidance
 
@@ -225,8 +225,8 @@ firmware/shared/tsumikoro_bus/
 - Ideal for motor control
 
 **Cons**:
-- Single point of failure (master)
-- Master must poll all slaves
+- Single point of failure (controller)
+- Controller must poll all peripherals
 - Scalability limited by polling overhead
 
 #### Option B: Peer-to-Peer with CSMA/CD
@@ -263,19 +263,19 @@ firmware/shared/tsumikoro_bus/
 
 | Address Range | Purpose |
 |---------------|---------|
-| 0x00 | Master/Bridge (ESP32) |
+| 0x00 | Controller/Bridge (ESP32) |
 | 0x01 - 0xEF | Standard device addresses (239 devices) |
 | 0xF0 - 0xFE | Reserved for future use |
 | 0xFF | Broadcast address (all devices) |
 
-### 4.3 Bus Arbitration (Master-Slave)
+### 4.3 Bus Arbitration (Controller-Peripheral)
 
 **Polling Strategy**:
-1. Master maintains a list of active slave IDs
-2. Master polls each slave in round-robin order
-3. Slave responds within timeout window (20ms)
-4. If no response, mark slave as offline (after N retries)
-5. Continue to next slave
+1. Controller maintains a list of active peripheral IDs
+2. Controller polls each peripheral in round-robin order
+3. Peripheral responds within timeout window (20ms)
+4. If no response, mark peripheral as offline (after N retries)
+5. Continue to next peripheral
 
 **Timing**:
 - Command packet TX: ~700µs (70 bytes at 1Mbaud)
@@ -484,7 +484,7 @@ Priority Example (collision at same time):
   Device 0xFF: backoff = 500 + 50 + 0 = 550µs
 
   → Device 0xFF retries first (broadcast has lowest priority)
-  → Device 0x01 retries last (master has highest priority)
+  → Device 0x01 retries last (controller has highest priority)
 ```
 
 **Exponential Backoff** (for repeated collisions):
@@ -526,13 +526,13 @@ return TSUMIKORO_STATUS_BUS_BUSY;
 - 4th collision: 4ms + jitter
 - 5th collision: 8ms + jitter (abort)
 
-#### 4.4.3 Master-Slave vs Peer-to-Peer
+#### 4.4.3 Controller-Peripheral vs Peer-to-Peer
 
-**Master-Slave Mode**:
+**Controller-Peripheral Mode**:
 - Collision detection still recommended for safety
-- Collisions indicate protocol violation (slave talking out of turn)
-- Master should log collision as error condition
-- Slave should never initiate transmission (only respond)
+- Collisions indicate protocol violation (peripheral talking out of turn)
+- Controller should log collision as error condition
+- Peripheral should never initiate transmission (only respond)
 
 **Peer-to-Peer Mode**:
 - Collision detection is **mandatory**
@@ -543,16 +543,16 @@ return TSUMIKORO_STATUS_BUS_BUSY;
 **Configuration**:
 
 ```c
-// Master-Slave mode (collision detection for safety only)
+// Controller-Peripheral mode (collision detection for safety only)
 tsumikoro_bus_config_t config = {
-    .is_master = true,  // or false for slave
+    .is_controller = true,  // or false for peripheral
     .enable_collision_detect = true,  // Recommended
     .collision_retry_count = 1,  // Don't retry much (protocol error)
 };
 
 // Peer-to-Peer mode (collision detection required)
 tsumikoro_bus_config_t config = {
-    .is_master = false,  // All nodes are peers
+    .is_controller = false,  // All nodes are peers
     .enable_collision_detect = true,  // REQUIRED
     .collision_retry_count = 5,  // Retry with exponential backoff
 };
@@ -720,7 +720,7 @@ Total: 7 bytes (minimum packet size)
 The bus operates on a **command/response model** with timeout-based error detection:
 
 ```
-Master                          Slave
+Controller                   Peripheral
   │                               │
   ├──── Command Packet ──────────>│
   │                               │ Process command
@@ -1014,7 +1014,7 @@ void app_init(void) {
 
 #### 4.7.4 Timeout Handling
 
-**Master Side** (sending commands):
+**Controller Side** (sending commands):
 
 ```c
 // Send command with timeout
@@ -1057,9 +1057,9 @@ tsumikoro_status_t tsumikoro_bus_send_command_blocking(
 }
 ```
 
-**Slave Side** (receiving commands):
+**Peripheral Side** (receiving commands):
 
-When a command packet is received, the slave:
+When a command packet is received, the peripheral:
 1. Validates packet (CRC8, markers)
 2. Looks up command handler in dispatch table
 3. Calls handler with request data
@@ -1119,11 +1119,11 @@ Broadcast commands (dest_id = 0xFF) have special handling:
 
 **Example**: Emergency stop all motors
 ```c
-// Master sends broadcast STOP
+// Controller sends broadcast STOP
 tsumikoro_bus_send_command(bus, 0xFF, CMD_STEPPER_STOP, NULL, 0, 0);
 // No response expected, command returns immediately
 
-// All slaves receive and execute, but don't respond
+// All peripherals receive and execute, but don't respond
 ```
 
 #### 4.7.6 Variable-Length Responses
@@ -1202,21 +1202,21 @@ if (retry_count >= MAX_RETRIES) {
 **Retry Policy**:
 - **Timeout errors**: Retry with backoff (3 attempts)
 - **CRC errors**: Don't retry (likely corruption, not missed response)
-- **NAK errors**: Don't retry (command rejected by slave)
+- **NAK errors**: Don't retry (command rejected by peripheral)
 - **Busy status**: Retry immediately (1-2 attempts)
 
 #### 4.7.8 Bus Scanning and Device Discovery
 
-The master (ESP32 bridge) can discover which devices are present on the bus by scanning all possible device IDs.
+The controller (ESP32 bridge) can discover which devices are present on the bus by scanning all possible device IDs.
 
 **Scan Methods**:
 
-1. **Ping Sweep** (RECOMMENDED for master-slave)
+1. **Ping Sweep** (RECOMMENDED for controller-peripheral)
 2. **Broadcast Discovery** (for peer-to-peer, requires collision handling)
 
 ##### Method 1: Ping Sweep
 
-Master iterates through all device IDs (0x01-0xFE) and sends CMD_PING to each:
+Controller iterates through all device IDs (0x01-0xFE) and sends CMD_PING to each:
 
 ```c
 /**
@@ -1322,7 +1322,7 @@ void tsumikoro_bus_smart_scan(tsumikoro_bus_handle_t bus) {
 
 ##### Method 2: Broadcast Discovery (Peer-to-Peer)
 
-Master broadcasts a discovery request, all devices respond with random backoff:
+Controller broadcasts a discovery request, all devices respond with random backoff:
 
 ```c
 /**
@@ -1387,7 +1387,7 @@ uint8_t handle_identify(
 - Collisions possible even with random backoff
 - Not deterministic
 - Slower than ping sweep (need 500ms+ listen window)
-- **Recommendation**: Use ping sweep for master-slave, broadcast for peer-to-peer
+- **Recommendation**: Use ping sweep for controller-peripheral, broadcast for peer-to-peer
 
 ##### Device Information Structure
 
@@ -1473,7 +1473,7 @@ Example (3 devices found at IDs 0x01, 0x05, 0x10):
 
 ##### Periodic Background Scanning
 
-Master can maintain a device presence table with periodic health checks:
+Controller can maintain a device presence table with periodic health checks:
 
 ```c
 void tsumikoro_bus_background_task(void) {
@@ -1993,7 +1993,7 @@ typedef struct {
     uint32_t baud_rate;          // Baud rate (typically 1000000)
     uint16_t rx_buffer_size;     // RX buffer size (platform-dependent)
     uint16_t tx_queue_depth;     // TX queue depth
-    bool is_master;              // True if master mode
+    bool is_controller;          // True if controller mode
     void *platform_config;       // Platform-specific HAL config
 } tsumikoro_bus_config_t;
 
@@ -2608,27 +2608,27 @@ ctest --verbose
 Simulate multi-device bus without hardware:
 
 ```c
-// Example: Master-slave roundtrip
-void test_master_slave_roundtrip(void) {
+// Example: Controller-peripheral roundtrip
+void test_controller_peripheral_roundtrip(void) {
     // Create virtual devices
-    tsumikoro_bus_handle_t master = create_mock_bus(0x00, true);
-    tsumikoro_bus_handle_t slave = create_mock_bus(0x01, false);
+    tsumikoro_bus_handle_t controller = create_mock_bus(0x00, true);
+    tsumikoro_bus_handle_t peripheral = create_mock_bus(0x01, false);
 
     // Connect them via mock layer
-    tsumikoro_mock_connect(master, slave);
+    tsumikoro_mock_connect(controller, peripheral);
 
-    // Master sends GET_STATUS command
-    tsumikoro_bus_send_command(master, 0x01, CMD_GET_STATUS, NULL, 0, 20);
+    // Controller sends GET_STATUS command
+    tsumikoro_bus_send_command(controller, 0x01, CMD_GET_STATUS, NULL, 0, 20);
 
-    // Process on slave
-    tsumikoro_mock_process(slave);
+    // Process on peripheral
+    tsumikoro_mock_process(peripheral);
 
-    // Slave responds (simulated in test)
+    // Peripheral responds (simulated in test)
     uint8_t status_data[8] = { /* status payload */ };
-    tsumikoro_bus_send_command(slave, 0x00, CMD_GET_STATUS, status_data, 8, 20);
+    tsumikoro_bus_send_command(peripheral, 0x00, CMD_GET_STATUS, status_data, 8, 20);
 
-    // Process on master
-    tsumikoro_mock_process(master);
+    // Process on controller
+    tsumikoro_mock_process(controller);
 
     // Verify response received
     assert_response_received();
@@ -2638,9 +2638,9 @@ void test_master_slave_roundtrip(void) {
 ### 12.3 Hardware Tests (Real Devices)
 
 **Test Bench**:
-- ESP32-S3 bridge (master) on `/dev/ttyUSB0`
-- STM32G071 motor controller (slave #1)
-- STM32G030 motor controller (slave #2)
+- ESP32-S3 bridge (controller) on `/dev/ttyUSB0`
+- STM32G071 motor controller (peripheral #1)
+- STM32G030 motor controller (peripheral #2)
 - RS-485 transceiver (MAX485 or equivalent)
 - Logic analyzer on bus lines (A, B, DE)
 - Oscilloscope for signal integrity
@@ -2858,16 +2858,16 @@ The smallest target (8KB RAM, 64MHz, 32KB Flash) can handle 1Mbaud:
 
 ### 15.3 Topology Enhancements
 
-- **Automatic device discovery** (master scans for slaves)
+- **Automatic device discovery** (controller scans for peripherals)
 - **Hot-plug support** (detect new devices on bus)
-- **Redundant masters** (failover support)
+- **Redundant controllers** (failover support)
 - **Bridging** (multi-bus support via ESP32)
 
 ### 15.4 Features
 
 - **Sleep/wake protocol** for power saving
 - **Firmware update over bus** (bootloader integration)
-- **Time synchronization** (master broadcasts timestamp)
+- **Time synchronization** (controller broadcasts timestamp)
 - **Bus sniffer/analyzer tool** (host application)
 - **Wireshark dissector** for protocol analysis
 - **Python bindings** for scripting and automation
