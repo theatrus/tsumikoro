@@ -3,6 +3,7 @@
 # Project sources
 set(PROJECT_SOURCES
     src/main.c
+    src/servo_pwm.c
     src/system_stm32g0xx.c
 )
 

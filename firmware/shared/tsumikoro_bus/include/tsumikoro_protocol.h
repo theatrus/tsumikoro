@@ -111,6 +111,9 @@ extern "C" {
 #define TSUMIKORO_CMD_SERVO_SET_SPEED     0x3003  /**< Set servo movement speed */
 #define TSUMIKORO_CMD_SERVO_SET_RANGE     0x3004  /**< Set servo angle range */
 #define TSUMIKORO_CMD_SERVO_CALIBRATE     0x3005  /**< Calibrate servo endpoints */
+#define TSUMIKORO_CMD_SERVO_ENABLE        0x3006  /**< Enable/disable servo output */
+#define TSUMIKORO_CMD_SERVO_SET_MULTI     0x3007  /**< Set multiple servo positions */
+#define TSUMIKORO_CMD_SERVO_GET_STATUS    0x3008  /**< Get servo channel status */
 
 /**
  * @brief Status codes

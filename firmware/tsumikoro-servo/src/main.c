@@ -10,6 +10,7 @@
 #include "stm32g0xx_hal.h"
 #include "tsumikoro_bus.h"
 #include "tsumikoro_hal_stm32.h"
+#include "servo_pwm.h"
 #include <string.h>
 
 /* Configuration */
@@ -51,20 +52,7 @@ static const tsumikoro_hal_stm32_config_t g_stm32_config = {
     .dma_rx_irq = BUS_DMA_RX_IRQn
 };
 
-/* Servo state */
-typedef struct {
-    int16_t current_position;    /**< Current position (0-1800 = 0-180 degrees * 10) */
-    int16_t target_position;     /**< Target position */
-    bool moving;                 /**< Servo is moving */
-    uint16_t speed;              /**< Movement speed */
-} servo_state_t;
-
-static servo_state_t g_servo_state = {
-    .current_position = 900,  /* Start at 90 degrees */
-    .target_position = 900,
-    .moving = false,
-    .speed = 100
-};
+/* Servo state - moved to servo_pwm module */
 
 /* Private function prototypes */
 void SystemClock_Config(void);
@@ -188,14 +176,10 @@ static void Bus_Init(void)
  */
 static void Servo_Init(void)
 {
-    /* TODO: Initialize servo PWM output */
-    /* - Configure TIM for PWM generation */
-    /* - Set up 50Hz PWM signal */
-    /* - Configure duty cycle for position control */
-
-    g_servo_state.current_position = 900;
-    g_servo_state.target_position = 900;
-    g_servo_state.moving = false;
+    /* Initialize servo PWM system using LL drivers */
+    if (!servo_pwm_init()) {
+        Error_Handler();
+    }
 }
 
 /**
@@ -203,20 +187,8 @@ static void Servo_Init(void)
  */
 static void Servo_Process(void)
 {
-    /* TODO: Implement servo position control */
-    /* - Update PWM duty cycle based on position */
-    /* - Implement smooth movement */
-
-    if (g_servo_state.moving) {
-        /* Simple incremental movement toward target */
-        if (g_servo_state.current_position < g_servo_state.target_position) {
-            g_servo_state.current_position++;
-        } else if (g_servo_state.current_position > g_servo_state.target_position) {
-            g_servo_state.current_position--;
-        } else {
-            g_servo_state.moving = false;
-        }
-    }
+    /* Process servo movement - updates PWM outputs */
+    servo_pwm_process();
 }
 
 /**
@@ -260,55 +232,160 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
             break;
 
         case TSUMIKORO_CMD_GET_STATUS:
-            /* Return servo status */
-            response.data[0] = g_servo_state.moving ? 0x01 : 0x00;
-            response.data[1] = (uint8_t)(g_servo_state.current_position >> 8);
-            response.data[2] = (uint8_t)(g_servo_state.current_position);
-            response.data_len = 3;
+            /* Return general device status (not servo-specific) */
+            response.data[0] = 0x00;  /* Status: OK */
+            response.data[1] = servo_pwm_get_channel_count();  /* Number of servo channels */
+            response.data_len = 2;
             break;
 
         case TSUMIKORO_CMD_SERVO_SET_POSITION:
-            /* Set servo position (0-1800 = 0-180 degrees * 10) */
-            if (packet->data_len >= 2) {
-                g_servo_state.target_position =
-                    ((int16_t)packet->data[0] << 8) |
-                    ((int16_t)packet->data[1]);
+            /* Set servo position (0-1800 = 0-180 degrees * 10)
+             * Data: [channel_index, position_hi, position_lo] */
+            if (packet->data_len >= 3) {
+                uint8_t channel = packet->data[0];
+                uint16_t position = ((uint16_t)packet->data[1] << 8) |
+                                   ((uint16_t)packet->data[2]);
 
-                /* Clamp to valid range */
-                if (g_servo_state.target_position < 0) {
-                    g_servo_state.target_position = 0;
-                } else if (g_servo_state.target_position > 1800) {
-                    g_servo_state.target_position = 1800;
+                if (servo_pwm_set_position(channel, position)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid channel/position */
                 }
-
-                g_servo_state.moving = true;
-
-                /* Acknowledge */
-                response.data[0] = 0x00;  /* Success */
                 response.data_len = 1;
             } else {
-                response.data[0] = 0xFF;  /* Error */
+                response.data[0] = 0xFF;  /* Error - invalid length */
                 response.data_len = 1;
             }
             break;
 
         case TSUMIKORO_CMD_SERVO_GET_POSITION:
-            /* Get current servo position */
-            response.data[0] = (uint8_t)(g_servo_state.current_position >> 8);
-            response.data[1] = (uint8_t)(g_servo_state.current_position);
-            response.data_len = 2;
+            /* Get current servo position
+             * Data: [channel_index] */
+            if (packet->data_len >= 1) {
+                uint8_t channel = packet->data[0];
+                uint16_t position = servo_pwm_get_position(channel);
+                response.data[0] = (uint8_t)(position >> 8);
+                response.data[1] = (uint8_t)(position);
+                response.data_len = 2;
+            } else {
+                response.data[0] = 0xFF;  /* Error - missing channel index */
+                response.data_len = 1;
+            }
             break;
 
         case TSUMIKORO_CMD_SERVO_SET_SPEED:
-            /* Set servo movement speed */
-            if (packet->data_len >= 2) {
-                g_servo_state.speed =
-                    ((uint16_t)packet->data[0] << 8) |
-                    ((uint16_t)packet->data[1]);
-                response.data[0] = 0x00;  /* Success */
+            /* Set servo movement speed
+             * Data: [channel_index, speed_hi, speed_lo] */
+            if (packet->data_len >= 3) {
+                uint8_t channel = packet->data[0];
+                uint16_t speed = ((uint16_t)packet->data[1] << 8) |
+                                ((uint16_t)packet->data[2]);
+
+                if (servo_pwm_set_speed(channel, speed)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid channel */
+                }
                 response.data_len = 1;
             } else {
-                response.data[0] = 0xFF;  /* Error */
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_SERVO_CALIBRATE:
+            /* Calibrate servo endpoints
+             * Data: [channel_index, min_pulse_hi, min_pulse_lo, max_pulse_hi, max_pulse_lo] */
+            if (packet->data_len >= 5) {
+                uint8_t channel = packet->data[0];
+                uint16_t min_pulse_us = ((uint16_t)packet->data[1] << 8) |
+                                       ((uint16_t)packet->data[2]);
+                uint16_t max_pulse_us = ((uint16_t)packet->data[3] << 8) |
+                                       ((uint16_t)packet->data[4]);
+
+                if (servo_pwm_set_calibration(channel, min_pulse_us, max_pulse_us)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid parameters */
+                }
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_SERVO_ENABLE:
+            /* Enable/disable servo output
+             * Data: [channel_index, enable (0=disable, 1=enable)] */
+            if (packet->data_len >= 2) {
+                uint8_t channel = packet->data[0];
+                bool enable = (packet->data[1] != 0);
+
+                if (servo_pwm_enable(channel, enable)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid channel */
+                }
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0xFF;  /* Error - invalid length */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_SERVO_SET_MULTI:
+            /* Set multiple servo positions
+             * Data: [count, ch0_idx, pos0_hi, pos0_lo, ch1_idx, pos1_hi, pos1_lo, ...] */
+            if (packet->data_len >= 1) {
+                uint8_t count = packet->data[0];
+                uint8_t idx = 1;
+                uint8_t success_count = 0;
+
+                for (uint8_t i = 0; i < count && idx + 2 < packet->data_len; i++) {
+                    uint8_t channel = packet->data[idx];
+                    uint16_t position = ((uint16_t)packet->data[idx + 1] << 8) |
+                                       ((uint16_t)packet->data[idx + 2]);
+                    idx += 3;
+
+                    if (servo_pwm_set_position(channel, position)) {
+                        success_count++;
+                    }
+                }
+
+                response.data[0] = success_count;  /* Number of successful updates */
+                response.data_len = 1;
+            } else {
+                response.data[0] = 0x00;  /* No servos updated */
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_SERVO_GET_STATUS:
+            /* Get servo channel status
+             * Data: [channel_index]
+             * Response: [enabled, moving, current_pos_hi, current_pos_lo, target_pos_hi, target_pos_lo] */
+            if (packet->data_len >= 1) {
+                uint8_t channel = packet->data[0];
+
+                if (channel < servo_pwm_get_channel_count()) {
+                    uint16_t current_pos = servo_pwm_get_position(channel);
+                    uint16_t target_pos = servo_pwm_get_target_position(channel);
+                    bool moving = servo_pwm_is_moving(channel);
+
+                    response.data[0] = 0x01;  /* Enabled (assume enabled if valid channel) */
+                    response.data[1] = moving ? 0x01 : 0x00;
+                    response.data[2] = (uint8_t)(current_pos >> 8);
+                    response.data[3] = (uint8_t)(current_pos);
+                    response.data[4] = (uint8_t)(target_pos >> 8);
+                    response.data[5] = (uint8_t)(target_pos);
+                    response.data_len = 6;
+                } else {
+                    response.data[0] = 0xFF;  /* Error - invalid channel */
+                    response.data_len = 1;
+                }
+            } else {
+                response.data[0] = 0xFF;  /* Error - missing channel index */
                 response.data_len = 1;
             }
             break;
