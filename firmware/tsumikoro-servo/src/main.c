@@ -10,6 +10,7 @@
 #include "stm32g0xx_hal.h"
 #include "tsumikoro_bus.h"
 #include "tsumikoro_hal_stm32.h"
+#include "tsumikoro_flash_config.h"
 #include "servo_pwm.h"
 #include "motor_hbridge.h"
 #include "limit_switch.h"
@@ -37,6 +38,7 @@
 /* Private variables */
 static tsumikoro_bus_handle_t g_bus_handle = NULL;
 static tsumikoro_hal_handle_t g_hal_handle = NULL;
+static tsumikoro_config_t g_config = {0};  /**< Device configuration */
 
 /* STM32 HAL configuration */
 static const tsumikoro_hal_stm32_config_t g_stm32_config = {
@@ -66,6 +68,9 @@ static void Servo_Init(void);
 static void Servo_Process(void);
 static void Motor_Init(void);
 static void LimitSwitch_Init(void);
+static uint8_t Read_Hardware_ID(void);
+static void Config_Init(void);
+static void Config_Load_Servo_Calibration(void);
 
 /* Bus callback functions */
 static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data);
@@ -83,6 +88,7 @@ int main(void)
 
     /* Initialize peripherals */
     GPIO_Init();
+    Config_Init();  /* Initialize configuration (must be after GPIO_Init for hardware ID) */
     UART_Init();
     Servo_Init();
     Motor_Init();
@@ -489,6 +495,32 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
             response.data_len = 1;
             break;
 
+        case TSUMIKORO_CMD_SAVE_CONFIG:
+            /* Save current configuration to flash
+             * Response: [status] (0x00=success, 0xFF=error) */
+            {
+                tsumikoro_flash_status_t status = tsumikoro_flash_config_save(&g_config);
+                response.data[0] = (status == TSUMIKORO_FLASH_OK) ? 0x00 : 0xFF;
+                response.data_len = 1;
+            }
+            break;
+
+        case TSUMIKORO_CMD_LOAD_CONFIG:
+            /* Load configuration from flash
+             * Response: [status] (0x00=success, 0xFF=error) */
+            {
+                tsumikoro_flash_status_t status = tsumikoro_flash_config_load(&g_config);
+                if (status == TSUMIKORO_FLASH_OK) {
+                    /* Apply loaded configuration to hardware */
+                    Config_Load_Servo_Calibration();
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error */
+                }
+                response.data_len = 1;
+            }
+            break;
+
         default:
             /* Unknown command - don't send response */
             return;
@@ -536,6 +568,76 @@ void SystemClock_Config(void)
     {
         Error_Handler();
     }
+}
+
+/**
+ * @brief Read hardware ID from PB7/PB8 pins
+ *
+ * Hardware ID is a 2-bit value (0-3) determined by:
+ * - PB7: Bit 0
+ * - PB8: Bit 1
+ *
+ * Pins are configured with pull-ups, so:
+ * - Open/High = 1
+ * - To GND = 0
+ *
+ * @return Hardware ID (0-3)
+ */
+static uint8_t Read_Hardware_ID(void)
+{
+    uint8_t hw_id = 0;
+
+    /* Read PB7 (bit 0) */
+    if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_7) == GPIO_PIN_SET) {
+        hw_id |= 0x01;
+    }
+
+    /* Read PB8 (bit 1) */
+    if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8) == GPIO_PIN_SET) {
+        hw_id |= 0x02;
+    }
+
+    return hw_id;
+}
+
+/**
+ * @brief Load servo calibration from config and apply to hardware
+ */
+static void Config_Load_Servo_Calibration(void)
+{
+    for (uint8_t i = 0; i < g_config.servo_count && i < servo_pwm_get_channel_count(); i++) {
+        servo_pwm_set_calibration(i,
+                                   g_config.servo_cal[i].min_pulse_us,
+                                   g_config.servo_cal[i].max_pulse_us);
+    }
+}
+
+/**
+ * @brief Initialize flash configuration
+ *
+ * Attempts to load configuration from flash. If not found or invalid,
+ * initializes with defaults using hardware ID.
+ */
+static void Config_Init(void)
+{
+    /* Initialize flash config library */
+    tsumikoro_flash_config_init();
+
+    /* Try to load existing configuration */
+    tsumikoro_flash_status_t status = tsumikoro_flash_config_load(&g_config);
+
+    if (status != TSUMIKORO_FLASH_OK) {
+        /* No valid config found - initialize with defaults */
+        uint8_t hw_id = Read_Hardware_ID();
+        uint8_t device_id = DEVICE_ID + hw_id;  /* Base ID + hardware offset */
+
+        tsumikoro_flash_config_init_defaults(&g_config, device_id, hw_id);
+
+        /* Note: Don't auto-save on first boot. Let user explicitly save via command. */
+    }
+
+    /* Apply servo calibration to hardware */
+    Config_Load_Servo_Calibration();
 }
 
 /**
