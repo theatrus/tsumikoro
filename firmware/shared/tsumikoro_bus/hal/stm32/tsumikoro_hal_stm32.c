@@ -49,6 +49,9 @@ typedef struct {
     volatile uint32_t last_activity_tick;
 } tsumikoro_stm32_device_t;
 
+/* Forward declarations */
+static void update_dma_rx_position(tsumikoro_stm32_device_t *device);
+
 /* ========== STM32 Peripheral Initialization ========== */
 
 bool tsumikoro_hal_stm32_init_peripheral(const tsumikoro_hal_stm32_config_t *config,
@@ -145,6 +148,12 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
         return NULL;
     }
 
+    // Enable Receiver Timeout feature for packet-based protocols
+    // Timeout value is in bit times (at configured baud rate)
+    // Set to ~20 bit times which at 1Mbaud = 20us (good for packet detection)
+    HAL_UART_ReceiverTimeout_Config(&device->uart_handle, 20);
+    HAL_UART_EnableReceiverTimeout(&device->uart_handle);
+
     // Configure DMA if enabled
     if (device->use_dma) {
         // TX DMA
@@ -187,6 +196,9 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
         HAL_UART_Receive_DMA(&device->uart_handle,
                             (uint8_t *)device->rx_buffer,
                             TSUMIKORO_STM32_RX_BUFFER_SIZE);
+
+        // Enable Receiver Timeout interrupt for immediate packet processing
+        __HAL_UART_ENABLE_IT(&device->uart_handle, UART_IT_RTO);
     } else {
         // Enable UART RX interrupt for non-DMA mode
         __HAL_UART_ENABLE_IT(&device->uart_handle, UART_IT_RXNE);
@@ -304,6 +316,12 @@ tsumikoro_hal_status_t tsumikoro_hal_receive(tsumikoro_hal_handle_t handle,
     }
 
     tsumikoro_stm32_device_t *device = (tsumikoro_stm32_device_t *)handle;
+
+    // Poll DMA position if using DMA (primary method - low latency)
+    // This ensures we process packets immediately without waiting for 64/128 byte interrupts
+    if (device->use_dma) {
+        update_dma_rx_position(device);
+    }
 
     // Check if data available in RX buffer
     if (device->rx_count == 0) {
@@ -425,6 +443,54 @@ uint32_t tsumikoro_hal_get_time_ms(void)
     return HAL_GetTick();
 }
 
+/* ========== Internal Helper Functions ========== */
+
+/**
+ * @brief Update DMA RX buffer position (called from interrupt and polling)
+ *
+ * This function checks the current DMA write position and updates rx_head/rx_count.
+ * It's called both from DMA interrupts (for immediate processing at 64/128 bytes)
+ * and from receive polling (for low-latency processing of smaller packets).
+ */
+static void update_dma_rx_position(tsumikoro_stm32_device_t *device)
+{
+    if (!device || !device->use_dma) {
+        return;
+    }
+
+    // Get current DMA write position
+    uint32_t dma_write_pos = TSUMIKORO_STM32_RX_BUFFER_SIZE -
+                             __HAL_DMA_GET_COUNTER(&device->dma_rx_handle);
+
+    // Calculate how many bytes were received since last check
+    size_t old_head = device->rx_head;
+    device->rx_head = dma_write_pos;
+
+    if (device->rx_head != old_head) {
+        size_t bytes_received;
+        if (device->rx_head > old_head) {
+            bytes_received = device->rx_head - old_head;
+        } else {
+            // Wrapped around
+            bytes_received = (TSUMIKORO_STM32_RX_BUFFER_SIZE - old_head) + device->rx_head;
+        }
+        device->rx_count += bytes_received;
+        // Prevent overflow
+        if (device->rx_count > TSUMIKORO_STM32_RX_BUFFER_SIZE) {
+            device->rx_count = TSUMIKORO_STM32_RX_BUFFER_SIZE;
+        }
+
+#ifdef TSUMIKORO_HAL_MOCK_DEBUG
+        if (bytes_received > 0) {
+            printf("[DMA UPDATE] +%u bytes, total=%u\n",
+                   (unsigned int)bytes_received, (unsigned int)device->rx_count);
+        }
+#endif
+    }
+
+    device->last_activity_tick = HAL_GetTick();
+}
+
 /* ========== Interrupt Handlers ========== */
 
 void tsumikoro_hal_stm32_uart_irq_handler(tsumikoro_hal_handle_t handle)
@@ -435,7 +501,21 @@ void tsumikoro_hal_stm32_uart_irq_handler(tsumikoro_hal_handle_t handle)
 
     tsumikoro_stm32_device_t *device = (tsumikoro_stm32_device_t *)handle;
 
-    // Let HAL process UART interrupts first (this handles TC and updates gState)
+    // Handle Receiver Timeout interrupt BEFORE HAL processing
+    // This fires when UART line has been idle for configured timeout (end of packet)
+    if (device->use_dma && __HAL_UART_GET_FLAG(&device->uart_handle, UART_FLAG_RTOF)) {
+        // Clear receiver timeout flag
+        __HAL_UART_CLEAR_IT(&device->uart_handle, UART_CLEAR_RTOF);
+
+        // Update DMA RX position immediately (packet just finished arriving)
+        update_dma_rx_position(device);
+
+#ifdef TSUMIKORO_HAL_MOCK_DEBUG
+        printf("[RTO] Receiver timeout - packet complete\n");
+#endif
+    }
+
+    // Let HAL process other UART interrupts (this handles TC and updates gState)
     HAL_UART_IRQHandler(&device->uart_handle);
 
     // After HAL processing, check if TX is complete (gState back to READY)
@@ -500,32 +580,9 @@ void tsumikoro_hal_stm32_dma_rx_irq_handler(tsumikoro_hal_handle_t handle)
 
     tsumikoro_stm32_device_t *device = (tsumikoro_stm32_device_t *)handle;
 
-    // Process DMA RX interrupt
+    // Process DMA RX interrupt (Half-Transfer and Transfer-Complete)
     HAL_DMA_IRQHandler(&device->dma_rx_handle);
 
-    // Update rx_head based on DMA position for circular mode
-    // DMA writes to buffer circularly, we need to track where it's at
-    uint32_t dma_write_pos = TSUMIKORO_STM32_RX_BUFFER_SIZE -
-                             __HAL_DMA_GET_COUNTER(&device->dma_rx_handle);
-
-    // Calculate how many bytes were received
-    size_t old_head = device->rx_head;
-    device->rx_head = dma_write_pos;
-
-    if (device->rx_head != old_head) {
-        size_t bytes_received;
-        if (device->rx_head > old_head) {
-            bytes_received = device->rx_head - old_head;
-        } else {
-            // Wrapped around
-            bytes_received = (TSUMIKORO_STM32_RX_BUFFER_SIZE - old_head) + device->rx_head;
-        }
-        device->rx_count += bytes_received;
-        // Prevent overflow (shouldn't happen if bus is processing fast enough)
-        if (device->rx_count > TSUMIKORO_STM32_RX_BUFFER_SIZE) {
-            device->rx_count = TSUMIKORO_STM32_RX_BUFFER_SIZE;
-        }
-    }
-
-    device->last_activity_tick = HAL_GetTick();
+    // Update DMA RX position (backup method - fires at 64 and 128 bytes)
+    update_dma_rx_position(device);
 }
