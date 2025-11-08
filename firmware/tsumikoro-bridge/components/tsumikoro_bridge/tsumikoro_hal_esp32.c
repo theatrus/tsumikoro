@@ -174,6 +174,8 @@ tsumikoro_hal_status_t tsumikoro_hal_transmit(tsumikoro_hal_handle_t handle,
 
     tsumikoro_esp32_device_t *device = (tsumikoro_esp32_device_t *)handle;
 
+    ESP_LOGI(TAG, "=== HAL TRANSMIT CALLED: len=%zu, tx_active=%d ===", len, device->tx_active);
+
     if (device->tx_active) {
         ESP_LOGW(TAG, "TX: Already in progress");
         return TSUMIKORO_HAL_BUSY;  // TX already in progress

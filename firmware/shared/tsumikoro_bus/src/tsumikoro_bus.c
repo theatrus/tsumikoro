@@ -953,6 +953,10 @@ tsumikoro_cmd_status_t tsumikoro_bus_send_command_blocking(tsumikoro_bus_handle_
 
     tsumikoro_bus_t *bus = (tsumikoro_bus_t *)handle;
 
+#ifdef ESP_PLATFORM
+    ESP_LOGI(BUS_TAG, "send_command_blocking: device=0x%02X, cmd=0x%04X, timeout=%ums",
+              packet->device_id, packet->command, timeout_ms);
+#endif
     BUS_DEBUG("send_command_blocking: device=0x%02X, cmd=0x%04X, timeout=%ums\n",
               packet->device_id, packet->command, timeout_ms);
 
