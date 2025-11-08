@@ -317,6 +317,14 @@ tsumikoro_hal_status_t tsumikoro_hal_receive(tsumikoro_hal_handle_t handle,
 
     tsumikoro_stm32_device_t *device = (tsumikoro_stm32_device_t *)handle;
 
+#if TSUMIKORO_IGNORE_RX_DURING_TX
+    // Don't process RX data during transmission (prevents echo processing)
+    if (device->tx_active) {
+        *received_len = 0;
+        return TSUMIKORO_HAL_NOT_READY;
+    }
+#endif
+
     // Poll DMA position if using DMA (primary method - low latency)
     // This ensures we process packets immediately without waiting for 64/128 byte interrupts
     if (device->use_dma) {
@@ -457,6 +465,13 @@ static void update_dma_rx_position(tsumikoro_stm32_device_t *device)
     if (!device || !device->use_dma) {
         return;
     }
+
+#if TSUMIKORO_IGNORE_RX_DURING_TX
+    // Ignore RX data during transmission (prevents processing echo in RS-485)
+    if (device->tx_active) {
+        return;
+    }
+#endif
 
     // Get current DMA write position
     uint32_t dma_write_pos = TSUMIKORO_STM32_RX_BUFFER_SIZE -

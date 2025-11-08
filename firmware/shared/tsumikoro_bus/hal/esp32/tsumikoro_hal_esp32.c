@@ -177,11 +177,21 @@ tsumikoro_hal_status_t tsumikoro_hal_transmit(tsumikoro_hal_handle_t handle,
     device->tx_active = true;
     device->last_activity_tick = xTaskGetTickCount();
 
+#if TSUMIKORO_IGNORE_RX_DURING_TX
+    // Flush RX buffer before transmitting to avoid processing echo
+    uart_flush_input(device->esp32_config->uart_port);
+#endif
+
     // Transmit data using UART
     int written = uart_write_bytes(device->esp32_config->uart_port, data, len);
 
     // Wait for transmission to complete
     uart_wait_tx_done(device->esp32_config->uart_port, pdMS_TO_TICKS(100));
+
+#if TSUMIKORO_IGNORE_RX_DURING_TX
+    // Flush RX buffer after transmitting to discard echo data
+    uart_flush_input(device->esp32_config->uart_port);
+#endif
 
     device->tx_active = false;
 

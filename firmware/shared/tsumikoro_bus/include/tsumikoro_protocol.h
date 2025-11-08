@@ -42,6 +42,27 @@ extern "C" {
 #define TSUMIKORO_PROTOCOL_VERSION_MINOR 7  /* v0.7: Added byte stuffing for frame sync */
 
 /**
+ * @brief Feature flags
+ *
+ * TSUMIKORO_IGNORE_RX_DURING_TX:
+ * When enabled (default), the HAL will ignore all received data while
+ * transmitting. This prevents processing of echo data in RS-485 half-duplex
+ * systems and avoids collision detection overhead.
+ *
+ * Benefits:
+ * - No echo processing overhead
+ * - Simpler state machine (no collision detection needed)
+ * - Better for controlled bus environments where controller manages all traffic
+ *
+ * When to disable:
+ * - If you need collision detection
+ * - If you want to process simultaneous RX during TX
+ */
+#ifndef TSUMIKORO_IGNORE_RX_DURING_TX
+#define TSUMIKORO_IGNORE_RX_DURING_TX 1   /**< Default: enabled (ignore RX during TX) */
+#endif
+
+/**
  * @brief Packet framing markers
  */
 #define TSUMIKORO_PACKET_START  0xAA
