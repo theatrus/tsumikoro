@@ -7,28 +7,42 @@ Open-source motor controller projects based on STM32G0 microcontrollers with ESP
 | Project | Description | MCU | Flash/RAM | Framework | Status |
 |---------|-------------|-----|-----------|-----------|--------|
 | **tsumikoro-servo** | 6-channel servo + H-bridge motor controller | STM32G030F6P6TR | 32KB/8KB | STM32 LL | ✅ Functional (PR #9) |
-| **tsumikoro-ministepper** | Mini stepper motor controller | STM32G071G8U6 | 64KB/36KB | STM32 HAL | 🚧 In Development |
+| **tsumikoro-ministepper** | Mini stepper motor controller | STM32G071G8U6 | 64KB/36KB | STM32 HAL + FreeRTOS | 🚧 In Development |
 | **tsumikoro-bridge** | WiFi/Network bridge (RS-485 bus) | ESP32/ESP32-S3 | 4MB+ | ESPHome | ✅ Functional (Merged) |
+| **nucleo-g071rb** | Development firmware (bare-metal) | STM32G071RBT6 | 128KB/36KB | STM32 HAL | ✅ Development Tool (PR #11) |
+| **nucleo-g071rb-freertos** | Development firmware (FreeRTOS) | STM32G071RBT6 | 128KB/36KB | STM32 HAL + FreeRTOS | ✅ Development Tool (PR #11) |
 
 ### Recent Updates
 
-- **2025-11**: Multi-drop RS-485 bus protocol implemented with ESP32 HAL
+- **2025-11**: NUCLEO-G071RB development firmware with FreeRTOS integration (PR #11)
+  - Bare-metal and FreeRTOS examples for bus protocol development
+  - Stack monitoring and optimization (18KB heap, optimized task stacks)
+  - Debug UART with statistics output and stack high-water marks
+  - CI/CD integration for all firmware targets
+- **2025-11**: Protocol improvements and bug fixes
+  - Fixed escape sequence handling in packet END marker detection
+  - Added comprehensive unit tests for bus handler (34 tests)
+  - Integration tests for controller/peripheral communication
+- **2025-11**: Multi-drop RS-485 bus protocol implemented with STM32 HAL
 - **2025-11**: Servo controller: 6 PWM channels + H-bridge motor driver (89% Flash usage)
 - **2025-11**: ESP32 bridge with Home Assistant integration
-- **2025-11**: Unified build system with top-level Makefile
+- **2025-11**: Unified build system with top-level Makefile and flash targets
 
 ## Repository Structure
 
 ```
 tsumikoro/
 ├── firmware/                 # All firmware projects (C/C++, Apache 2.0)
-│   ├── tsumikoro-ministepper/  # STM32G071 mini stepper controller
-│   ├── tsumikoro-servo/        # STM32G030 servo controller
+│   ├── tsumikoro-ministepper/  # STM32G071 mini stepper controller (FreeRTOS)
+│   ├── tsumikoro-servo/        # STM32G030 servo controller (bare-metal)
 │   ├── tsumikoro-bridge/       # ESP32/ESP32-S3 network bridge (ESPHome)
 │   │   ├── esphome/           # ESPHome configuration
 │   │   └── components/        # Custom ESPHome components
-│   ├── common/                # Shared HAL and utilities (STM32)
-│   └── shared/                # Shared protocol definitions (C/C++)
+│   ├── nucleo-g071rb/         # NUCLEO-G071RB development firmware (bare-metal)
+│   ├── nucleo-g071rb-freertos/# NUCLEO-G071RB development firmware (FreeRTOS)
+│   ├── common/                # Shared HAL and utilities (STM32, FreeRTOS)
+│   └── shared/                # Shared protocol definitions and tests
+│       └── tsumikoro_bus/    # Bus protocol library with unit tests
 ├── hardware/                 # PCB designs (coming soon, CERN-OHL-P v2)
 ├── mechanical/               # 3D models (coming soon, CERN-OHL-P v2)
 └── LICENSE                  # Dual licensing information
@@ -62,6 +76,10 @@ make build
 make build-servo       # STM32G030 servo controller
 make build-ministepper # STM32G071 stepper controller
 make build-bridge      # ESP32 network bridge
+make build-nucleo      # NUCLEO-G071RB development boards
+
+# Run protocol tests
+make test
 
 # Clean all builds
 make clean
@@ -74,14 +92,34 @@ make help
 
 **Servo Controller (STM32G030):**
 ```bash
-make build-servo
-# Output: firmware/build/servo-g030/tsumikoro-servo.elf
+cd firmware
+make servo-g030
+make flash-servo-g030  # Flash using st-flash
+# Output: build/servo-g030/tsumikoro-servo.bin
 ```
 
 **Ministepper (STM32G071):**
 ```bash
-make build-ministepper
-# Output: firmware/build/ministepper-g071/tsumikoro-ministepper.elf
+cd firmware
+make ministepper-g071
+make flash-ministepper-g071
+# Output: build/ministepper-g071/tsumikoro-ministepper.bin
+```
+
+**NUCLEO-G071RB Development Boards:**
+```bash
+cd firmware
+
+# Bare-metal version
+make nucleo-g071rb
+make flash-nucleo-g071rb
+
+# FreeRTOS version (with stack monitoring)
+make nucleo-g071rb-freertos
+make flash-nucleo-g071rb-freertos
+
+# Reset target after flashing
+make reset
 ```
 
 **ESP32 Bridge:**
@@ -141,6 +179,34 @@ Multi-drop RS-485 serial bus protocol for reliable motor controller communicatio
 - Custom ESPHome components for Tsumikoro protocol
 - OTA firmware updates
 
+### FreeRTOS Integration
+
+**Real-Time Operating System Support:**
+- Preemptive multitasking with configurable priorities
+- Dedicated RTOS threads for RX, TX, and bus handler
+- Inter-task communication via queues and semaphores
+- Stack overflow detection and monitoring
+- Optimized heap and stack allocations (18KB heap, task-specific stacks)
+
+**Development Tools:**
+- Stack high-water mark monitoring via debug UART
+- Runtime statistics (heap usage, IRQ counts, task states)
+- Comprehensive unit tests for protocol and bus handler
+- CI/CD integration for automated builds and testing
+
+### Continuous Integration
+
+**Automated Builds:**
+- All firmware targets built automatically on push/PR
+- Protocol unit tests run on every commit
+- Artifacts retained for 30 days
+- Multi-platform support (STM32 + ESP32)
+
+**Build Matrix:**
+- STM32 builds: servo-g030, ministepper-g071, nucleo-g071rb, nucleo-g071rb-freertos
+- ESP32 builds: tsumikoro-bridge (ESPHome)
+- Protocol tests: 151 assertions across CRC8, protocol, integration, and bus handler tests
+
 ## Hardware
 
 ### Motor Controllers (STM32)
@@ -149,11 +215,23 @@ Multi-drop RS-485 serial bus protocol for reliable motor controller communicatio
 - 64KB Flash, 36KB RAM
 - ARM Cortex-M0+ @ 64MHz
 - UFQFPN28 package
+- FreeRTOS support with optimized task stacks
 
 **STM32G030F6P6TR** (Servo)
 - 32KB Flash, 8KB RAM
 - ARM Cortex-M0+ @ 64MHz
 - TSSOP20 package
+- Bare-metal for maximum efficiency
+
+### Development Boards
+
+**STM32 NUCLEO-G071RB**
+- 128KB Flash, 36KB RAM
+- ARM Cortex-M0+ @ 64MHz
+- Arduino-compatible headers
+- On-board ST-LINK debugger
+- Available in both bare-metal and FreeRTOS firmware variants
+- Ideal for bus protocol development and testing
 
 ### Network Bridge (ESP32)
 
