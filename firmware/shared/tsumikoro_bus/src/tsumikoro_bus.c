@@ -270,9 +270,8 @@ static tsumikoro_status_t bus_transmit_pending(tsumikoro_bus_t *bus)
 #endif
 
     // Transmit via HAL
-    tsumikoro_hal_enable_tx(bus->hal);
+    // Note: HAL manages DE pin internally (sets high before TX, clears low after TC)
     tsumikoro_hal_status_t hal_status = tsumikoro_hal_transmit(bus->hal, tx_buffer, tx_len);
-    tsumikoro_hal_disable_tx(bus->hal);
 
     if (hal_status != TSUMIKORO_HAL_OK) {
         BUS_DEBUG("Transmit failed: hal_status=%d\n", hal_status);
