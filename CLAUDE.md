@@ -181,6 +181,41 @@ arm-none-eabi-gdb nucleo-g071rb-freertos/nucleo-g071rb-freertos.elf
 (gdb) x/32x $sp   # Examine stack
 ```
 
+## Continuous Integration
+
+The project uses GitHub Actions for CI/CD. All builds and tests run automatically on push to main and pull requests.
+
+### CI Jobs
+- **test-protocol**: Run bus protocol unit tests
+- **build-stm32-ministepper**: Build ministepper (STM32G071G8U6)
+- **build-stm32-servo**: Build servo (STM32G030F6P6)
+- **build-nucleo-g071rb**: Build NUCLEO bare-metal (STM32G071RBT6)
+- **build-nucleo-g071rb-freertos**: Build NUCLEO FreeRTOS (STM32G071RBT6)
+- **build-esp32-bridge**: Build ESP32 bridge (ESP32-S3)
+
+### CI Artifacts
+Build artifacts are retained for 30 days and include:
+- `.elf` files (with debug symbols)
+- `.bin` files (flashable binaries)
+- `.hex` files (Intel HEX format)
+
+### Keeping CI in Sync
+**IMPORTANT**: When adding or removing firmware targets, update both:
+1. `.github/workflows/build.yml` - Add CI build job
+2. `firmware/Makefile` - Add build and flash targets
+
+Both files have comments at the top reminding you to keep them synchronized.
+
+### Running CI Locally
+```bash
+cd firmware
+make test                          # Run protocol tests
+make ministepper-g071              # Build ministepper
+make servo-g030                    # Build servo
+make nucleo-g071rb                 # Build NUCLEO bare-metal
+make nucleo-g071rb-freertos        # Build NUCLEO FreeRTOS
+```
+
 ## Troubleshooting
 
 ### Firmware doesn't start after flash

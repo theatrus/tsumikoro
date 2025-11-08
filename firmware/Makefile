@@ -1,5 +1,10 @@
 # Makefile for Tsumikoro Firmware Projects
 # Provides convenient targets for building STM32 and ESP32 projects
+#
+# IMPORTANT: Keep targets in sync with .github/workflows/build.yml!
+# When adding/removing firmware targets, update both:
+# - firmware/Makefile (this file)
+# - .github/workflows/build.yml (CI builds)
 
 .PHONY: help clean test reset
 .PHONY: ministepper-g071 servo-g030 servo-g071 nucleo-g071rb nucleo-g071rb-freertos

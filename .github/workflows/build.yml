@@ -1,5 +1,19 @@
 name: Build All Firmware
 
+# IMPORTANT: Keep CI targets in sync with firmware/Makefile!
+# When adding/removing firmware targets, update both:
+# - .github/workflows/build.yml (this file)
+# - firmware/Makefile (build and flash targets)
+#
+# Current STM32 targets:
+# - tsumikoro-ministepper (STM32G071G8U6)
+# - tsumikoro-servo (STM32G030F6P6)
+# - nucleo-g071rb (STM32G071RBT6, bare-metal)
+# - nucleo-g071rb-freertos (STM32G071RBT6, FreeRTOS)
+#
+# Current ESP32 targets:
+# - tsumikoro-bridge (ESP32-S3)
+
 on:
   push:
     branches: [ main ]
@@ -120,6 +134,96 @@ jobs:
             firmware/build/servo-g030/tsumikoro-servo/tsumikoro-servo.elf
             firmware/build/servo-g030/tsumikoro-servo/tsumikoro-servo.bin
             firmware/build/servo-g030/tsumikoro-servo/tsumikoro-servo.hex
+          retention-days: 30
+
+  build-nucleo-g071rb:
+    name: Build NUCLEO-G071RB (bare-metal)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Setup ARM GCC toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.3.Rel1'
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+
+      - name: Configure CMake
+        working-directory: firmware
+        run: |
+          mkdir -p build/nucleo-g071rb
+          cd build/nucleo-g071rb
+          cmake ../.. -G Ninja -DPROJECT=nucleo-g071rb -DMCU=STM32G071 -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build firmware
+        working-directory: firmware/build/nucleo-g071rb
+        run: ninja
+
+      - name: Display build info
+        working-directory: firmware/build/nucleo-g071rb
+        run: |
+          ls -lh nucleo-g071rb/nucleo-g071rb.*
+          arm-none-eabi-size nucleo-g071rb/nucleo-g071rb.elf
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: nucleo-g071rb-firmware
+          path: |
+            firmware/build/nucleo-g071rb/nucleo-g071rb/nucleo-g071rb.elf
+            firmware/build/nucleo-g071rb/nucleo-g071rb/nucleo-g071rb.bin
+            firmware/build/nucleo-g071rb/nucleo-g071rb/nucleo-g071rb.hex
+          retention-days: 30
+
+  build-nucleo-g071rb-freertos:
+    name: Build NUCLEO-G071RB (FreeRTOS)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Setup ARM GCC toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.3.Rel1'
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+
+      - name: Configure CMake
+        working-directory: firmware
+        run: |
+          mkdir -p build/nucleo-g071rb-freertos
+          cd build/nucleo-g071rb-freertos
+          cmake ../.. -G Ninja -DPROJECT=nucleo-g071rb-freertos -DMCU=STM32G071 -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build firmware
+        working-directory: firmware/build/nucleo-g071rb-freertos
+        run: ninja
+
+      - name: Display build info
+        working-directory: firmware/build/nucleo-g071rb-freertos
+        run: |
+          ls -lh nucleo-g071rb-freertos/nucleo-g071rb-freertos.*
+          arm-none-eabi-size nucleo-g071rb-freertos/nucleo-g071rb-freertos.elf
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: nucleo-g071rb-freertos-firmware
+          path: |
+            firmware/build/nucleo-g071rb-freertos/nucleo-g071rb-freertos/nucleo-g071rb-freertos.elf
+            firmware/build/nucleo-g071rb-freertos/nucleo-g071rb-freertos/nucleo-g071rb-freertos.bin
+            firmware/build/nucleo-g071rb-freertos/nucleo-g071rb-freertos/nucleo-g071rb-freertos.hex
           retention-days: 30
 
   build-esp32-bridge:
