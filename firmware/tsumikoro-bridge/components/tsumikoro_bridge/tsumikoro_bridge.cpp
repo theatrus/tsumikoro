@@ -398,11 +398,11 @@ bool TsumikoroBridge::nucleo_get_led(uint8_t device_id, uint8_t *led_state, uint
 
   tsumikoro_packet_t response;
 
-  ESP_LOGI(TAG, ">>> Calling tsumikoro_bus_send_command_blocking for GET_LED, device=0x%02X", device_id);
+  ESP_LOGE(TAG, "!!! GET_LED: Calling send_command_blocking, device=0x%02X !!!", device_id);
   tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
     this->bus_handle_, &cmd, &response, 100
   );
-  ESP_LOGI(TAG, "<<< tsumikoro_bus_send_command_blocking returned status=%d", status);
+  ESP_LOGE(TAG, "!!! GET_LED: Returned status=%d, data_len=%u !!!", status, response.data_len);
 
   if (status == TSUMIKORO_CMD_STATUS_SUCCESS && response.data_len >= 2) {
     *led_state = response.data[0];
@@ -433,11 +433,11 @@ bool TsumikoroBridge::nucleo_get_button(uint8_t device_id, uint8_t *button_state
 
   tsumikoro_packet_t response;
 
-  ESP_LOGI(TAG, ">>> Calling tsumikoro_bus_send_command_blocking for GET_BUTTON, device=0x%02X", device_id);
+  ESP_LOGE(TAG, "!!! GET_BUTTON: Calling send_command_blocking, device=0x%02X !!!", device_id);
   tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
     this->bus_handle_, &cmd, &response, 100
   );
-  ESP_LOGI(TAG, "<<< tsumikoro_bus_send_command_blocking returned status=%d", status);
+  ESP_LOGE(TAG, "!!! GET_BUTTON: Returned status=%d, data_len=%u !!!", status, response.data_len);
 
   if (status == TSUMIKORO_CMD_STATUS_SUCCESS && response.data_len >= 1) {
     *button_state = response.data[0];

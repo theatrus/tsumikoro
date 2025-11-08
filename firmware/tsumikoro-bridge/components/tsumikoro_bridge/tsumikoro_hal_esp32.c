@@ -152,6 +152,12 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
              device->device_id,
              device->is_controller ? "Controller" : "Peripheral");
 
+    // Check UART status at init
+    size_t available = 0;
+    uart_get_buffered_data_len(device->esp32_config->uart_port, &available);
+    ESP_LOGE(TAG, "!!! UART INIT: %zu bytes in RX buffer, rx_callback=%p !!!",
+             available, (void*)device->rx_callback);
+
     return (tsumikoro_hal_handle_t)device;
 }
 
