@@ -282,14 +282,10 @@ tsumikoro_hal_status_t tsumikoro_hal_transmit(tsumikoro_hal_handle_t handle,
 
     HAL_StatusTypeDef status;
     if (device->use_dma) {
+        // HAL_UART_Transmit_DMA enables TC interrupt automatically
         status = HAL_UART_Transmit_DMA(&device->uart_handle, (uint8_t *)data, len);
     } else {
         status = HAL_UART_Transmit_IT(&device->uart_handle, (uint8_t *)data, len);
-    }
-
-    if (status == HAL_OK) {
-        // Enable TC (Transmission Complete) interrupt for RS-485 DE timing
-        __HAL_UART_ENABLE_IT(&device->uart_handle, UART_IT_TC);
     }
 
     if (status != HAL_OK) {
@@ -535,12 +531,15 @@ void tsumikoro_hal_stm32_uart_irq_handler(tsumikoro_hal_handle_t handle)
 #endif
     }
 
-    // Check for Transmission Complete (TC) flag before HAL processing
-    // This ensures we wait for the last bit to be transmitted before clearing DE
-    if (device->tx_active && __HAL_UART_GET_FLAG(&device->uart_handle, UART_FLAG_TC)) {
-        // Clear TC flag
-        __HAL_UART_CLEAR_FLAG(&device->uart_handle, UART_FLAG_TC);
+    // Check if TC (Transmission Complete) flag is set before letting HAL process it
+    bool tc_was_set = device->tx_active && __HAL_UART_GET_FLAG(&device->uart_handle, UART_FLAG_TC);
 
+    // Let HAL process UART interrupts (this will clear TC and update gState)
+    HAL_UART_IRQHandler(&device->uart_handle);
+
+    // After HAL processing, if TC was set, clear DE
+    // This ensures the last bit has been transmitted before disabling the driver
+    if (tc_was_set) {
         device->tx_active = false;
         device->last_activity_tick = HAL_GetTick();
 
@@ -554,9 +553,6 @@ void tsumikoro_hal_stm32_uart_irq_handler(tsumikoro_hal_handle_t handle)
 #endif
         }
     }
-
-    // Let HAL process other UART interrupts
-    HAL_UART_IRQHandler(&device->uart_handle);
 
     // Handle RX for non-DMA mode
     if (!device->use_dma && __HAL_UART_GET_FLAG(&device->uart_handle, UART_FLAG_RXNE)) {
