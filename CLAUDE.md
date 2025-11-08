@@ -67,14 +67,26 @@ These are displayed in the Stats task output every 10 seconds.
 
 ## Flashing STM32 Firmware
 
+### Using Makefile Targets (Recommended)
 ```bash
-cd firmware/build
-st-flash write nucleo-g071rb/nucleo-g071rb.bin 0x08000000 --reset
-# or FreeRTOS version:
-st-flash write nucleo-g071rb-freertos/nucleo-g071rb-freertos.bin 0x08000000 --reset
+cd firmware
+make flash-nucleo-g071rb-freertos   # Flash FreeRTOS firmware
+make flash-nucleo-g071rb            # Flash bare-metal firmware
+make flash-servo-g030               # Flash servo (STM32G030)
+make flash-servo-g071               # Flash servo (STM32G071)
+make flash-ministepper-g071         # Flash ministepper
+make reset                          # Reset STM32 target
 ```
 
-Always use `--reset` to properly reset the device after flashing.
+### Using st-flash Directly
+```bash
+# Always use --reset flag before write command
+st-flash --reset write build/nucleo-g071rb-freertos/nucleo-g071rb-freertos/nucleo-g071rb-freertos.bin 0x08000000
+st-flash --reset write build/nucleo-g071rb/nucleo-g071rb/nucleo-g071rb.bin 0x08000000
+st-flash reset  # Reset only
+```
+
+The `--reset` flag ensures the device properly resets after flashing.
 
 ## Serial Console
 
@@ -135,15 +147,26 @@ Stack usage monitoring via `uxTaskGetStackHighWaterMark()` is displayed every 10
 
 ### Build and flash:
 ```bash
-cd firmware/build
-make && st-flash write nucleo-g071rb-freertos/nucleo-g071rb-freertos.bin 0x08000000 --reset
+cd firmware
+make nucleo-g071rb-freertos flash-nucleo-g071rb-freertos
+```
+
+### Build all and flash specific target:
+```bash
+cd firmware
+make nucleo-g071rb-freertos   # Build
+make flash-nucleo-g071rb-freertos  # Flash
 ```
 
 ### Enable debug and rebuild:
 1. Edit `firmware/nucleo-g071rb-freertos/CMakeLists.txt`
 2. Add: `target_compile_definitions(tsumikoro_bus PRIVATE TSUMIKORO_HAL_DEBUG=1 TSUMIKORO_BUS_DEBUG=1)`
-3. Rebuild: `make clean && make`
-4. Flash: `st-flash write nucleo-g071rb-freertos/nucleo-g071rb-freertos.bin 0x08000000 --reset`
+3. Rebuild and flash:
+```bash
+cd firmware
+make clean-nucleo-g071rb-freertos
+make nucleo-g071rb-freertos flash-nucleo-g071rb-freertos
+```
 
 ### Debug hard fault:
 ```bash

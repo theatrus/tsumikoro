@@ -1,20 +1,29 @@
 # Makefile for Tsumikoro Firmware Projects
 # Provides convenient targets for building STM32 and ESP32 projects
 
-.PHONY: help clean test
+.PHONY: help clean test reset
 .PHONY: ministepper-g071 servo-g030 servo-g071 nucleo-g071rb nucleo-g071rb-freertos
+.PHONY: flash-ministepper-g071 flash-servo-g030 flash-servo-g071 flash-nucleo-g071rb flash-nucleo-g071rb-freertos
 .PHONY: esp-bridge esp-bridge-upload esp-bridge-logs
 
 # Default target
 help:
 	@echo "Tsumikoro Firmware Build System"
 	@echo ""
-	@echo "STM32 Projects (using CMake + arm-none-eabi-gcc):"
+	@echo "STM32 Build Targets (using CMake + arm-none-eabi-gcc):"
 	@echo "  ministepper-g071        Build tsumikoro-ministepper for STM32G071"
 	@echo "  servo-g030              Build tsumikoro-servo for STM32G030"
 	@echo "  servo-g071              Build tsumikoro-servo for STM32G071"
 	@echo "  nucleo-g071rb           Build NUCLEO-G071RB firmware (bare-metal)"
 	@echo "  nucleo-g071rb-freertos  Build NUCLEO-G071RB firmware (FreeRTOS)"
+	@echo ""
+	@echo "STM32 Flash Targets (using st-flash):"
+	@echo "  flash-ministepper-g071         Flash tsumikoro-ministepper"
+	@echo "  flash-servo-g030               Flash tsumikoro-servo (STM32G030)"
+	@echo "  flash-servo-g071               Flash tsumikoro-servo (STM32G071)"
+	@echo "  flash-nucleo-g071rb            Flash NUCLEO-G071RB (bare-metal)"
+	@echo "  flash-nucleo-g071rb-freertos   Flash NUCLEO-G071RB (FreeRTOS)"
+	@echo "  reset                          Reset STM32 target"
 	@echo ""
 	@echo "ESP32 Projects (using ESPHome):"
 	@echo "  esp-bridge          Build tsumikoro-bridge (ESP32-S3)"
@@ -29,10 +38,11 @@ help:
 	@echo "  clean-<project>     Clean specific project"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make nucleo-g071rb        # Build NUCLEO firmware"
-	@echo "  make servo-g030           # Build servo for G030"
-	@echo "  make esp-bridge           # Build ESP32 bridge"
-	@echo "  make test                 # Run tests"
+	@echo "  make nucleo-g071rb-freertos            # Build FreeRTOS firmware"
+	@echo "  make flash-nucleo-g071rb-freertos      # Flash FreeRTOS firmware"
+	@echo "  make servo-g030 flash-servo-g030       # Build and flash servo"
+	@echo "  make reset                              # Reset STM32"
+	@echo "  make test                               # Run tests"
 
 # STM32 Projects
 ministepper-g071:
@@ -74,6 +84,32 @@ nucleo-g071rb-freertos:
 		cmake ../.. -DPROJECT=nucleo-g071rb-freertos -DMCU=STM32G071 -DCMAKE_BUILD_TYPE=Release && \
 		make -j$$(nproc)
 	@echo "Build complete: build/nucleo-g071rb-freertos/nucleo-g071rb-freertos.elf"
+
+# STM32 Flash Targets
+flash-ministepper-g071:
+	@echo "Flashing tsumikoro-ministepper for STM32G071..."
+	st-flash --reset write build/ministepper-g071/tsumikoro-ministepper/tsumikoro-ministepper.bin 0x08000000
+
+flash-servo-g030:
+	@echo "Flashing tsumikoro-servo for STM32G030..."
+	st-flash --reset write build/servo-g030/tsumikoro-servo/tsumikoro-servo.bin 0x08000000
+
+flash-servo-g071:
+	@echo "Flashing tsumikoro-servo for STM32G071..."
+	st-flash --reset write build/servo-g071/tsumikoro-servo/tsumikoro-servo.bin 0x08000000
+
+flash-nucleo-g071rb:
+	@echo "Flashing nucleo-g071rb firmware (bare-metal)..."
+	st-flash --reset write build/nucleo-g071rb/nucleo-g071rb/nucleo-g071rb.bin 0x08000000
+
+flash-nucleo-g071rb-freertos:
+	@echo "Flashing nucleo-g071rb-freertos firmware (FreeRTOS)..."
+	st-flash --reset write build/nucleo-g071rb-freertos/nucleo-g071rb-freertos/nucleo-g071rb-freertos.bin 0x08000000
+
+# Reset STM32 target
+reset:
+	@echo "Resetting STM32 target..."
+	st-flash reset
 
 # ESP32 Projects
 esp-bridge:
