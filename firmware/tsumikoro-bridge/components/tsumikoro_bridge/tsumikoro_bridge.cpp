@@ -392,9 +392,12 @@ bool TsumikoroBridge::nucleo_get_led(uint8_t device_id, uint8_t *led_state, uint
   };
 
   tsumikoro_packet_t response;
+
+  ESP_LOGI(TAG, ">>> Calling tsumikoro_bus_send_command_blocking for GET_LED, device=0x%02X", device_id);
   tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
     this->bus_handle_, &cmd, &response, 100
   );
+  ESP_LOGI(TAG, "<<< tsumikoro_bus_send_command_blocking returned status=%d", status);
 
   if (status == TSUMIKORO_CMD_STATUS_SUCCESS && response.data_len >= 2) {
     *led_state = response.data[0];
@@ -405,7 +408,8 @@ bool TsumikoroBridge::nucleo_get_led(uint8_t device_id, uint8_t *led_state, uint
              *auto_blink ? "enabled" : "disabled");
     return true;
   } else {
-    ESP_LOGW(TAG, "NUCLEO_GET_LED device 0x%02X: failed", device_id);
+    ESP_LOGW(TAG, "NUCLEO_GET_LED device 0x%02X: failed (status=%d, data_len=%u)",
+             device_id, status, response.data_len);
     return false;
   }
 }
@@ -423,9 +427,12 @@ bool TsumikoroBridge::nucleo_get_button(uint8_t device_id, uint8_t *button_state
   };
 
   tsumikoro_packet_t response;
+
+  ESP_LOGI(TAG, ">>> Calling tsumikoro_bus_send_command_blocking for GET_BUTTON, device=0x%02X", device_id);
   tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
     this->bus_handle_, &cmd, &response, 100
   );
+  ESP_LOGI(TAG, "<<< tsumikoro_bus_send_command_blocking returned status=%d", status);
 
   if (status == TSUMIKORO_CMD_STATUS_SUCCESS && response.data_len >= 1) {
     *button_state = response.data[0];
@@ -434,7 +441,8 @@ bool TsumikoroBridge::nucleo_get_button(uint8_t device_id, uint8_t *button_state
              *button_state ? "PRESSED" : "RELEASED");
     return true;
   } else {
-    ESP_LOGW(TAG, "NUCLEO_GET_BUTTON device 0x%02X: failed", device_id);
+    ESP_LOGW(TAG, "NUCLEO_GET_BUTTON device 0x%02X: failed (status=%d, data_len=%u)",
+             device_id, status, response.data_len);
     return false;
   }
 }
