@@ -2,7 +2,7 @@
  * @file FreeRTOSConfig.h
  * @brief FreeRTOS configuration for Tsumikoro ministepper (STM32G071)
  *
- * STM32G071RBT6: Cortex-M0+, 64 MHz, 128KB Flash, 36KB RAM
+ * STM32G071G8U6: Cortex-M0+, 64 MHz, 64KB Flash, 36KB RAM, UFQFPN28 package
  *
  * Copyright (c) 2025 Yann Ramin
  * SPDX-License-Identifier: Apache-2.0
