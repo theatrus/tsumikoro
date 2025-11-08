@@ -145,8 +145,8 @@ static void UART_Init(void)
     __HAL_RCC_USART1_CLK_ENABLE();
     __HAL_RCC_DMA1_CLK_ENABLE();
 
-    /* Initialize UART peripheral */
-    if (!tsumikoro_hal_stm32_init_peripheral(&g_stm32_config, BUS_BAUD_RATE)) {
+    /* Initialize UART peripheral (clocks and GPIO only) */
+    if (!tsumikoro_hal_stm32_init_peripheral(&g_stm32_config)) {
         Error_Handler();
     }
 }

@@ -42,15 +42,15 @@ typedef struct {
 /**
  * @brief Initialize UART peripheral (must be called before HAL init)
  *
- * Configures GPIO, UART, and DMA peripherals. Should be called during
+ * Configures clocks and GPIO for DE/RE pins. Should be called during
  * application initialization before calling tsumikoro_hal_init().
  *
+ * Note: UART configuration (including baud rate) is done later in tsumikoro_hal_init().
+ *
  * @param config STM32-specific platform configuration
- * @param baud_rate Desired baud rate (e.g., 1000000 for 1Mbaud)
  * @return true on success, false on error
  */
-bool tsumikoro_hal_stm32_init_peripheral(const tsumikoro_hal_stm32_config_t *config,
-                                          uint32_t baud_rate);
+bool tsumikoro_hal_stm32_init_peripheral(const tsumikoro_hal_stm32_config_t *config);
 
 /**
  * @brief UART IRQ handler (call from UART interrupt)

@@ -54,8 +54,7 @@ static void update_dma_rx_position(tsumikoro_stm32_device_t *device);
 
 /* ========== STM32 Peripheral Initialization ========== */
 
-bool tsumikoro_hal_stm32_init_peripheral(const tsumikoro_hal_stm32_config_t *config,
-                                          uint32_t baud_rate)
+bool tsumikoro_hal_stm32_init_peripheral(const tsumikoro_hal_stm32_config_t *config)
 {
     if (config == NULL || config->uart_instance == NULL) {
         return false;
@@ -108,6 +107,12 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
                                            void *user_data)
 {
     if (config == NULL || config->platform_data == NULL) {
+        return NULL;
+    }
+
+    // Validate baud rate is within reasonable bounds
+    // Typical range: 9600 to 2000000 (2 Mbaud)
+    if (config->baud_rate < 9600 || config->baud_rate > 2000000) {
         return NULL;
     }
 

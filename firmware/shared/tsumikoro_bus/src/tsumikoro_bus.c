@@ -180,14 +180,16 @@ static void bus_set_state(tsumikoro_bus_t *bus, tsumikoro_bus_state_t new_state)
     bus->state_enter_time_ms = tsumikoro_hal_get_time_ms();
 }
 
+#if !TSUMIKORO_BUS_USE_RTOS
 /**
- * @brief Get elapsed time in current state
+ * @brief Get elapsed time in current state (bare-metal mode only)
  */
 static uint32_t bus_get_state_elapsed_ms(tsumikoro_bus_t *bus)
 {
     uint32_t now = tsumikoro_hal_get_time_ms();
     return now - bus->state_enter_time_ms;
 }
+#endif /* !TSUMIKORO_BUS_USE_RTOS */
 
 /**
  * @brief Complete pending command
@@ -325,8 +327,9 @@ static void bus_retry_command(tsumikoro_bus_t *bus)
     }
 }
 
+#if !TSUMIKORO_BUS_USE_RTOS
 /**
- * @brief Process received packet
+ * @brief Process received packet (bare-metal mode only)
  */
 static void bus_process_rx_packet(tsumikoro_bus_t *bus)
 {
@@ -474,11 +477,13 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
         bus->unsolicited_callback(&rx_packet, bus->unsolicited_user_data);
     }
 }
+#endif /* !TSUMIKORO_BUS_USE_RTOS */
 
 /* ========== State Machine ========== */
 
+#if !TSUMIKORO_BUS_USE_RTOS
 /**
- * @brief Process state machine
+ * @brief Process state machine (bare-metal mode only)
  */
 static void bus_process_state_machine(tsumikoro_bus_t *bus)
 {
@@ -540,6 +545,7 @@ static void bus_process_state_machine(tsumikoro_bus_t *bus)
             break;
     }
 }
+#endif /* !TSUMIKORO_BUS_USE_RTOS */
 
 #if TSUMIKORO_BUS_USE_RTOS
 /* ========== RTOS Implementation ========== */
