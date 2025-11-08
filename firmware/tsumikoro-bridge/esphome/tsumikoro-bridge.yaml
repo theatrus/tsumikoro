@@ -78,3 +78,94 @@ tsumikoro_bridge:
   # Device configuration
   device_id: 0x00  # Controller address
   turnaround_delay: 3  # 3 byte intervals
+
+# NUCLEO-G071RB Test Mode Controls
+# Device ID for NUCLEO board
+globals:
+  - id: nucleo_device_id
+    type: int
+    restore_value: no
+    initial_value: '0x10'
+
+# LED Control Switches
+switch:
+  - platform: template
+    name: "NUCLEO LED ON"
+    icon: "mdi:led-on"
+    lambda: |-
+      return false;  # Stateless switch
+    turn_on_action:
+      - lambda: |-
+          auto bridge = id(motor_bridge);
+          uint8_t device_id = id(nucleo_device_id);
+          ESP_LOGI("nucleo_test", "Setting NUCLEO LED ON (device 0x%02X)", device_id);
+          bridge->nucleo_set_led(device_id, 1);
+
+  - platform: template
+    name: "NUCLEO LED OFF"
+    icon: "mdi:led-off"
+    lambda: |-
+      return false;  # Stateless switch
+    turn_on_action:
+      - lambda: |-
+          auto bridge = id(motor_bridge);
+          uint8_t device_id = id(nucleo_device_id);
+          ESP_LOGI("nucleo_test", "Setting NUCLEO LED OFF (device 0x%02X)", device_id);
+          bridge->nucleo_set_led(device_id, 0);
+
+  - platform: template
+    name: "NUCLEO LED Auto-Blink"
+    icon: "mdi:led-variant-on"
+    lambda: |-
+      return false;  # Stateless switch
+    turn_on_action:
+      - lambda: |-
+          auto bridge = id(motor_bridge);
+          uint8_t device_id = id(nucleo_device_id);
+          ESP_LOGI("nucleo_test", "Setting NUCLEO LED Auto-Blink (device 0x%02X)", device_id);
+          bridge->nucleo_set_led(device_id, 2);
+
+# Button State Sensor
+binary_sensor:
+  - platform: template
+    name: "NUCLEO Button"
+    icon: "mdi:gesture-tap-button"
+    lambda: |-
+      auto bridge = id(motor_bridge);
+      uint8_t device_id = id(nucleo_device_id);
+      uint8_t button_state = 0;
+      if (bridge->nucleo_get_button(device_id, &button_state)) {
+        return button_state == 1;
+      }
+      return false;
+
+# LED State Sensors
+sensor:
+  - platform: template
+    name: "NUCLEO LED State"
+    icon: "mdi:led-outline"
+    lambda: |-
+      auto bridge = id(motor_bridge);
+      uint8_t device_id = id(nucleo_device_id);
+      uint8_t led_state = 0;
+      uint8_t auto_blink = 0;
+      if (bridge->nucleo_get_led(device_id, &led_state, &auto_blink)) {
+        return led_state;
+      }
+      return NAN;
+    update_interval: 2s
+
+text_sensor:
+  - platform: template
+    name: "NUCLEO Auto-Blink Mode"
+    icon: "mdi:sync"
+    lambda: |-
+      auto bridge = id(motor_bridge);
+      uint8_t device_id = id(nucleo_device_id);
+      uint8_t led_state = 0;
+      uint8_t auto_blink = 0;
+      if (bridge->nucleo_get_led(device_id, &led_state, &auto_blink)) {
+        return auto_blink ? std::string("Enabled") : std::string("Disabled");
+      }
+      return std::string("Unknown");
+    update_interval: 2s
