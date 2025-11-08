@@ -21,6 +21,10 @@ esp32:
 # Enable logging
 logger:
   level: DEBUG
+  logs:
+    tsumikoro_hal_esp32: DEBUG
+    tsumikoro_bus: DEBUG
+    tsumikoro_bridge: DEBUG
 
 # Enable Home Assistant API
 api:
