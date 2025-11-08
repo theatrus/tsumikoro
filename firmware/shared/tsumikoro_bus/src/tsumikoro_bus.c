@@ -814,12 +814,12 @@ static bool bus_rtos_init(tsumikoro_bus_t *bus)
     // Create threads
     tsumikoro_thread_config_t thread_config;
 
-    BUS_DEBUG("Creating RX thread (2048 bytes stack)...\n");
+    BUS_DEBUG("Creating RX thread (%d bytes stack)...\n", TSUMIKORO_BUS_RX_THREAD_STACK_SIZE);
     // RX thread (high priority)
     thread_config.name = "bus_rx";
     thread_config.function = bus_rx_thread;
     thread_config.argument = bus;
-    thread_config.stack_size = 2048;
+    thread_config.stack_size = TSUMIKORO_BUS_RX_THREAD_STACK_SIZE;
     thread_config.priority = TSUMIKORO_THREAD_PRIORITY_HIGH;
     bus->rx_thread = tsumikoro_thread_create(&thread_config);
     if (!bus->rx_thread) {
@@ -827,12 +827,12 @@ static bool bus_rtos_init(tsumikoro_bus_t *bus)
         goto error;
     }
 
-    BUS_DEBUG("Creating TX thread (2048 bytes stack)...\n");
+    BUS_DEBUG("Creating TX thread (%d bytes stack)...\n", TSUMIKORO_BUS_TX_THREAD_STACK_SIZE);
     // TX thread (high priority)
     thread_config.name = "bus_tx";
     thread_config.function = bus_tx_thread;
     thread_config.argument = bus;
-    thread_config.stack_size = 2048;
+    thread_config.stack_size = TSUMIKORO_BUS_TX_THREAD_STACK_SIZE;
     thread_config.priority = TSUMIKORO_THREAD_PRIORITY_HIGH;
     bus->tx_thread = tsumikoro_thread_create(&thread_config);
     if (!bus->tx_thread) {
@@ -840,12 +840,12 @@ static bool bus_rtos_init(tsumikoro_bus_t *bus)
         goto error;
     }
 
-    BUS_DEBUG("Creating handler thread (3072 bytes stack)...\n");
+    BUS_DEBUG("Creating handler thread (%d bytes stack)...\n", TSUMIKORO_BUS_HANDLER_THREAD_STACK_SIZE);
     // Handler thread (normal priority)
     thread_config.name = "bus_handler";
     thread_config.function = bus_handler_thread;
     thread_config.argument = bus;
-    thread_config.stack_size = 3072;
+    thread_config.stack_size = TSUMIKORO_BUS_HANDLER_THREAD_STACK_SIZE;
     thread_config.priority = TSUMIKORO_THREAD_PRIORITY_NORMAL;
     bus->handler_thread = tsumikoro_thread_create(&thread_config);
     if (!bus->handler_thread) {

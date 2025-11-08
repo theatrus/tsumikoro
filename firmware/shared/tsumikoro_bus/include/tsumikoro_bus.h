@@ -44,6 +44,13 @@ typedef struct {
 }
 
 /**
+ * @brief RTOS thread stack sizes (in bytes)
+ */
+#define TSUMIKORO_BUS_RX_THREAD_STACK_SIZE      1536
+#define TSUMIKORO_BUS_TX_THREAD_STACK_SIZE      1536
+#define TSUMIKORO_BUS_HANDLER_THREAD_STACK_SIZE 2048
+
+/**
  * @brief Bus state machine states
  */
 typedef enum {

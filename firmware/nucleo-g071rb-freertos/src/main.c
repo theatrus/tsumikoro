@@ -59,6 +59,11 @@
 #define PRIORITY_LED_TASK       (tskIDLE_PRIORITY + 1)  /* Low priority for LED */
 #define PRIORITY_BUTTON_TASK    (tskIDLE_PRIORITY + 1)  /* Low priority for button */
 
+/* Task stack sizes (in words) */
+#define LED_TASK_STACK_SIZE     128
+#define BUTTON_TASK_STACK_SIZE  128
+#define STATS_TASK_STACK_SIZE   256
+
 /* UART Handles */
 UART_HandleTypeDef huart2;  /* Debug UART (PA2/PA3 - ST-Link VCP) */
 
@@ -513,12 +518,21 @@ static void vStatsTask(void *pvParameters)
         printf("UART IRQ: %lu, DMA RX: %lu, DMA TX: %lu, Callbacks: %lu\r\n",
                g_uart1_irq_count, g_dma_rx_irq_count, g_dma_tx_irq_count, g_bus_callback_count);
         printf("\r\nStack High Water Marks (words free / total):\r\n");
-        printf("  LED task:      %3lu / 128  (%lu%% used)\r\n", led_hwm, (128 - led_hwm) * 100 / 128);
-        printf("  Button task:   %3lu / 128  (%lu%% used)\r\n", button_hwm, (128 - button_hwm) * 100 / 128);
-        printf("  Stats task:    %3lu / 384  (%lu%% used)\r\n", stats_hwm, (384 - stats_hwm) * 100 / 384);
-        printf("  bus_rx:        %3lu / 512  (%lu%% used)\r\n", rx_hwm, (512 - rx_hwm) * 100 / 512);
-        printf("  bus_tx:        %3lu / 512  (%lu%% used)\r\n", tx_hwm, (512 - tx_hwm) * 100 / 512);
-        printf("  bus_handler:   %3lu / 768  (%lu%% used)\r\n", handler_hwm, (768 - handler_hwm) * 100 / 768);
+        printf("  LED task:      %3lu / %u  (%lu%% used)\r\n", led_hwm, LED_TASK_STACK_SIZE,
+               (LED_TASK_STACK_SIZE - led_hwm) * 100 / LED_TASK_STACK_SIZE);
+        printf("  Button task:   %3lu / %u  (%lu%% used)\r\n", button_hwm, BUTTON_TASK_STACK_SIZE,
+               (BUTTON_TASK_STACK_SIZE - button_hwm) * 100 / BUTTON_TASK_STACK_SIZE);
+        printf("  Stats task:    %3lu / %u  (%lu%% used)\r\n", stats_hwm, STATS_TASK_STACK_SIZE,
+               (STATS_TASK_STACK_SIZE - stats_hwm) * 100 / STATS_TASK_STACK_SIZE);
+        printf("  bus_rx:        %3lu / %u  (%lu%% used)\r\n", rx_hwm,
+               TSUMIKORO_BUS_RX_THREAD_STACK_SIZE / sizeof(StackType_t),
+               (TSUMIKORO_BUS_RX_THREAD_STACK_SIZE / sizeof(StackType_t) - rx_hwm) * 100 / (TSUMIKORO_BUS_RX_THREAD_STACK_SIZE / sizeof(StackType_t)));
+        printf("  bus_tx:        %3lu / %u  (%lu%% used)\r\n", tx_hwm,
+               TSUMIKORO_BUS_TX_THREAD_STACK_SIZE / sizeof(StackType_t),
+               (TSUMIKORO_BUS_TX_THREAD_STACK_SIZE / sizeof(StackType_t) - tx_hwm) * 100 / (TSUMIKORO_BUS_TX_THREAD_STACK_SIZE / sizeof(StackType_t)));
+        printf("  bus_handler:   %3lu / %u  (%lu%% used)\r\n", handler_hwm,
+               TSUMIKORO_BUS_HANDLER_THREAD_STACK_SIZE / sizeof(StackType_t),
+               (TSUMIKORO_BUS_HANDLER_THREAD_STACK_SIZE / sizeof(StackType_t) - handler_hwm) * 100 / (TSUMIKORO_BUS_HANDLER_THREAD_STACK_SIZE / sizeof(StackType_t)));
         printf("\r\n");
     }
 }
@@ -567,21 +581,21 @@ int main(void)
     BaseType_t result;
 
     printf("[MAIN] Creating LED task...\r\n");
-    result = xTaskCreate(vLEDTask, "LED", 128, NULL, PRIORITY_LED_TASK, NULL);
+    result = xTaskCreate(vLEDTask, "LED", LED_TASK_STACK_SIZE, NULL, PRIORITY_LED_TASK, NULL);
     if (result != pdPASS) {
         printf("[MAIN] ERROR: Failed to create LED task! Heap: %u\r\n", xPortGetFreeHeapSize());
         Error_Handler();
     }
 
     printf("[MAIN] Creating Button task...\r\n");
-    result = xTaskCreate(vButtonTask, "Button", 128, NULL, PRIORITY_BUTTON_TASK, NULL);
+    result = xTaskCreate(vButtonTask, "Button", BUTTON_TASK_STACK_SIZE, NULL, PRIORITY_BUTTON_TASK, NULL);
     if (result != pdPASS) {
         printf("[MAIN] ERROR: Failed to create Button task! Heap: %u\r\n", xPortGetFreeHeapSize());
         Error_Handler();
     }
 
     printf("[MAIN] Creating Stats task...\r\n");
-    result = xTaskCreate(vStatsTask, "Stats", 384, NULL, tskIDLE_PRIORITY + 1, NULL);
+    result = xTaskCreate(vStatsTask, "Stats", STATS_TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
     if (result != pdPASS) {
         printf("[MAIN] ERROR: Failed to create Stats task! Heap: %u\r\n", xPortGetFreeHeapSize());
         Error_Handler();
