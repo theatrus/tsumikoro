@@ -17,10 +17,18 @@
 
 /* Debug logging (define TSUMIKORO_BUS_DEBUG to enable) */
 #ifdef TSUMIKORO_BUS_DEBUG
-#include <stdio.h>
-#define BUS_DEBUG(...) printf("[BUS] " __VA_ARGS__)
+    #ifdef ESP_PLATFORM
+        // ESP32: Use ESP-IDF logging
+        #include "esp_log.h"
+        static const char *BUS_TAG = "tsumikoro_bus";
+        #define BUS_DEBUG(fmt, ...) ESP_LOGI(BUS_TAG, fmt, ##__VA_ARGS__)
+    #else
+        // STM32/other: Use printf
+        #include <stdio.h>
+        #define BUS_DEBUG(...) printf("[BUS] " __VA_ARGS__)
+    #endif
 #else
-#define BUS_DEBUG(...) ((void)0)
+    #define BUS_DEBUG(...) ((void)0)
 #endif
 
 /**
