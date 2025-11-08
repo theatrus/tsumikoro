@@ -31,6 +31,12 @@ set(TSUMIKORO_BUS_USE_RTOS OFF CACHE BOOL "Disable FreeRTOS in bus protocol" FOR
 # Add tsumikoro_bus library in bare-metal mode
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/tsumikoro_bus ${CMAKE_CURRENT_BINARY_DIR}/tsumikoro_bus)
 
+# Enable bus protocol debug output
+target_compile_definitions(tsumikoro_bus PRIVATE
+    TSUMIKORO_BUS_DEBUG
+    TSUMIKORO_HAL_MOCK_DEBUG
+)
+
 # tsumikoro_bus needs HAL config for its STM32 HAL implementation
 target_include_directories(tsumikoro_bus PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/inc

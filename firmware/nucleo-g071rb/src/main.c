@@ -12,7 +12,7 @@
  * - LED (LD4): PA5
  * - User Button (B1): PC13
  * - USART2 (ST-Link VCP): PA2 (TX), PA3 (RX)
- * - USART1 (Bus): PA9 (TX), PA10 (RX)
+ * - USART1 (Bus): PC4 (TX/D1), PC5 (RX/D0), PA1 (DE - RS-485 Driver Enable)
  */
 
 #include "stm32g0xx_hal.h"
@@ -32,6 +32,8 @@
 #define LED_PORT        GPIOA
 #define BUTTON_PIN      GPIO_PIN_13
 #define BUTTON_PORT     GPIOC
+#define BUS_DE_PIN      GPIO_PIN_1
+#define BUS_DE_PORT     GPIOA
 
 /* UART configuration */
 #define BUS_UART                USART1
@@ -49,6 +51,14 @@
 /* UART Handles */
 UART_HandleTypeDef huart2;  /* Debug UART (PA2/PA3 - ST-Link VCP) */
 
+/* Redirect printf to debug UART for bus protocol debug */
+int _write(int file, char *ptr, int len)
+{
+    (void)file;
+    HAL_UART_Transmit(&huart2, (uint8_t *)ptr, len, 1000);
+    return len;
+}
+
 /* Bus handles */
 static tsumikoro_bus_handle_t g_bus_handle = NULL;
 tsumikoro_hal_handle_t g_hal_handle = NULL;  /* Non-static for interrupt handlers */
@@ -60,9 +70,9 @@ static const tsumikoro_hal_stm32_config_t g_stm32_config = {
     .dma_rx = BUS_DMA_RX,
     .dma_tx_request = DMA_REQUEST_USART1_TX,
     .dma_rx_request = DMA_REQUEST_USART1_RX,
-    .de_port = NULL,  /* No RS-485 transceiver on NUCLEO */
-    .de_pin = 0,
-    .re_port = NULL,
+    .de_port = BUS_DE_PORT,  /* PA1 - RS-485 Driver Enable */
+    .de_pin = BUS_DE_PIN,
+    .re_port = NULL,  /* Shared with DE on most transceivers */
     .re_pin = 0,
     .uart_irq = BUS_UART_IRQn,
     .dma_tx_irq = BUS_DMA_TX_IRQn,
@@ -76,6 +86,16 @@ static uint32_t led_toggle_time = 0;
 
 /* Button state */
 static bool last_button_state = false;
+
+/* Debug counters from interrupt handlers */
+extern volatile uint32_t g_uart1_irq_count;
+extern volatile uint32_t g_dma_rx_irq_count;
+extern volatile uint32_t g_dma_tx_irq_count;
+
+/* Debug counters for bus processing */
+static uint32_t g_bus_process_count = 0;
+static uint32_t g_bus_callback_count = 0;
+static uint32_t g_last_dma_rx = 0;
 
 /* Forward declarations */
 void Error_Handler(void);
@@ -156,18 +176,26 @@ static void GPIO_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(BUTTON_PORT, &GPIO_InitStruct);
 
-    /* Configure UART1 pins (PA9 = TX, PA10 = RX for bus) */
-    GPIO_InitStruct.Pin = GPIO_PIN_9 | GPIO_PIN_10;
+    /* Configure RS-485 Driver Enable pin (PA1) */
+    HAL_GPIO_WritePin(BUS_DE_PORT, BUS_DE_PIN, GPIO_PIN_RESET);
+    GPIO_InitStruct.Pin = BUS_DE_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(BUS_DE_PORT, &GPIO_InitStruct);
+
+    /* Configure UART1 pins (PC4 = TX/D1, PC5 = RX/D0 for bus) */
+    GPIO_InitStruct.Pin = GPIO_PIN_4 | GPIO_PIN_5;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF1_USART1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 }
 
 /**
  * @brief USART1 Initialization (Bus UART)
- * PA9: TX, PA10: RX
+ * PC4: TX (D1), PC5: RX (D0)
  * Initialized by tsumikoro_hal_stm32
  */
 static void USART1_Init(void)
@@ -261,13 +289,26 @@ static void Bus_Init(void)
 static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data)
 {
     (void)user_data;
+    char debug_buf[80];
+
+    g_bus_callback_count++;
+
+    HAL_UART_Transmit(&huart2, (uint8_t *)"[CALLBACK ENTERED]\r\n", 19, 100);
 
     if (packet == NULL) {
+        HAL_UART_Transmit(&huart2, (uint8_t *)"[CALLBACK] NULL packet\r\n", 24, 100);
         return;
     }
 
+    /* Log received command */
+    int len = snprintf(debug_buf, sizeof(debug_buf),
+                     "[BUS] RX: dev=0x%02X cmd=0x%04X len=%d\r\n",
+                     packet->device_id, packet->command, packet->data_len);
+    HAL_UART_Transmit(&huart2, (uint8_t *)debug_buf, len, 100);
+
     /* Only process commands addressed to us */
     if (packet->device_id != DEVICE_ID) {
+        HAL_UART_Transmit(&huart2, (uint8_t *)"[CALLBACK] Wrong device ID\r\n", 29, 100);
         return;
     }
 
@@ -282,6 +323,7 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
     switch (packet->command) {
         case TSUMIKORO_CMD_PING:
             /* Simple ping response */
+            HAL_UART_Transmit(&huart2, (uint8_t *)"[BUS] PING\r\n", 12, 100);
             break;
 
         case TSUMIKORO_CMD_GET_VERSION:
@@ -308,15 +350,20 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
                     /* Enable auto-blink mode */
                     led_auto_blink = true;
                     response.data[0] = 0x00;  /* Success */
+                    HAL_UART_Transmit(&huart2, (uint8_t *)"[BUS] LED Auto-Blink ON\r\n", 25, 100);
                 } else {
                     /* Manual control - disable auto-blink */
                     led_auto_blink = false;
                     led_state = (packet->data[0] != 0);
                     HAL_GPIO_WritePin(LED_PORT, LED_PIN, led_state ? GPIO_PIN_SET : GPIO_PIN_RESET);
                     response.data[0] = 0x00;  /* Success */
+                    len = snprintf(debug_buf, sizeof(debug_buf),
+                                 "[BUS] LED Set: %s\r\n", led_state ? "ON" : "OFF");
+                    HAL_UART_Transmit(&huart2, (uint8_t *)debug_buf, len, 100);
                 }
             } else {
                 response.data[0] = 0xFF;  /* Error - invalid length */
+                HAL_UART_Transmit(&huart2, (uint8_t *)"[BUS] LED Set Error\r\n", 21, 100);
             }
             response.data_len = 1;
             break;
@@ -326,20 +373,34 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
             response.data[0] = led_state ? 0x01 : 0x00;
             response.data[1] = led_auto_blink ? 0x01 : 0x00;  /* Auto-blink status */
             response.data_len = 2;
+            len = snprintf(debug_buf, sizeof(debug_buf),
+                         "[BUS] LED Get: state=%d auto=%d\r\n",
+                         response.data[0], response.data[1]);
+            HAL_UART_Transmit(&huart2, (uint8_t *)debug_buf, len, 100);
             break;
 
         case CMD_BUTTON_GET:
             /* Get button state */
             response.data[0] = (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN) == GPIO_PIN_SET) ? 0x01 : 0x00;
             response.data_len = 1;
+            len = snprintf(debug_buf, sizeof(debug_buf),
+                         "[BUS] Button Get: %d\r\n", response.data[0]);
+            HAL_UART_Transmit(&huart2, (uint8_t *)debug_buf, len, 100);
             break;
 
         default:
             /* Unknown command - no response */
+            len = snprintf(debug_buf, sizeof(debug_buf),
+                         "[BUS] Unknown cmd: 0x%04X\r\n", packet->command);
+            HAL_UART_Transmit(&huart2, (uint8_t *)debug_buf, len, 100);
             return;
     }
 
     /* Send response */
+    len = snprintf(debug_buf, sizeof(debug_buf),
+                 "[BUS] TX: cmd=0x%04X len=%d\r\n",
+                 response.command, response.data_len);
+    HAL_UART_Transmit(&huart2, (uint8_t *)debug_buf, len, 100);
     tsumikoro_bus_send_no_response(g_bus_handle, &response);
 }
 
@@ -367,6 +428,7 @@ int main(void)
                      "STM32G071RBT6 @ 64 MHz\r\n"
                      "128KB Flash, 36KB RAM\r\n"
                      "Bus ID: 0x10, Baud: 1 Mbaud\r\n"
+                     "USART1: PC4(TX/D1), PC5(RX/D0), PA1(DE)\r\n"
                      "========================================\r\n\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
 
@@ -377,8 +439,17 @@ int main(void)
     while (1) {
         uint32_t now = HAL_GetTick();
 
+        /* Check for new DMA RX interrupts */
+        if (g_dma_rx_irq_count != g_last_dma_rx) {
+            char buf[50];
+            int len = snprintf(buf, sizeof(buf), "[NEW DMA RX] Count: %lu\r\n", g_dma_rx_irq_count);
+            HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, 100);
+            g_last_dma_rx = g_dma_rx_irq_count;
+        }
+
         /* Process bus protocol (should be called regularly, ~1ms) */
         if (now - last_process_time >= 1) {
+            g_bus_process_count++;
             tsumikoro_bus_process(g_bus_handle);
             last_process_time = now;
         }
@@ -393,12 +464,15 @@ int main(void)
 
             /* Print status every 10 LED toggles (10 seconds) */
             if (loop_count % 10 == 0) {
-                char buffer[100];
+                char buffer[200];
                 int len = snprintf(buffer, sizeof(buffer),
-                                 "Uptime: %lu s, LED: %s, Button: %s\r\n",
+                                 "Uptime: %lu s, LED: %s\r\n"
+                                 "  UART IRQ: %lu, DMA RX: %lu, DMA TX: %lu\r\n"
+                                 "  Bus Process: %lu, Callbacks: %lu\r\n",
                                  now / 1000,
                                  led_state ? "ON " : "OFF",
-                                 HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN) == GPIO_PIN_SET ? "PRESSED" : "RELEASED");
+                                 g_uart1_irq_count, g_dma_rx_irq_count, g_dma_tx_irq_count,
+                                 g_bus_process_count, g_bus_callback_count);
                 HAL_UART_Transmit(&huart2, (uint8_t *)buffer, len, 100);
             }
         }

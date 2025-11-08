@@ -364,12 +364,28 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
 
     // Decode packet (using local non-volatile buffer)
     tsumikoro_packet_t rx_packet;
+    size_t bytes_consumed = 0;
     tsumikoro_status_t status = tsumikoro_packet_decode(local_rx_buffer,
                                                          local_rx_len,
-                                                         &rx_packet);
+                                                         &rx_packet,
+                                                         &bytes_consumed);
 
-    // Clear volatile RX buffer
-    bus->rx_buffer_len = 0;
+    // Remove consumed bytes from buffer
+    if (status == TSUMIKORO_STATUS_OK && bytes_consumed > 0) {
+        // Successfully decoded - remove consumed bytes, keep remaining data
+        size_t remaining = (bytes_consumed < local_rx_len) ? (local_rx_len - bytes_consumed) : 0;
+
+        if (remaining > 0) {
+            // Move remaining bytes to start of buffer
+            for (size_t i = 0; i < remaining; i++) {
+                bus->rx_buffer[i] = bus->rx_buffer[bytes_consumed + i];
+            }
+        }
+        bus->rx_buffer_len = remaining;
+    } else {
+        // Decode failed - clear buffer to avoid reprocessing
+        bus->rx_buffer_len = 0;
+    }
 
     if (status == TSUMIKORO_STATUS_CRC_ERROR) {
         BUS_DEBUG("CRC error\n");
@@ -553,9 +569,11 @@ static void bus_rx_thread(void *arg)
 
         // Decode packet
         tsumikoro_packet_t rx_packet;
+        size_t bytes_consumed = 0;
         tsumikoro_status_t status = tsumikoro_packet_decode(rx_msg.data,
                                                              rx_msg.len,
-                                                             &rx_packet);
+                                                             &rx_packet,
+                                                             &bytes_consumed);
 
         if (status != TSUMIKORO_STATUS_OK) {
             BUS_DEBUG("RX thread: decode failed, status=%d\n", status);

@@ -12,6 +12,11 @@ extern UART_HandleTypeDef huart2;
 /* External bus HAL handle */
 extern tsumikoro_hal_handle_t g_hal_handle;
 
+/* Debug counters for interrupt activity */
+volatile uint32_t g_uart1_irq_count = 0;
+volatile uint32_t g_dma_rx_irq_count = 0;
+volatile uint32_t g_dma_tx_irq_count = 0;
+
 /**
  * @brief This function handles Non maskable interrupt.
  */
@@ -57,6 +62,7 @@ void SysTick_Handler(void)
  */
 void USART1_IRQHandler(void)
 {
+    g_uart1_irq_count++;
     tsumikoro_hal_stm32_uart_irq_handler(g_hal_handle);
 }
 
@@ -73,6 +79,7 @@ void USART2_IRQHandler(void)
  */
 void DMA1_Channel1_IRQHandler(void)
 {
+    g_dma_tx_irq_count++;
     tsumikoro_hal_stm32_dma_tx_irq_handler(g_hal_handle);
 }
 
@@ -82,5 +89,6 @@ void DMA1_Channel1_IRQHandler(void)
  */
 void DMA1_Channel2_3_IRQHandler(void)
 {
+    g_dma_rx_irq_count++;
     tsumikoro_hal_stm32_dma_rx_irq_handler(g_hal_handle);
 }
