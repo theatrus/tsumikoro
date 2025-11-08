@@ -21,6 +21,7 @@
     #include "esp_log.h"
     static const char *BUS_TAG = "tsumikoro_bus";
     #define BUS_DEBUG(fmt, ...) ESP_LOGI(BUS_TAG, fmt, ##__VA_ARGS__)
+    #warning "Compiling tsumikoro_bus.c with ESP_PLATFORM defined - debug enabled"
 #else
     // STM32/other: Use printf (controlled by TSUMIKORO_BUS_DEBUG)
     #ifdef TSUMIKORO_BUS_DEBUG
@@ -951,6 +952,9 @@ tsumikoro_cmd_status_t tsumikoro_bus_send_command_blocking(tsumikoro_bus_handle_
     }
 
     tsumikoro_bus_t *bus = (tsumikoro_bus_t *)handle;
+
+    BUS_DEBUG("send_command_blocking: device=0x%02X, cmd=0x%04X, timeout=%ums\n",
+              packet->device_id, packet->command, timeout_ms);
 
     // Use bus default timeout if not specified
     if (timeout_ms == 0) {
