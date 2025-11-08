@@ -161,18 +161,13 @@ tsumikoro_status_t tsumikoro_packet_decode(const uint8_t *buffer,
     }
 
     // Search for END marker (0x55) to verify we have a complete packet
-    // Note: We need to check for escaped 0x55 (AA 02) vs actual end marker
+    // Note: Since 0x55 in data is escaped to 0xAA 0x02, any 0x55 we encounter
+    // in the stream MUST be the END marker (not an escaped character)
     bool found_end = false;
     size_t end_idx = start_idx + 2;  // Skip past start marker
     while (end_idx < buffer_len) {
         if (buffer[end_idx] == TSUMIKORO_PACKET_END) {
-            // Check if this is an escaped 0x55 (preceded by 0xAA)
-            if (end_idx > start_idx + 2 && buffer[end_idx - 1] == TSUMIKORO_ESCAPE_BYTE) {
-                // This is an escape sequence, not the end marker
-                end_idx++;
-                continue;
-            }
-            // Found genuine END marker
+            // Found END marker
             found_end = true;
             break;
         }
