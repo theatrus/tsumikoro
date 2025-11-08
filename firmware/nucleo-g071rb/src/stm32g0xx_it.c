@@ -4,9 +4,13 @@
  */
 
 #include "stm32g0xx_hal.h"
+#include "tsumikoro_hal_stm32.h"
 
 /* External UART handles */
 extern UART_HandleTypeDef huart2;
+
+/* External bus HAL handle */
+extern tsumikoro_hal_handle_t g_hal_handle;
 
 /**
  * @brief This function handles Non maskable interrupt.
@@ -49,9 +53,34 @@ void SysTick_Handler(void)
 }
 
 /**
- * @brief This function handles USART2 global interrupt.
+ * @brief This function handles USART1 global interrupt (Bus UART).
+ */
+void USART1_IRQHandler(void)
+{
+    tsumikoro_hal_stm32_uart_irq_handler(g_hal_handle);
+}
+
+/**
+ * @brief This function handles USART2 global interrupt (Debug UART).
  */
 void USART2_IRQHandler(void)
 {
     HAL_UART_IRQHandler(&huart2);
+}
+
+/**
+ * @brief This function handles DMA1 Channel 1 interrupt (Bus UART TX).
+ */
+void DMA1_Channel1_IRQHandler(void)
+{
+    tsumikoro_hal_stm32_dma_tx_irq_handler(g_hal_handle);
+}
+
+/**
+ * @brief This function handles DMA1 Channel 2 and Channel 3 interrupt.
+ * Channel 2 is used for Bus UART RX.
+ */
+void DMA1_Channel2_3_IRQHandler(void)
+{
+    tsumikoro_hal_stm32_dma_rx_irq_handler(g_hal_handle);
 }
