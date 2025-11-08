@@ -1,5 +1,5 @@
 # Tsumikoro Bridge ESPHome Component
-# Build timestamp: 2025-11-08 10:46
+# Build timestamp: 2025-11-08 11:45 - FORCE REBUILD
 
 # Get the shared bus protocol source directory
 set(TSUMIKORO_BUS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../shared/tsumikoro_bus")

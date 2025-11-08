@@ -36,12 +36,17 @@ void TsumikoroBridge::setup() {
     .platform_data = (void *)&this->esp32_config_
   };
 
+  ESP_LOGE(TAG, "=== ABOUT TO CALL tsumikoro_hal_init ===");
   this->hal_handle_ = tsumikoro_hal_init(&hal_config, nullptr, nullptr);
+  ESP_LOGE(TAG, "=== RETURNED FROM tsumikoro_hal_init, handle=%p ===", this->hal_handle_);
+
   if (!this->hal_handle_) {
     ESP_LOGE(TAG, "Failed to initialize HAL");
     this->mark_failed();
     return;
   }
+
+  ESP_LOGE(TAG, "=== HAL INITIALIZED SUCCESSFULLY ===");
 
   // Initialize bus handler (RTOS mode)
   tsumikoro_bus_config_t bus_config = TSUMIKORO_BUS_DEFAULT_CONFIG();

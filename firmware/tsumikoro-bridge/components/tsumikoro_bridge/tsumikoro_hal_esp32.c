@@ -15,6 +15,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#warning "COMPILING tsumikoro_hal_esp32.c - BUILD TIMESTAMP 2025-11-08 11:45"
+
 static const char *TAG = "tsumikoro_hal_esp32";
 
 /**
@@ -110,10 +112,14 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
                                            tsumikoro_hal_rx_callback_t rx_callback,
                                            void *user_data)
 {
+    ESP_LOGE(TAG, "!!! HAL INIT CALLED - TIMESTAMP 2025-11-08 11:45 !!!");
+
     if (!config || !config->platform_data) {
         ESP_LOGE(TAG, "Invalid configuration");
         return NULL;
     }
+
+    ESP_LOGE(TAG, "!!! HAL INIT: config valid, device_id=0x%02X !!!", config->device_id);
 
     const tsumikoro_hal_esp32_config_t *esp32_config =
         (const tsumikoro_hal_esp32_config_t *)config->platform_data;
