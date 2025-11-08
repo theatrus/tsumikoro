@@ -15,9 +15,16 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#warning "COMPILING tsumikoro_hal_esp32.c - BUILD TIMESTAMP 2025-11-08 11:45"
-
 static const char *TAG = "tsumikoro_hal_esp32";
+
+/* Debug logging */
+#ifdef TSUMIKORO_HAL_DEBUG
+    #define HAL_DEBUG(fmt, ...) ESP_LOGD(TAG, fmt, ##__VA_ARGS__)
+    #define HAL_DEBUG_BUFFER(data, len) ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, len, ESP_LOG_DEBUG)
+#else
+    #define HAL_DEBUG(...) ((void)0)
+    #define HAL_DEBUG_BUFFER(data, len) ((void)0)
+#endif
 
 /**
  * @brief Maximum receive buffer size
@@ -112,14 +119,10 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
                                            tsumikoro_hal_rx_callback_t rx_callback,
                                            void *user_data)
 {
-    ESP_LOGE(TAG, "!!! HAL INIT CALLED - TIMESTAMP 2025-11-08 11:45 !!!");
-
     if (!config || !config->platform_data) {
         ESP_LOGE(TAG, "Invalid configuration");
         return NULL;
     }
-
-    ESP_LOGE(TAG, "!!! HAL INIT: config valid, device_id=0x%02X !!!", config->device_id);
 
     const tsumikoro_hal_esp32_config_t *esp32_config =
         (const tsumikoro_hal_esp32_config_t *)config->platform_data;
@@ -148,15 +151,10 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
     device->tx_active = false;
     device->last_activity_tick = 0;
 
-    ESP_LOGI(TAG, "HAL initialized: Device ID=0x%02X, %s",
-             device->device_id,
-             device->is_controller ? "Controller" : "Peripheral");
-
-    // Check UART status at init
-    size_t available = 0;
-    uart_get_buffered_data_len(device->esp32_config->uart_port, &available);
-    ESP_LOGE(TAG, "!!! UART INIT: %zu bytes in RX buffer, rx_callback=%p !!!",
-             available, (void*)device->rx_callback);
+    HAL_DEBUG("HAL initialized: Device ID=0x%02X, %s, RX callback=%p",
+              device->device_id,
+              device->is_controller ? "Controller" : "Peripheral",
+              (void*)device->rx_callback);
 
     return (tsumikoro_hal_handle_t)device;
 }
@@ -186,16 +184,13 @@ tsumikoro_hal_status_t tsumikoro_hal_transmit(tsumikoro_hal_handle_t handle,
 
     tsumikoro_esp32_device_t *device = (tsumikoro_esp32_device_t *)handle;
 
-    ESP_LOGI(TAG, "=== HAL TRANSMIT CALLED: len=%zu, tx_active=%d ===", len, device->tx_active);
-
     if (device->tx_active) {
         ESP_LOGW(TAG, "TX: Already in progress");
-        return TSUMIKORO_HAL_BUSY;  // TX already in progress
+        return TSUMIKORO_HAL_BUSY;
     }
 
-    // Log the packet being transmitted
-    ESP_LOGI(TAG, "TX: Sending %zu bytes", len);
-    ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, len, ESP_LOG_INFO);
+    HAL_DEBUG("TX: Sending %zu bytes", len);
+    HAL_DEBUG_BUFFER(data, len);
 
     device->tx_active = true;
     device->last_activity_tick = xTaskGetTickCount();
@@ -252,32 +247,23 @@ tsumikoro_hal_status_t tsumikoro_hal_receive(tsumikoro_hal_handle_t handle,
     tsumikoro_esp32_device_t *device = (tsumikoro_esp32_device_t *)handle;
     *received_len = 0;
 
-    // Check available data before reading
-    size_t available = 0;
-    uart_get_buffered_data_len(device->esp32_config->uart_port, &available);
-    if (available > 0) {
-        ESP_LOGD(TAG, "RX: %zu bytes available in UART buffer", available);
-    }
-
     // Check if RX callback is registered (RTOS mode)
     if (device->rx_callback) {
-        ESP_LOGD(TAG, "RX: RTOS mode, reading up to %zu bytes (timeout=%ums)", max_len, timeout_ms);
-
         // In RTOS mode with callback, read directly from UART and invoke callback
         int len = uart_read_bytes(device->esp32_config->uart_port,
                                    buffer, max_len,
                                    pdMS_TO_TICKS(timeout_ms));
 
         if (len > 0) {
-            ESP_LOGI(TAG, "RX: Received %d bytes", len);
-            ESP_LOG_BUFFER_HEX_LEVEL(TAG, buffer, len, ESP_LOG_INFO);
+            HAL_DEBUG("RX: Received %d bytes", len);
+            HAL_DEBUG_BUFFER(buffer, len);
 
             device->last_activity_tick = xTaskGetTickCount();
             *received_len = len;
             device->rx_callback(buffer, len, device->user_data);
             return TSUMIKORO_HAL_OK;
         } else if (len == 0) {
-            ESP_LOGD(TAG, "RX: Timeout (no data received)");
+            HAL_DEBUG("RX: Timeout (no data received)");
         } else {
             ESP_LOGE(TAG, "RX: Error reading UART (%d)", len);
         }

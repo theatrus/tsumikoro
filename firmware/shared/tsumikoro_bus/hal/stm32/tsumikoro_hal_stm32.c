@@ -529,6 +529,29 @@ void tsumikoro_hal_stm32_uart_irq_handler(tsumikoro_hal_handle_t handle)
 #ifdef TSUMIKORO_HAL_MOCK_DEBUG
         printf("[RTO] Receiver timeout - packet complete\n");
 #endif
+
+        // In RTOS mode, invoke RX callback with available data
+        if (device->rx_callback && device->rx_count > 0) {
+            // Copy data from circular buffer for callback
+            uint8_t callback_buffer[TSUMIKORO_STM32_RX_BUFFER_SIZE];
+            size_t callback_len = 0;
+
+            // Copy all available data
+            size_t to_copy = device->rx_count;
+            for (size_t i = 0; i < to_copy; i++) {
+                callback_buffer[i] = device->rx_buffer[device->rx_tail];
+                device->rx_tail = (device->rx_tail + 1) % TSUMIKORO_STM32_RX_BUFFER_SIZE;
+                callback_len++;
+            }
+            device->rx_count -= callback_len;
+
+#ifdef TSUMIKORO_HAL_MOCK_DEBUG
+            printf("[HAL] Invoking RX callback with %u bytes\n", (unsigned int)callback_len);
+#endif
+
+            // Invoke callback (RTOS mode: posts to queue from ISR)
+            device->rx_callback(callback_buffer, callback_len, device->user_data);
+        }
     }
 
     // Check if TC (Transmission Complete) flag is set before letting HAL process it

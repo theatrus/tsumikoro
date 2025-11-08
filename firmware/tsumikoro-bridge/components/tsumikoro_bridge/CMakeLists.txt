@@ -1,5 +1,5 @@
 # Tsumikoro Bridge ESPHome Component
-# Build timestamp: 2025-11-08 11:45 - FORCE REBUILD
+# Build timestamp: 2025-11-08 12:02 - Enable HAL debug flag
 
 # Get the shared bus protocol source directory
 set(TSUMIKORO_BUS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../shared/tsumikoro_bus")
@@ -23,6 +23,7 @@ idf_component_register(
 
 # Enable debug logging and RTOS mode for bus protocol
 target_compile_definitions(${COMPONENT_LIB} PRIVATE
+    TSUMIKORO_HAL_DEBUG=1
     TSUMIKORO_BUS_DEBUG=1
     TSUMIKORO_BUS_USE_RTOS=1
 )

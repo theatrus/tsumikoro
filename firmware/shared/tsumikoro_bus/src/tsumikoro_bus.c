@@ -17,11 +17,14 @@
 
 /* Debug logging */
 #ifdef ESP_PLATFORM
-    // ESP32: Use ESP-IDF logging (always enabled for debugging)
+    // ESP32: Use ESP-IDF logging
     #include "esp_log.h"
     static const char *BUS_TAG = "tsumikoro_bus";
-    #define BUS_DEBUG(fmt, ...) ESP_LOGI(BUS_TAG, fmt, ##__VA_ARGS__)
-    #warning "Compiling tsumikoro_bus.c with ESP_PLATFORM defined - debug enabled"
+    #ifdef TSUMIKORO_BUS_DEBUG
+        #define BUS_DEBUG(fmt, ...) ESP_LOGD(BUS_TAG, fmt, ##__VA_ARGS__)
+    #else
+        #define BUS_DEBUG(...) ((void)0)
+    #endif
 #else
     // STM32/other: Use printf (controlled by TSUMIKORO_BUS_DEBUG)
     #ifdef TSUMIKORO_BUS_DEBUG
@@ -551,8 +554,16 @@ static void bus_hal_rx_callback(const uint8_t *data, size_t len, void *user_data
     tsumikoro_bus_t *bus = (tsumikoro_bus_t *)user_data;
 
     if (!bus || !data || len == 0 || len > TSUMIKORO_MAX_PACKET_LEN) {
+#ifdef TSUMIKORO_BUS_DEBUG
+        printf("[BUS RX CB] Invalid params: bus=%p, data=%p, len=%u\n",
+               bus, data, (unsigned int)len);
+#endif
         return;
     }
+
+#ifdef TSUMIKORO_BUS_DEBUG
+    printf("[BUS RX CB] Received %u bytes, posting to RX queue\n", (unsigned int)len);
+#endif
 
     // Create RX message
     tsumikoro_rx_msg_t rx_msg;
@@ -560,7 +571,11 @@ static void bus_hal_rx_callback(const uint8_t *data, size_t len, void *user_data
     rx_msg.len = len;
 
     // Post to RX queue (non-blocking from ISR)
-    tsumikoro_queue_send_from_isr(bus->rx_queue, &rx_msg);
+    bool posted = tsumikoro_queue_send_from_isr(bus->rx_queue, &rx_msg);
+
+#ifdef TSUMIKORO_BUS_DEBUG
+    printf("[BUS RX CB] Queue send result: %s\n", posted ? "success" : "FAILED");
+#endif
 }
 
 /**
@@ -766,23 +781,40 @@ static void bus_handler_thread(void *arg)
  */
 static bool bus_rtos_init(tsumikoro_bus_t *bus)
 {
+    BUS_DEBUG("Creating RX queue...\n");
     // Create queues
     bus->rx_queue = tsumikoro_queue_create(8, sizeof(tsumikoro_rx_msg_t));
-    if (!bus->rx_queue) goto error;
+    if (!bus->rx_queue) {
+        BUS_DEBUG("ERROR: Failed to create RX queue!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating TX queue...\n");
     bus->tx_queue = tsumikoro_queue_create(4, sizeof(tsumikoro_tx_msg_t));
-    if (!bus->tx_queue) goto error;
+    if (!bus->tx_queue) {
+        BUS_DEBUG("ERROR: Failed to create TX queue!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating handler queue...\n");
     bus->handler_queue = tsumikoro_queue_create(8, sizeof(tsumikoro_handler_event_t));
-    if (!bus->handler_queue) goto error;
+    if (!bus->handler_queue) {
+        BUS_DEBUG("ERROR: Failed to create handler queue!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating blocking semaphore...\n");
     // Create semaphore
     bus->blocking_sem = tsumikoro_semaphore_create_binary();
-    if (!bus->blocking_sem) goto error;
+    if (!bus->blocking_sem) {
+        BUS_DEBUG("ERROR: Failed to create blocking semaphore!\n");
+        goto error;
+    }
 
     // Create threads
     tsumikoro_thread_config_t thread_config;
 
+    BUS_DEBUG("Creating RX thread (2048 bytes stack)...\n");
     // RX thread (high priority)
     thread_config.name = "bus_rx";
     thread_config.function = bus_rx_thread;
@@ -790,8 +822,12 @@ static bool bus_rtos_init(tsumikoro_bus_t *bus)
     thread_config.stack_size = 2048;
     thread_config.priority = TSUMIKORO_THREAD_PRIORITY_HIGH;
     bus->rx_thread = tsumikoro_thread_create(&thread_config);
-    if (!bus->rx_thread) goto error;
+    if (!bus->rx_thread) {
+        BUS_DEBUG("ERROR: Failed to create RX thread!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating TX thread (2048 bytes stack)...\n");
     // TX thread (high priority)
     thread_config.name = "bus_tx";
     thread_config.function = bus_tx_thread;
@@ -799,8 +835,12 @@ static bool bus_rtos_init(tsumikoro_bus_t *bus)
     thread_config.stack_size = 2048;
     thread_config.priority = TSUMIKORO_THREAD_PRIORITY_HIGH;
     bus->tx_thread = tsumikoro_thread_create(&thread_config);
-    if (!bus->tx_thread) goto error;
+    if (!bus->tx_thread) {
+        BUS_DEBUG("ERROR: Failed to create TX thread!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating handler thread (3072 bytes stack)...\n");
     // Handler thread (normal priority)
     thread_config.name = "bus_handler";
     thread_config.function = bus_handler_thread;
@@ -808,12 +848,16 @@ static bool bus_rtos_init(tsumikoro_bus_t *bus)
     thread_config.stack_size = 3072;
     thread_config.priority = TSUMIKORO_THREAD_PRIORITY_NORMAL;
     bus->handler_thread = tsumikoro_thread_create(&thread_config);
-    if (!bus->handler_thread) goto error;
+    if (!bus->handler_thread) {
+        BUS_DEBUG("ERROR: Failed to create handler thread!\n");
+        goto error;
+    }
 
-    BUS_DEBUG("RTOS resources initialized\n");
+    BUS_DEBUG("RTOS resources initialized successfully\n");
     return true;
 
 error:
+    BUS_DEBUG("RTOS init failed, cleaning up...\n");
     // Cleanup on error
     if (bus->rx_queue) tsumikoro_queue_delete(bus->rx_queue);
     if (bus->tx_queue) tsumikoro_queue_delete(bus->tx_queue);
@@ -933,8 +977,17 @@ tsumikoro_status_t tsumikoro_bus_send_command_async(tsumikoro_bus_handle_t handl
     bus->pending_cmd.active = true;
     bus->pending_cmd.expects_response = true;
 
-    // Start transmission process
+#if TSUMIKORO_BUS_USE_RTOS
+    // In RTOS mode, directly transmit (TX thread handles bus idle check)
+    BUS_DEBUG("send_command_async: transmitting directly\n");
+    if (bus_transmit_pending(bus) != TSUMIKORO_STATUS_OK) {
+        bus->pending_cmd.active = false;
+        return TSUMIKORO_STATUS_ERROR;
+    }
+#else
+    // Bare-metal mode: use state machine
     bus_set_state(bus, TSUMIKORO_BUS_STATE_WAIT_BUS_IDLE);
+#endif
 
     return TSUMIKORO_STATUS_OK;
 }
@@ -961,8 +1014,17 @@ tsumikoro_status_t tsumikoro_bus_send_no_response(tsumikoro_bus_handle_t handle,
     bus->pending_cmd.active = true;
     bus->pending_cmd.expects_response = false;
 
-    // Start transmission process
+#if TSUMIKORO_BUS_USE_RTOS
+    // In RTOS mode, directly transmit (TX thread handles bus idle check)
+    BUS_DEBUG("send_no_response: transmitting directly\n");
+    if (bus_transmit_pending(bus) != TSUMIKORO_STATUS_OK) {
+        bus->pending_cmd.active = false;
+        return TSUMIKORO_STATUS_ERROR;
+    }
+#else
+    // Bare-metal mode: use state machine
     bus_set_state(bus, TSUMIKORO_BUS_STATE_WAIT_BUS_IDLE);
+#endif
 
     return TSUMIKORO_STATUS_OK;
 }
@@ -978,10 +1040,6 @@ tsumikoro_cmd_status_t tsumikoro_bus_send_command_blocking(tsumikoro_bus_handle_
 
     tsumikoro_bus_t *bus = (tsumikoro_bus_t *)handle;
 
-#ifdef ESP_PLATFORM
-    ESP_LOGI(BUS_TAG, "send_command_blocking: device=0x%02X, cmd=0x%04X, timeout=%ums",
-              packet->device_id, packet->command, timeout_ms);
-#endif
     BUS_DEBUG("send_command_blocking: device=0x%02X, cmd=0x%04X, timeout=%ums\n",
               packet->device_id, packet->command, timeout_ms);
 

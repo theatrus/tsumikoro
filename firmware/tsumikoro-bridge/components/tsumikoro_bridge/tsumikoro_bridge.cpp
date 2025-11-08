@@ -36,17 +36,13 @@ void TsumikoroBridge::setup() {
     .platform_data = (void *)&this->esp32_config_
   };
 
-  ESP_LOGE(TAG, "=== ABOUT TO CALL tsumikoro_hal_init ===");
   this->hal_handle_ = tsumikoro_hal_init(&hal_config, nullptr, nullptr);
-  ESP_LOGE(TAG, "=== RETURNED FROM tsumikoro_hal_init, handle=%p ===", this->hal_handle_);
 
   if (!this->hal_handle_) {
     ESP_LOGE(TAG, "Failed to initialize HAL");
     this->mark_failed();
     return;
   }
-
-  ESP_LOGE(TAG, "=== HAL INITIALIZED SUCCESSFULLY ===");
 
   // Initialize bus handler (RTOS mode)
   tsumikoro_bus_config_t bus_config = TSUMIKORO_BUS_DEFAULT_CONFIG();
@@ -397,12 +393,9 @@ bool TsumikoroBridge::nucleo_get_led(uint8_t device_id, uint8_t *led_state, uint
   };
 
   tsumikoro_packet_t response;
-
-  ESP_LOGE(TAG, "!!! GET_LED: Calling send_command_blocking, device=0x%02X !!!", device_id);
   tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
     this->bus_handle_, &cmd, &response, 100
   );
-  ESP_LOGE(TAG, "!!! GET_LED: Returned status=%d, data_len=%u !!!", status, response.data_len);
 
   if (status == TSUMIKORO_CMD_STATUS_SUCCESS && response.data_len >= 2) {
     *led_state = response.data[0];
@@ -432,12 +425,9 @@ bool TsumikoroBridge::nucleo_get_button(uint8_t device_id, uint8_t *button_state
   };
 
   tsumikoro_packet_t response;
-
-  ESP_LOGE(TAG, "!!! GET_BUTTON: Calling send_command_blocking, device=0x%02X !!!", device_id);
   tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
     this->bus_handle_, &cmd, &response, 100
   );
-  ESP_LOGE(TAG, "!!! GET_BUTTON: Returned status=%d, data_len=%u !!!", status, response.data_len);
 
   if (status == TSUMIKORO_CMD_STATUS_SUCCESS && response.data_len >= 1) {
     *button_state = response.data[0];

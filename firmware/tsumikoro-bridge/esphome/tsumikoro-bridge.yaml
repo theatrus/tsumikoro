@@ -19,8 +19,10 @@ esp32:
       CONFIG_FREERTOS_HZ: "1000"
 
 # Enable logging
+# Global level must be VERBOSE to enable ESP-IDF DEBUG logs (esp_log_level_set)
+# Per-tag levels then filter to desired verbosity
 logger:
-  level: DEBUG
+  level: VERBOSE
   logs:
     tsumikoro_hal_esp32: DEBUG
     tsumikoro_bus: DEBUG
