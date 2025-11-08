@@ -93,7 +93,7 @@ switch:
     name: "NUCLEO LED ON"
     icon: "mdi:led-on"
     lambda: |-
-      return false;  # Stateless switch
+      return false;  // Stateless switch
     turn_on_action:
       - lambda: |-
           auto bridge = id(motor_bridge);
@@ -105,7 +105,7 @@ switch:
     name: "NUCLEO LED OFF"
     icon: "mdi:led-off"
     lambda: |-
-      return false;  # Stateless switch
+      return false;  // Stateless switch
     turn_on_action:
       - lambda: |-
           auto bridge = id(motor_bridge);
@@ -117,7 +117,7 @@ switch:
     name: "NUCLEO LED Auto-Blink"
     icon: "mdi:led-variant-on"
     lambda: |-
-      return false;  # Stateless switch
+      return false;  // Stateless switch
     turn_on_action:
       - lambda: |-
           auto bridge = id(motor_bridge);
