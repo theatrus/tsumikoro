@@ -353,6 +353,14 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
     }
 
     BUS_DEBUG("RX packet: %u bytes\n", (unsigned int)local_rx_len);
+#ifdef TSUMIKORO_BUS_DEBUG
+    // Hex dump of received data
+    printf("[RX HEX] ");
+    for (size_t i = 0; i < local_rx_len; i++) {
+        printf("%02X ", local_rx_buffer[i]);
+    }
+    printf("\n");
+#endif
 
     // Check if this is our own transmission echo (RS-485 with RE asserted)
     if (bus->expecting_tx_echo &&
