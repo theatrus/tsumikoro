@@ -467,6 +467,7 @@ static void bus_process_state_machine(tsumikoro_bus_t *bus)
                 }
             } else if (bus_get_state_elapsed_ms(bus) >= bus->config.bus_idle_timeout_ms) {
                 // Timeout waiting for bus idle
+                BUS_DEBUG("Timeout waiting for bus idle (%ums elapsed)\n", bus_get_state_elapsed_ms(bus));
                 if (bus->config.auto_retry) {
                     bus_retry_command(bus);
                 } else {
@@ -482,6 +483,8 @@ static void bus_process_state_machine(tsumikoro_bus_t *bus)
         case TSUMIKORO_BUS_STATE_WAITING_RESPONSE:
             // Check for timeout
             if (bus_get_state_elapsed_ms(bus) >= bus->config.response_timeout_ms) {
+                BUS_DEBUG("Response timeout (%ums elapsed, expected response from 0x%02X)\n",
+                         bus_get_state_elapsed_ms(bus), bus->pending_cmd.packet.device_id);
                 if (bus->config.auto_retry) {
                     bus_retry_command(bus);
                 } else {

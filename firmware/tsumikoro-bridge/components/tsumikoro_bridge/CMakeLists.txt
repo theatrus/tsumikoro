@@ -19,3 +19,8 @@ idf_component_register(
         driver
         esp_timer
 )
+
+# Enable debug logging for bus protocol
+target_compile_definitions(${COMPONENT_LIB} PRIVATE
+    TSUMIKORO_BUS_DEBUG=1
+)
