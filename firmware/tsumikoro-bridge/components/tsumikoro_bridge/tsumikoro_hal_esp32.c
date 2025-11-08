@@ -132,6 +132,9 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
     device->baud_rate = config->baud_rate;
     device->turnaround_delay_bytes = config->turnaround_delay_bytes;
     device->rx_callback = rx_callback;
+
+    ESP_LOGI(TAG, "HAL init: device_id=0x%02X, controller=%d, baud=%u",
+             device->device_id, device->is_controller, device->baud_rate);
     device->user_data = user_data;
     device->rx_head = 0;
     device->rx_tail = 0;

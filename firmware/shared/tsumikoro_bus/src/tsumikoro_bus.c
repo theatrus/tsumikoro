@@ -15,20 +15,20 @@
 #include "tsumikoro_rtos.h"
 #endif
 
-/* Debug logging (define TSUMIKORO_BUS_DEBUG to enable) */
-#ifdef TSUMIKORO_BUS_DEBUG
-    #ifdef ESP_PLATFORM
-        // ESP32: Use ESP-IDF logging
-        #include "esp_log.h"
-        static const char *BUS_TAG = "tsumikoro_bus";
-        #define BUS_DEBUG(fmt, ...) ESP_LOGI(BUS_TAG, fmt, ##__VA_ARGS__)
-    #else
-        // STM32/other: Use printf
+/* Debug logging */
+#ifdef ESP_PLATFORM
+    // ESP32: Use ESP-IDF logging (always enabled for debugging)
+    #include "esp_log.h"
+    static const char *BUS_TAG = "tsumikoro_bus";
+    #define BUS_DEBUG(fmt, ...) ESP_LOGI(BUS_TAG, fmt, ##__VA_ARGS__)
+#else
+    // STM32/other: Use printf (controlled by TSUMIKORO_BUS_DEBUG)
+    #ifdef TSUMIKORO_BUS_DEBUG
         #include <stdio.h>
         #define BUS_DEBUG(...) printf("[BUS] " __VA_ARGS__)
+    #else
+        #define BUS_DEBUG(...) ((void)0)
     #endif
-#else
-    #define BUS_DEBUG(...) ((void)0)
 #endif
 
 /**
