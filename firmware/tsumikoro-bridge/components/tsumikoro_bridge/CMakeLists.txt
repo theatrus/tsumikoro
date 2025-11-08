@@ -21,7 +21,8 @@ idf_component_register(
         esp_timer
 )
 
-# Enable debug logging for bus protocol
+# Enable debug logging and RTOS mode for bus protocol
 target_compile_definitions(${COMPONENT_LIB} PRIVATE
     TSUMIKORO_BUS_DEBUG=1
+    TSUMIKORO_BUS_USE_RTOS=1
 )
