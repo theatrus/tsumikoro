@@ -1,9 +1,9 @@
 # Tsumikoro Multi-Drop Serial Bus Library
 
-## Design Document v0.6
+## Design Document v0.7
 
 **Status**: Draft - Design Phase
-**Last Updated**: 2025-11-04
+**Last Updated**: 2025-11-08
 **Author**: Tsumikoro Project
 **Copyright**: 2025-2025 Yann Ramin
 **License**: Apache-2.0
@@ -656,63 +656,96 @@ At 1Mbaud, motor noise and EMI can cause burst errors. CRC8 provides superior er
 
 ### 4.6 Packet Format
 
-Based on existing `tsumikoro_protocol.h` with CRC8 checksum and **16-bit command field**:
+Based on existing `tsumikoro_protocol.h` with CRC8 checksum, **16-bit command field**, and **byte stuffing** for frame synchronization:
 
 ```
-Wire Format:
-[START(1)][ID(1)][CMD_HI(1)][CMD_LO(1)][LEN(1)][DATA(0-64)][CRC8(1)][END(1)]
+Wire Format (after byte stuffing):
+[START(2)][ID][CMD_HI][CMD_LO][LEN][DATA(0-64)][CRC8][END(1)]
 
-Byte Offsets:
-  0: START marker (0xAA)
-  1: Controller ID (0x00-0xFF)
-  2: Command high byte (tsumikoro_command_t >> 8)
-  3: Command low byte (tsumikoro_command_t & 0xFF)
-  4: Data length (0-64)
-  5 to 5+len-1: Data payload
-  5+len: CRC8 checksum (covers bytes 1 through 4+len)
-  6+len: END marker (0x55)
+Byte Offsets (unstuffed):
+  0-1: START marker (0xAA 0xAA) - double byte for unambiguous frame detection
+  2: Controller ID (0x00-0xFF)
+  3: Command high byte (tsumikoro_command_t >> 8)
+  4: Command low byte (tsumikoro_command_t & 0xFF)
+  5: Data length (0-64)
+  6 to 6+len-1: Data payload
+  6+len: CRC8 checksum (covers bytes 2 through 5+len)
+  7+len: END marker (0x55)
 
-Total packet size: 7 + data_len bytes (7-71 bytes)
+Minimum packet size: 8 bytes (no data)
+Maximum packet size: 149 bytes (with full byte stuffing of 64-byte payload)
+Typical packet size: 8 + data_len bytes (unstuffed)
 ```
+
+**Byte Stuffing (v0.7)**:
+
+To prevent false frame synchronization, bytes 0xAA and 0x55 in the payload are escaped:
+
+```
+Escape Sequences:
+  0xAA in payload → 0xAA 0x01
+  0x55 in payload → 0xAA 0x02
+
+Escape byte: 0xAA (same as START marker)
+```
+
+**Important**: Byte stuffing applies ONLY to the payload (ID, CMD_HI, CMD_LO, LEN, DATA, CRC8).
+The START marker (0xAA 0xAA) and END marker (0x55) are NOT escaped.
 
 **Byte Order**: Little-endian (CMD_HI first, CMD_LO second)
 
-**CRC8 Calculation Range**:
-- Starts at: `controller_id` (byte 1)
-- Ends at: Last data byte (byte 4+len)
+**CRC8 Calculation Range** (on unstuffed data):
+- Starts at: `controller_id` (byte 2)
+- Ends at: Last data byte (byte 5+len)
 - Includes: ID + CMD_HI + CMD_LO + LEN + DATA
+- CRC is calculated BEFORE byte stuffing
 
 **Example Packet** (SET_SPEED command 0x2002 to device 0x01, speed=100):
 ```
-Hex:  AA 01 20 02 02 00 64 [CRC8] 55
-      │  │  │  │  │  └─┬─┘   │     │
-      │  │  │  │  │    │     │     └─ END marker
-      │  │  │  │  │    │     └─────── CRC8 of [01 20 02 02 00 64]
-      │  │  │  │  │    └───────────── Data: 0x0064 = 100 (little-endian)
-      │  │  │  │  └────────────────── Length: 2 bytes
-      │  │  │  └───────────────────── Command low: 0x02
-      │  │  └──────────────────────── Command high: 0x20 (stepper range)
-      │  └─────────────────────────── Controller ID: 1
-      └────────────────────────────── START marker
+Hex:  AA AA 01 20 02 02 00 64 [CRC8] 55
+      │  │  │  │  │  │  └─┬─┘   │     │
+      │  │  │  │  │  │    │     │     └─ END marker
+      │  │  │  │  │  │    │     └─────── CRC8 of [01 20 02 02 00 64]
+      │  │  │  │  │  │    └───────────── Data: 0x0064 = 100 (little-endian)
+      │  │  │  │  │  └────────────────── Length: 2 bytes
+      │  │  │  │  └───────────────────── Command low: 0x02
+      │  │  │  └──────────────────────── Command high: 0x20 (stepper range)
+      │  │  └─────────────────────────── Controller ID: 1
+      │  └────────────────────────────── START marker (byte 2)
+      └───────────────────────────────── START marker (byte 1)
 
 Command: 0x2002 (Stepper: SET_SPEED)
-Total: 9 bytes
+Total: 10 bytes (no byte stuffing needed in this example)
 ```
 
 **Broadcast Example** (STOP command 0x0003 to all devices):
 ```
-Hex:  AA FF 00 03 00 [CRC8] 55
-      │  │  │  │  │    │     │
-      │  │  │  │  │    │     └─ END marker
-      │  │  │  │  │    └─────── CRC8 of [FF 00 03 00]
-      │  │  │  │  └──────────── Length: 0 bytes (no data)
-      │  │  │  └─────────────── Command low: 0x03 (STOP)
-      │  │  └────────────────── Command high: 0x00 (generic range)
-      │  └───────────────────── Controller ID: 0xFF (broadcast)
-      └──────────────────────── START marker
+Hex:  AA AA FF 00 03 00 [CRC8] 55
+      │  │  │  │  │  │    │     │
+      │  │  │  │  │  │    │     └─ END marker
+      │  │  │  │  │  │    └─────── CRC8 of [FF 00 03 00]
+      │  │  │  │  │  └──────────── Length: 0 bytes (no data)
+      │  │  │  │  └─────────────── Command low: 0x03 (STOP)
+      │  │  │  └────────────────── Command high: 0x00 (generic range)
+      │  │  └───────────────────── Controller ID: 0xFF (broadcast)
+      │  └──────────────────────── START marker (byte 2)
+      └─────────────────────────── START marker (byte 1)
 
 Command: 0x0003 (Generic: STOP)
-Total: 7 bytes (minimum packet size)
+Total: 8 bytes (minimum packet size)
+```
+
+**Byte Stuffing Example** (packet with 0xAA and 0x55 in payload):
+```
+Unstuffed (logical):
+  AA AA 10 F0 03 01 AA 34 55    (device 0x10, cmd 0xF003, data=[0xAA])
+        │              └─ This 0xAA in payload needs escaping
+
+Stuffed (on wire):
+  AA AA 10 F0 03 01 AA 01 34 55
+        │              └─┬─┘      Escaped: 0xAA → 0xAA 0x01
+
+Total: 10 bytes on wire (9 bytes unstuffed + 1 escape byte)
 ```
 
 ### 4.7 Command/Response Protocol
