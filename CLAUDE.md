@@ -1,4 +1,181 @@
-- Do not run cat or stty
+# Claude Code Assistant Guidelines
+
+## General Rules
+- Do not run cat or stty commands
 - Do not read debug messages from the serial port - ask the user to do that
 - Use makefile targets when possible
-- Always reset the device after flashing
+- Always reset the device after flashing: `st-flash write <file> 0x08000000 --reset`
+
+## Build Commands
+
+### STM32 Firmware (NUCLEO-G071RB)
+```bash
+cd firmware/build
+make                    # Build all targets
+make clean             # Clean build artifacts
+```
+
+Available targets:
+- `nucleo-g071rb/nucleo-g071rb.elf` - Bare-metal firmware
+- `nucleo-g071rb-freertos/nucleo-g071rb-freertos.elf` - FreeRTOS firmware
+
+### ESP32 Firmware (tsumikoro-bridge)
+```bash
+cd firmware/tsumikoro-bridge
+make build             # Build ESPHome firmware
+make clean             # Clean build
+make upload            # Upload to ESP32
+```
+
+## Debug Flags
+
+### STM32 HAL Debug (tsumikoro_hal_stm32.c)
+Enable in CMakeLists.txt:
+```cmake
+target_compile_definitions(tsumikoro_bus PRIVATE TSUMIKORO_HAL_DEBUG=1)
+```
+
+Enables debug output:
+- `[HAL_INIT]` - Initialization steps
+- `[HAL_RX]` - RX data with hex dumps
+- `[HAL_TX]` - TX data with hex dumps
+- `[DMA UPDATE]` - DMA position updates
+- `[RTO]` - Receiver timeout events
+- `[HAL]` - Callback invocations
+
+### Bus Protocol Debug (tsumikoro_bus.c)
+Enable in CMakeLists.txt:
+```cmake
+target_compile_definitions(tsumikoro_bus PRIVATE TSUMIKORO_BUS_DEBUG=1)
+```
+
+Enables debug output:
+- `[BUS]` - State machine transitions
+- `[BUS RX CB]` - RX callback and queue operations
+- `[BUS] RX thread` - RX thread operations
+- `[BUS] TX thread` - TX thread operations
+- `[BUS] Handler` - Handler thread operations
+- Packet decode/encode details
+
+### STM32 Interrupt Counters
+The firmware tracks interrupt counts:
+- `g_uart1_irq_count` - UART1 interrupt count
+- `g_dma_rx_irq_count` - DMA RX interrupt count
+- `g_dma_tx_irq_count` - DMA TX interrupt count
+
+These are displayed in the Stats task output every 10 seconds.
+
+## Flashing STM32 Firmware
+
+```bash
+cd firmware/build
+st-flash write nucleo-g071rb/nucleo-g071rb.bin 0x08000000 --reset
+# or FreeRTOS version:
+st-flash write nucleo-g071rb-freertos/nucleo-g071rb-freertos.bin 0x08000000 --reset
+```
+
+Always use `--reset` to properly reset the device after flashing.
+
+## Serial Console
+
+The NUCLEO board has two serial ports:
+- **USART2** (ST-Link VCP): Debug output at 115200 baud - PA2(TX), PA3(RX)
+- **USART1** (Bus protocol): 1 Mbaud RS-485 - PC4(TX), PC5(RX), PA1(DE)
+
+User should monitor USART2 for debug output using their preferred serial tool.
+
+## GDB Debugging
+
+### Standard debugging:
+```bash
+# Terminal 1:
+st-util
+
+# Terminal 2:
+cd firmware/build
+arm-none-eabi-gdb nucleo-g071rb-freertos/nucleo-g071rb-freertos.elf
+(gdb) target extended-remote :4242
+(gdb) load
+(gdb) monitor reset
+(gdb) continue
+```
+
+### RX data flow debugging:
+```bash
+# Terminal 1:
+st-util
+
+# Terminal 2:
+cd firmware/build
+arm-none-eabi-gdb -x .gdbinit-rx-debug
+```
+
+The `.gdbinit-rx-debug` file sets up breakpoints for RX flow:
+1. UART IRQ handler (receiver timeout)
+2. HAL RX callback
+3. RX thread
+4. Packet decode
+5. Handler thread
+
+## Memory Usage
+
+### NUCLEO-G071RB (STM32G071RBT6)
+- Flash: 128 KB
+- RAM: 36 KB
+
+### FreeRTOS Memory Allocation
+- Heap: 18 KB (configTOTAL_HEAP_SIZE)
+- Bus threads: 2048/2048/3072 bytes (RX/TX/Handler)
+- App tasks: 512/512/1536 bytes (LED/Button/Stats)
+- Free heap during operation: ~3-5 KB
+
+Stack usage monitoring via `uxTaskGetStackHighWaterMark()` is displayed every 10s in Stats task.
+
+## Common Workflows
+
+### Build and flash:
+```bash
+cd firmware/build
+make && st-flash write nucleo-g071rb-freertos/nucleo-g071rb-freertos.bin 0x08000000 --reset
+```
+
+### Enable debug and rebuild:
+1. Edit `firmware/nucleo-g071rb-freertos/CMakeLists.txt`
+2. Add: `target_compile_definitions(tsumikoro_bus PRIVATE TSUMIKORO_HAL_DEBUG=1 TSUMIKORO_BUS_DEBUG=1)`
+3. Rebuild: `make clean && make`
+4. Flash: `st-flash write nucleo-g071rb-freertos/nucleo-g071rb-freertos.bin 0x08000000 --reset`
+
+### Debug hard fault:
+```bash
+# Terminal 1: st-util
+# Terminal 2:
+arm-none-eabi-gdb nucleo-g071rb-freertos/nucleo-g071rb-freertos.elf
+(gdb) target extended-remote :4242
+(gdb) continue
+# Wait for hard fault
+(gdb) bt          # Backtrace
+(gdb) info registers
+(gdb) x/32x $sp   # Examine stack
+```
+
+## Troubleshooting
+
+### Firmware doesn't start after flash
+- Make sure you used `--reset` flag
+- Try power cycling the board
+- Check with GDB if stuck in Error_Handler or HardFault_Handler
+
+### No RX activity
+- Enable TSUMIKORO_HAL_DEBUG to see if data is being received
+- Check DMA and UART IRQ counts in Stats output
+- Verify UART1 is properly initialized (1 Mbaud, 8N1)
+
+### Stack overflow
+- Check Stats task output for stack high water marks
+- Increase stack size in xTaskCreate() or bus thread configs
+- Look for large stack buffers in functions
+
+### Heap exhaustion
+- Check "Heap free" in Stats output
+- Reduce configTOTAL_HEAP_SIZE or task stack sizes if needed
+- Verify no memory leaks in dynamic allocations
