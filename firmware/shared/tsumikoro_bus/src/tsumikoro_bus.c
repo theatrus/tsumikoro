@@ -379,9 +379,9 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
                                                          &rx_packet,
                                                          &bytes_consumed);
 
-    // Remove consumed bytes from buffer
-    if (status == TSUMIKORO_STATUS_OK && bytes_consumed > 0) {
-        // Successfully decoded - remove consumed bytes, keep remaining data
+    // Remove consumed bytes from buffer (even on decode failure to maintain sync)
+    if (bytes_consumed > 0) {
+        // Remove consumed bytes, keep remaining data
         size_t remaining = (bytes_consumed < local_rx_len) ? (local_rx_len - bytes_consumed) : 0;
 
         if (remaining > 0) {
@@ -391,9 +391,15 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
             }
         }
         bus->rx_buffer_len = remaining;
-    } else {
-        // Decode failed - clear buffer to avoid reprocessing
-        bus->rx_buffer_len = 0;
+
+        if (status != TSUMIKORO_STATUS_OK) {
+            BUS_DEBUG("Consumed %u bytes of invalid data, %u bytes remaining\n",
+                     (unsigned int)bytes_consumed, (unsigned int)remaining);
+        }
+    } else if (status != TSUMIKORO_STATUS_OK) {
+        // Decode failed with no bytes consumed - waiting for more data
+        BUS_DEBUG("Decode failed but waiting for more data (%u bytes buffered)\n",
+                 (unsigned int)local_rx_len);
     }
 
     if (status == TSUMIKORO_STATUS_CRC_ERROR) {

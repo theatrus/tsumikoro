@@ -142,7 +142,16 @@ tsumikoro_status_t tsumikoro_packet_decode(const uint8_t *buffer,
     }
 
     // Check if we found a start marker and have enough bytes remaining
-    if (start_idx + 1 >= buffer_len || (buffer_len - start_idx) < TSUMIKORO_MIN_PACKET_LEN) {
+    if (start_idx + 1 >= buffer_len) {
+        // No start marker found in entire buffer - discard all but last byte
+        // (last byte might be first 0xAA of the start marker)
+        *bytes_consumed = (buffer_len > 0) ? buffer_len - 1 : 0;
+        return TSUMIKORO_STATUS_INVALID_PACKET;
+    }
+
+    if ((buffer_len - start_idx) < TSUMIKORO_MIN_PACKET_LEN) {
+        // Found start marker but not enough bytes yet - don't consume anything
+        *bytes_consumed = 0;
         return TSUMIKORO_STATUS_INVALID_PACKET;
     }
 
@@ -167,6 +176,8 @@ tsumikoro_status_t tsumikoro_packet_decode(const uint8_t *buffer,
 
     // If we don't have a complete packet yet, return not ready
     if (!found_end) {
+        // Found start marker but no end marker - don't consume, wait for more data
+        *bytes_consumed = 0;
         return TSUMIKORO_STATUS_INVALID_PACKET;
     }
 
@@ -239,11 +250,15 @@ tsumikoro_status_t tsumikoro_packet_decode(const uint8_t *buffer,
 
     // Validate data length
     if (packet->data_len > TSUMIKORO_MAX_DATA_LEN) {
+        // Invalid packet - consume it so we can search for next one
+        *bytes_consumed = end_idx + 1;
         return TSUMIKORO_STATUS_INVALID_PACKET;
     }
 
     // Check we have enough bytes for data + CRC
     if (unstuffed_idx < (payload_idx + packet->data_len + 1)) {
+        // Malformed packet - consume it so we can search for next one
+        *bytes_consumed = end_idx + 1;
         return TSUMIKORO_STATUS_INVALID_PACKET;
     }
 
@@ -260,6 +275,8 @@ tsumikoro_status_t tsumikoro_packet_decode(const uint8_t *buffer,
     uint8_t calculated_crc = tsumikoro_crc8_calculate_table(unstuffed_payload, payload_idx);
 
     if (received_crc != calculated_crc) {
+        // CRC error - consume the packet so we can search for next one
+        *bytes_consumed = end_idx + 1;
         return TSUMIKORO_STATUS_CRC_ERROR;
     }
 
