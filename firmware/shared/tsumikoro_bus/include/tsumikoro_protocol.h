@@ -63,6 +63,27 @@ extern "C" {
 #endif
 
 /**
+ * TSUMIKORO_COLLISION_DETECTION:
+ * When enabled, the bus layer will detect collisions by comparing received
+ * data against transmitted packets (echo detection). This adds memory and
+ * CPU overhead to buffer and compare transmitted packets.
+ *
+ * Benefits:
+ * - Can detect when multiple devices transmit simultaneously
+ * - Enables automatic collision recovery (if implemented)
+ *
+ * Drawbacks:
+ * - Requires buffering last transmitted packet (TSUMIKORO_MAX_PACKET_LEN bytes)
+ * - Requires byte-by-byte comparison of received data
+ * - Not needed when TSUMIKORO_IGNORE_RX_DURING_TX is enabled
+ *
+ * Default: disabled (collision detection not performed)
+ */
+#ifndef TSUMIKORO_COLLISION_DETECTION
+#define TSUMIKORO_COLLISION_DETECTION 0
+#endif
+
+/**
  * @brief Packet framing markers
  */
 #define TSUMIKORO_PACKET_START  0xAA

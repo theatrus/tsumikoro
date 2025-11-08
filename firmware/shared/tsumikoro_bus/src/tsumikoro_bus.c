@@ -108,10 +108,12 @@ typedef struct {
     // Pending command
     tsumikoro_pending_cmd_t pending_cmd;
 
+#if TSUMIKORO_COLLISION_DETECTION
     // Last transmitted packet (for echo detection/collision detection)
     uint8_t last_tx_buffer[TSUMIKORO_MAX_PACKET_LEN];
     size_t last_tx_len;
     volatile bool expecting_tx_echo;     /**< Expecting to receive our own transmission (volatile: read in ISR) */
+#endif
 
     // RX buffer for incoming packets (volatile: written by HAL RX callback in ISR context)
     volatile uint8_t rx_buffer[TSUMIKORO_MAX_PACKET_LEN];
@@ -260,10 +262,12 @@ static tsumikoro_status_t bus_transmit_pending(tsumikoro_bus_t *bus)
 #else
     // Bare-metal mode: transmit directly via HAL
 
+#if TSUMIKORO_COLLISION_DETECTION
     // Store transmitted packet for echo detection (RS-485 receives own transmission)
     memcpy(bus->last_tx_buffer, tx_buffer, tx_len);
     bus->last_tx_len = tx_len;
     bus->expecting_tx_echo = true;
+#endif
 
     // Transmit via HAL
     tsumikoro_hal_enable_tx(bus->hal);
@@ -272,7 +276,9 @@ static tsumikoro_status_t bus_transmit_pending(tsumikoro_bus_t *bus)
 
     if (hal_status != TSUMIKORO_HAL_OK) {
         BUS_DEBUG("Transmit failed: hal_status=%d\n", hal_status);
+#if TSUMIKORO_COLLISION_DETECTION
         bus->expecting_tx_echo = false;
+#endif
         return TSUMIKORO_STATUS_ERROR;
     }
 
@@ -362,6 +368,7 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
     printf("\n");
 #endif
 
+#if TSUMIKORO_COLLISION_DETECTION
     // Check if this is our own transmission echo (RS-485 with RE asserted)
     if (bus->expecting_tx_echo &&
         local_rx_len == bus->last_tx_len &&
@@ -378,6 +385,7 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
         bus->expecting_tx_echo = false;
         // TODO: Handle collision (retry transmission)
     }
+#endif
 
     // Decode packet (using local non-volatile buffer)
     tsumikoro_packet_t rx_packet;
@@ -577,6 +585,7 @@ static void bus_rx_thread(void *arg)
 
         BUS_DEBUG("RX thread: received %u bytes\n", (unsigned int)rx_msg.len);
 
+#if TSUMIKORO_COLLISION_DETECTION
         // Check for TX echo
         if (bus->expecting_tx_echo &&
             rx_msg.len == bus->last_tx_len &&
@@ -592,6 +601,7 @@ static void bus_rx_thread(void *arg)
             bus->expecting_tx_echo = false;
             // TODO: Handle collision
         }
+#endif
 
         // Decode packet
         tsumikoro_packet_t rx_packet;
@@ -658,10 +668,12 @@ static void bus_tx_thread(void *arg)
         tsumikoro_hal_status_t hal_status = tsumikoro_hal_transmit(bus->hal, tx_msg.data, tx_msg.len);
 
         if (hal_status == TSUMIKORO_HAL_OK) {
+#if TSUMIKORO_COLLISION_DETECTION
             // Save last TX for echo detection
             memcpy(bus->last_tx_buffer, tx_msg.data, tx_msg.len);
             bus->last_tx_len = tx_msg.len;
             bus->expecting_tx_echo = true;
+#endif
 
             BUS_DEBUG("TX thread: transmission complete\n");
 

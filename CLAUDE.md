@@ -1,3 +1,4 @@
 - Do not run cat or stty
 - Do not read debug messages from the serial port - ask the user to do that
 - Use makefile targets when possible
+- Always reset the device after flashing
