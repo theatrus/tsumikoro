@@ -143,9 +143,14 @@ tsumikoro_status_t tsumikoro_packet_decode(const uint8_t *buffer,
 
     // Check if we found a start marker and have enough bytes remaining
     if (start_idx + 1 >= buffer_len) {
-        // No start marker found in entire buffer - discard all but last byte
-        // (last byte might be first 0xAA of the start marker)
-        *bytes_consumed = (buffer_len > 0) ? buffer_len - 1 : 0;
+        // No start marker found in entire buffer
+        // Keep last byte only if it's 0xAA (might be first byte of start marker)
+        if (buffer_len > 0 && buffer[buffer_len - 1] == TSUMIKORO_PACKET_START) {
+            *bytes_consumed = buffer_len - 1;
+        } else {
+            // Last byte is not 0xAA, discard everything including it
+            *bytes_consumed = buffer_len;
+        }
         return TSUMIKORO_STATUS_INVALID_PACKET;
     }
 
