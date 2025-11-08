@@ -164,7 +164,7 @@ in voltage and temperature.*/
   *        frequency.
   */
 #if !defined  (EXTERNAL_I2S2_CLOCK_VALUE)
-  #define EXTERNAL_I2S2_CLOCK_VALUE    48000U /*!< Value of the I2S2 External clock source in Hz*/
+  #define EXTERNAL_I2S2_CLOCK_VALUE    48000000U /*!< Value of the I2S2 External clock source in Hz*/
 #endif /* EXTERNAL_I2S2_CLOCK_VALUE */
 #endif
 
