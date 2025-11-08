@@ -343,7 +343,7 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
         local_rx_buffer[i] = bus->rx_buffer[i];
     }
 
-    BUS_DEBUG("RX packet: %zu bytes\n", local_rx_len);
+    BUS_DEBUG("RX packet: %u bytes\n", (unsigned int)local_rx_len);
 
     // Check if this is our own transmission echo (RS-485 with RE asserted)
     if (bus->expecting_tx_echo &&
@@ -549,7 +549,7 @@ static void bus_rx_thread(void *arg)
             continue;
         }
 
-        BUS_DEBUG("RX thread: received %zu bytes\n", rx_msg.len);
+        BUS_DEBUG("RX thread: received %u bytes\n", (unsigned int)rx_msg.len);
 
         // Check for TX echo
         if (bus->expecting_tx_echo &&
@@ -612,7 +612,7 @@ static void bus_tx_thread(void *arg)
             continue;
         }
 
-        BUS_DEBUG("TX thread: transmitting %zu bytes\n", tx_msg.len);
+        BUS_DEBUG("TX thread: transmitting %u bytes\n", (unsigned int)tx_msg.len);
 
         // Wait for bus idle (with timeout)
         uint32_t start_time = tsumikoro_hal_get_time_ms();
