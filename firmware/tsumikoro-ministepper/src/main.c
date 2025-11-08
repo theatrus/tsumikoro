@@ -33,6 +33,9 @@
 #define BUS_RE_PORT             NULL        /**< Optional, can tie RE to DE */
 #define BUS_RE_PIN              0
 
+/* Task stack sizes (in words) */
+#define MAIN_TASK_STACK_SIZE    256
+
 /* Private variables */
 static tsumikoro_bus_handle_t g_bus_handle = NULL;
 static tsumikoro_hal_handle_t g_hal_handle = NULL;
@@ -124,7 +127,7 @@ int main(void)
     BaseType_t result = xTaskCreate(
         MainTask,
         "Main",
-        256,  /* Stack size in words */
+        MAIN_TASK_STACK_SIZE,
         NULL,
         tskIDLE_PRIORITY + 1,
         NULL
