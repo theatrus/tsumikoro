@@ -37,6 +37,7 @@ void TsumikoroBridge::setup() {
   };
 
   this->hal_handle_ = tsumikoro_hal_init(&hal_config, nullptr, nullptr);
+
   if (!this->hal_handle_) {
     ESP_LOGE(TAG, "Failed to initialize HAL");
     this->mark_failed();
@@ -344,6 +345,101 @@ void TsumikoroBridge::handle_unsolicited_message_(const tsumikoro_packet_t *pack
   // - Servo position updates
   // - Error conditions
   // - Status changes
+}
+
+bool TsumikoroBridge::nucleo_set_led(uint8_t device_id, uint8_t state) {
+  if (!this->bus_handle_) {
+    return false;
+  }
+
+  // Custom command 0xF001: Set LED state
+  tsumikoro_packet_t cmd = {
+    .device_id = device_id,
+    .command = 0xF001,
+    .data_len = 1
+  };
+  cmd.data[0] = state;
+
+  tsumikoro_packet_t response;
+  tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
+    this->bus_handle_, &cmd, &response, 100
+  );
+
+  if (status == TSUMIKORO_CMD_STATUS_SUCCESS && response.data_len >= 1) {
+    bool success = (response.data[0] == 0x00);
+    if (success) {
+      const char *state_str = (state == 0) ? "OFF" : (state == 1) ? "ON" : "AUTO-BLINK";
+      ESP_LOGI(TAG, "NUCLEO_SET_LED device 0x%02X to %s: success", device_id, state_str);
+    } else {
+      ESP_LOGW(TAG, "NUCLEO_SET_LED device 0x%02X: device returned error", device_id);
+    }
+    return success;
+  } else {
+    ESP_LOGW(TAG, "NUCLEO_SET_LED device 0x%02X: failed (status=%d)", device_id, status);
+    return false;
+  }
+}
+
+bool TsumikoroBridge::nucleo_get_led(uint8_t device_id, uint8_t *led_state, uint8_t *auto_blink) {
+  if (!this->bus_handle_ || !led_state || !auto_blink) {
+    return false;
+  }
+
+  // Custom command 0xF002: Get LED state
+  tsumikoro_packet_t cmd = {
+    .device_id = device_id,
+    .command = 0xF002,
+    .data_len = 0
+  };
+
+  tsumikoro_packet_t response;
+  tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
+    this->bus_handle_, &cmd, &response, 100
+  );
+
+  if (status == TSUMIKORO_CMD_STATUS_SUCCESS && response.data_len >= 2) {
+    *led_state = response.data[0];
+    *auto_blink = response.data[1];
+    ESP_LOGD(TAG, "NUCLEO_GET_LED device 0x%02X: LED=%s, auto-blink=%s",
+             device_id,
+             *led_state ? "ON" : "OFF",
+             *auto_blink ? "enabled" : "disabled");
+    return true;
+  } else {
+    ESP_LOGW(TAG, "NUCLEO_GET_LED device 0x%02X: failed (status=%d, data_len=%u)",
+             device_id, status, response.data_len);
+    return false;
+  }
+}
+
+bool TsumikoroBridge::nucleo_get_button(uint8_t device_id, uint8_t *button_state) {
+  if (!this->bus_handle_ || !button_state) {
+    return false;
+  }
+
+  // Custom command 0xF003: Get button state
+  tsumikoro_packet_t cmd = {
+    .device_id = device_id,
+    .command = 0xF003,
+    .data_len = 0
+  };
+
+  tsumikoro_packet_t response;
+  tsumikoro_cmd_status_t status = tsumikoro_bus_send_command_blocking(
+    this->bus_handle_, &cmd, &response, 100
+  );
+
+  if (status == TSUMIKORO_CMD_STATUS_SUCCESS && response.data_len >= 1) {
+    *button_state = response.data[0];
+    ESP_LOGD(TAG, "NUCLEO_GET_BUTTON device 0x%02X: %s",
+             device_id,
+             *button_state ? "PRESSED" : "RELEASED");
+    return true;
+  } else {
+    ESP_LOGW(TAG, "NUCLEO_GET_BUTTON device 0x%02X: failed (status=%d, data_len=%u)",
+             device_id, status, response.data_len);
+    return false;
+  }
 }
 
 }  // namespace tsumikoro_bridge

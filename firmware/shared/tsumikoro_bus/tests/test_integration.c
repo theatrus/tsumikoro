@@ -26,7 +26,8 @@ static void controller_rx_callback(const uint8_t *data, size_t len, void *user_d
 {
     test_device_context_t *ctx = (test_device_context_t *)user_data;
 
-    tsumikoro_status_t status = tsumikoro_packet_decode(data, len, &ctx->last_packet);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(data, len, &ctx->last_packet, &bytes_consumed);
     if (status == TSUMIKORO_STATUS_OK) {
         ctx->packet_received = true;
         ctx->rx_count++;
@@ -37,7 +38,8 @@ static void peripheral_rx_callback(const uint8_t *data, size_t len, void *user_d
 {
     test_device_context_t *ctx = (test_device_context_t *)user_data;
 
-    tsumikoro_status_t status = tsumikoro_packet_decode(data, len, &ctx->last_packet);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(data, len, &ctx->last_packet, &bytes_consumed);
     if (status == TSUMIKORO_STATUS_OK) {
         ctx->packet_received = true;
         ctx->rx_count++;

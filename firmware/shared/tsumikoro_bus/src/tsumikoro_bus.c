@@ -15,12 +15,24 @@
 #include "tsumikoro_rtos.h"
 #endif
 
-/* Debug logging (define TSUMIKORO_BUS_DEBUG to enable) */
-#ifdef TSUMIKORO_BUS_DEBUG
-#include <stdio.h>
-#define BUS_DEBUG(...) printf("[BUS] " __VA_ARGS__)
+/* Debug logging */
+#ifdef ESP_PLATFORM
+    // ESP32: Use ESP-IDF logging
+    #include "esp_log.h"
+    static const char *BUS_TAG = "tsumikoro_bus";
+    #ifdef TSUMIKORO_BUS_DEBUG
+        #define BUS_DEBUG(fmt, ...) ESP_LOGD(BUS_TAG, fmt, ##__VA_ARGS__)
+    #else
+        #define BUS_DEBUG(...) ((void)0)
+    #endif
 #else
-#define BUS_DEBUG(...) ((void)0)
+    // STM32/other: Use printf (controlled by TSUMIKORO_BUS_DEBUG)
+    #ifdef TSUMIKORO_BUS_DEBUG
+        #include <stdio.h>
+        #define BUS_DEBUG(...) printf("[BUS] " __VA_ARGS__)
+    #else
+        #define BUS_DEBUG(...) ((void)0)
+    #endif
 #endif
 
 /**
@@ -99,10 +111,12 @@ typedef struct {
     // Pending command
     tsumikoro_pending_cmd_t pending_cmd;
 
+#if TSUMIKORO_COLLISION_DETECTION
     // Last transmitted packet (for echo detection/collision detection)
     uint8_t last_tx_buffer[TSUMIKORO_MAX_PACKET_LEN];
     size_t last_tx_len;
     volatile bool expecting_tx_echo;     /**< Expecting to receive our own transmission (volatile: read in ISR) */
+#endif
 
     // RX buffer for incoming packets (volatile: written by HAL RX callback in ISR context)
     volatile uint8_t rx_buffer[TSUMIKORO_MAX_PACKET_LEN];
@@ -251,19 +265,22 @@ static tsumikoro_status_t bus_transmit_pending(tsumikoro_bus_t *bus)
 #else
     // Bare-metal mode: transmit directly via HAL
 
+#if TSUMIKORO_COLLISION_DETECTION
     // Store transmitted packet for echo detection (RS-485 receives own transmission)
     memcpy(bus->last_tx_buffer, tx_buffer, tx_len);
     bus->last_tx_len = tx_len;
     bus->expecting_tx_echo = true;
+#endif
 
     // Transmit via HAL
-    tsumikoro_hal_enable_tx(bus->hal);
+    // Note: HAL manages DE pin internally (sets high before TX, clears low after TC)
     tsumikoro_hal_status_t hal_status = tsumikoro_hal_transmit(bus->hal, tx_buffer, tx_len);
-    tsumikoro_hal_disable_tx(bus->hal);
 
     if (hal_status != TSUMIKORO_HAL_OK) {
         BUS_DEBUG("Transmit failed: hal_status=%d\n", hal_status);
+#if TSUMIKORO_COLLISION_DETECTION
         bus->expecting_tx_echo = false;
+#endif
         return TSUMIKORO_STATUS_ERROR;
     }
 
@@ -343,8 +360,17 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
         local_rx_buffer[i] = bus->rx_buffer[i];
     }
 
-    BUS_DEBUG("RX packet: %zu bytes\n", local_rx_len);
+    BUS_DEBUG("RX packet: %u bytes\n", (unsigned int)local_rx_len);
+#ifdef TSUMIKORO_BUS_DEBUG
+    // Hex dump of received data
+    printf("[RX HEX] ");
+    for (size_t i = 0; i < local_rx_len; i++) {
+        printf("%02X ", local_rx_buffer[i]);
+    }
+    printf("\n");
+#endif
 
+#if TSUMIKORO_COLLISION_DETECTION
     // Check if this is our own transmission echo (RS-485 with RE asserted)
     if (bus->expecting_tx_echo &&
         local_rx_len == bus->last_tx_len &&
@@ -361,15 +387,38 @@ static void bus_process_rx_packet(tsumikoro_bus_t *bus)
         bus->expecting_tx_echo = false;
         // TODO: Handle collision (retry transmission)
     }
+#endif
 
     // Decode packet (using local non-volatile buffer)
     tsumikoro_packet_t rx_packet;
+    size_t bytes_consumed = 0;
     tsumikoro_status_t status = tsumikoro_packet_decode(local_rx_buffer,
                                                          local_rx_len,
-                                                         &rx_packet);
+                                                         &rx_packet,
+                                                         &bytes_consumed);
 
-    // Clear volatile RX buffer
-    bus->rx_buffer_len = 0;
+    // Remove consumed bytes from buffer (even on decode failure to maintain sync)
+    if (bytes_consumed > 0) {
+        // Remove consumed bytes, keep remaining data
+        size_t remaining = (bytes_consumed < local_rx_len) ? (local_rx_len - bytes_consumed) : 0;
+
+        if (remaining > 0) {
+            // Move remaining bytes to start of buffer
+            for (size_t i = 0; i < remaining; i++) {
+                bus->rx_buffer[i] = bus->rx_buffer[bytes_consumed + i];
+            }
+        }
+        bus->rx_buffer_len = remaining;
+
+        if (status != TSUMIKORO_STATUS_OK) {
+            BUS_DEBUG("Consumed %u bytes of invalid data, %u bytes remaining\n",
+                     (unsigned int)bytes_consumed, (unsigned int)remaining);
+        }
+    } else if (status != TSUMIKORO_STATUS_OK) {
+        // Decode failed with no bytes consumed - waiting for more data
+        BUS_DEBUG("Decode failed but waiting for more data (%u bytes buffered)\n",
+                 (unsigned int)local_rx_len);
+    }
 
     if (status == TSUMIKORO_STATUS_CRC_ERROR) {
         BUS_DEBUG("CRC error\n");
@@ -451,6 +500,7 @@ static void bus_process_state_machine(tsumikoro_bus_t *bus)
                 }
             } else if (bus_get_state_elapsed_ms(bus) >= bus->config.bus_idle_timeout_ms) {
                 // Timeout waiting for bus idle
+                BUS_DEBUG("Timeout waiting for bus idle (%ums elapsed)\n", bus_get_state_elapsed_ms(bus));
                 if (bus->config.auto_retry) {
                     bus_retry_command(bus);
                 } else {
@@ -466,6 +516,8 @@ static void bus_process_state_machine(tsumikoro_bus_t *bus)
         case TSUMIKORO_BUS_STATE_WAITING_RESPONSE:
             // Check for timeout
             if (bus_get_state_elapsed_ms(bus) >= bus->config.response_timeout_ms) {
+                BUS_DEBUG("Response timeout (%ums elapsed, expected response from 0x%02X)\n",
+                         bus_get_state_elapsed_ms(bus), bus->pending_cmd.packet.device_id);
                 if (bus->config.auto_retry) {
                     bus_retry_command(bus);
                 } else {
@@ -502,8 +554,16 @@ static void bus_hal_rx_callback(const uint8_t *data, size_t len, void *user_data
     tsumikoro_bus_t *bus = (tsumikoro_bus_t *)user_data;
 
     if (!bus || !data || len == 0 || len > TSUMIKORO_MAX_PACKET_LEN) {
+#ifdef TSUMIKORO_BUS_DEBUG
+        printf("[BUS RX CB] Invalid params: bus=%p, data=%p, len=%u\n",
+               bus, data, (unsigned int)len);
+#endif
         return;
     }
+
+#ifdef TSUMIKORO_BUS_DEBUG
+    printf("[BUS RX CB] Received %u bytes, posting to RX queue\n", (unsigned int)len);
+#endif
 
     // Create RX message
     tsumikoro_rx_msg_t rx_msg;
@@ -511,7 +571,11 @@ static void bus_hal_rx_callback(const uint8_t *data, size_t len, void *user_data
     rx_msg.len = len;
 
     // Post to RX queue (non-blocking from ISR)
-    tsumikoro_queue_send_from_isr(bus->rx_queue, &rx_msg);
+    bool posted = tsumikoro_queue_send_from_isr(bus->rx_queue, &rx_msg);
+
+#ifdef TSUMIKORO_BUS_DEBUG
+    printf("[BUS RX CB] Queue send result: %s\n", posted ? "success" : "FAILED");
+#endif
 }
 
 /**
@@ -533,8 +597,9 @@ static void bus_rx_thread(void *arg)
             continue;
         }
 
-        BUS_DEBUG("RX thread: received %zu bytes\n", rx_msg.len);
+        BUS_DEBUG("RX thread: received %u bytes\n", (unsigned int)rx_msg.len);
 
+#if TSUMIKORO_COLLISION_DETECTION
         // Check for TX echo
         if (bus->expecting_tx_echo &&
             rx_msg.len == bus->last_tx_len &&
@@ -550,12 +615,15 @@ static void bus_rx_thread(void *arg)
             bus->expecting_tx_echo = false;
             // TODO: Handle collision
         }
+#endif
 
         // Decode packet
         tsumikoro_packet_t rx_packet;
+        size_t bytes_consumed = 0;
         tsumikoro_status_t status = tsumikoro_packet_decode(rx_msg.data,
                                                              rx_msg.len,
-                                                             &rx_packet);
+                                                             &rx_packet,
+                                                             &bytes_consumed);
 
         if (status != TSUMIKORO_STATUS_OK) {
             BUS_DEBUG("RX thread: decode failed, status=%d\n", status);
@@ -594,7 +662,7 @@ static void bus_tx_thread(void *arg)
             continue;
         }
 
-        BUS_DEBUG("TX thread: transmitting %zu bytes\n", tx_msg.len);
+        BUS_DEBUG("TX thread: transmitting %u bytes\n", (unsigned int)tx_msg.len);
 
         // Wait for bus idle (with timeout)
         uint32_t start_time = tsumikoro_hal_get_time_ms();
@@ -614,10 +682,12 @@ static void bus_tx_thread(void *arg)
         tsumikoro_hal_status_t hal_status = tsumikoro_hal_transmit(bus->hal, tx_msg.data, tx_msg.len);
 
         if (hal_status == TSUMIKORO_HAL_OK) {
+#if TSUMIKORO_COLLISION_DETECTION
             // Save last TX for echo detection
             memcpy(bus->last_tx_buffer, tx_msg.data, tx_msg.len);
             bus->last_tx_len = tx_msg.len;
             bus->expecting_tx_echo = true;
+#endif
 
             BUS_DEBUG("TX thread: transmission complete\n");
 
@@ -711,54 +781,83 @@ static void bus_handler_thread(void *arg)
  */
 static bool bus_rtos_init(tsumikoro_bus_t *bus)
 {
+    BUS_DEBUG("Creating RX queue...\n");
     // Create queues
     bus->rx_queue = tsumikoro_queue_create(8, sizeof(tsumikoro_rx_msg_t));
-    if (!bus->rx_queue) goto error;
+    if (!bus->rx_queue) {
+        BUS_DEBUG("ERROR: Failed to create RX queue!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating TX queue...\n");
     bus->tx_queue = tsumikoro_queue_create(4, sizeof(tsumikoro_tx_msg_t));
-    if (!bus->tx_queue) goto error;
+    if (!bus->tx_queue) {
+        BUS_DEBUG("ERROR: Failed to create TX queue!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating handler queue...\n");
     bus->handler_queue = tsumikoro_queue_create(8, sizeof(tsumikoro_handler_event_t));
-    if (!bus->handler_queue) goto error;
+    if (!bus->handler_queue) {
+        BUS_DEBUG("ERROR: Failed to create handler queue!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating blocking semaphore...\n");
     // Create semaphore
     bus->blocking_sem = tsumikoro_semaphore_create_binary();
-    if (!bus->blocking_sem) goto error;
+    if (!bus->blocking_sem) {
+        BUS_DEBUG("ERROR: Failed to create blocking semaphore!\n");
+        goto error;
+    }
 
     // Create threads
     tsumikoro_thread_config_t thread_config;
 
+    BUS_DEBUG("Creating RX thread (%d bytes stack)...\n", TSUMIKORO_BUS_RX_THREAD_STACK_SIZE);
     // RX thread (high priority)
     thread_config.name = "bus_rx";
     thread_config.function = bus_rx_thread;
     thread_config.argument = bus;
-    thread_config.stack_size = 2048;
+    thread_config.stack_size = TSUMIKORO_BUS_RX_THREAD_STACK_SIZE;
     thread_config.priority = TSUMIKORO_THREAD_PRIORITY_HIGH;
     bus->rx_thread = tsumikoro_thread_create(&thread_config);
-    if (!bus->rx_thread) goto error;
+    if (!bus->rx_thread) {
+        BUS_DEBUG("ERROR: Failed to create RX thread!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating TX thread (%d bytes stack)...\n", TSUMIKORO_BUS_TX_THREAD_STACK_SIZE);
     // TX thread (high priority)
     thread_config.name = "bus_tx";
     thread_config.function = bus_tx_thread;
     thread_config.argument = bus;
-    thread_config.stack_size = 2048;
+    thread_config.stack_size = TSUMIKORO_BUS_TX_THREAD_STACK_SIZE;
     thread_config.priority = TSUMIKORO_THREAD_PRIORITY_HIGH;
     bus->tx_thread = tsumikoro_thread_create(&thread_config);
-    if (!bus->tx_thread) goto error;
+    if (!bus->tx_thread) {
+        BUS_DEBUG("ERROR: Failed to create TX thread!\n");
+        goto error;
+    }
 
+    BUS_DEBUG("Creating handler thread (%d bytes stack)...\n", TSUMIKORO_BUS_HANDLER_THREAD_STACK_SIZE);
     // Handler thread (normal priority)
     thread_config.name = "bus_handler";
     thread_config.function = bus_handler_thread;
     thread_config.argument = bus;
-    thread_config.stack_size = 3072;
+    thread_config.stack_size = TSUMIKORO_BUS_HANDLER_THREAD_STACK_SIZE;
     thread_config.priority = TSUMIKORO_THREAD_PRIORITY_NORMAL;
     bus->handler_thread = tsumikoro_thread_create(&thread_config);
-    if (!bus->handler_thread) goto error;
+    if (!bus->handler_thread) {
+        BUS_DEBUG("ERROR: Failed to create handler thread!\n");
+        goto error;
+    }
 
-    BUS_DEBUG("RTOS resources initialized\n");
+    BUS_DEBUG("RTOS resources initialized successfully\n");
     return true;
 
 error:
+    BUS_DEBUG("RTOS init failed, cleaning up...\n");
     // Cleanup on error
     if (bus->rx_queue) tsumikoro_queue_delete(bus->rx_queue);
     if (bus->tx_queue) tsumikoro_queue_delete(bus->tx_queue);
@@ -878,8 +977,17 @@ tsumikoro_status_t tsumikoro_bus_send_command_async(tsumikoro_bus_handle_t handl
     bus->pending_cmd.active = true;
     bus->pending_cmd.expects_response = true;
 
-    // Start transmission process
+#if TSUMIKORO_BUS_USE_RTOS
+    // In RTOS mode, directly transmit (TX thread handles bus idle check)
+    BUS_DEBUG("send_command_async: transmitting directly\n");
+    if (bus_transmit_pending(bus) != TSUMIKORO_STATUS_OK) {
+        bus->pending_cmd.active = false;
+        return TSUMIKORO_STATUS_ERROR;
+    }
+#else
+    // Bare-metal mode: use state machine
     bus_set_state(bus, TSUMIKORO_BUS_STATE_WAIT_BUS_IDLE);
+#endif
 
     return TSUMIKORO_STATUS_OK;
 }
@@ -906,8 +1014,17 @@ tsumikoro_status_t tsumikoro_bus_send_no_response(tsumikoro_bus_handle_t handle,
     bus->pending_cmd.active = true;
     bus->pending_cmd.expects_response = false;
 
-    // Start transmission process
+#if TSUMIKORO_BUS_USE_RTOS
+    // In RTOS mode, directly transmit (TX thread handles bus idle check)
+    BUS_DEBUG("send_no_response: transmitting directly\n");
+    if (bus_transmit_pending(bus) != TSUMIKORO_STATUS_OK) {
+        bus->pending_cmd.active = false;
+        return TSUMIKORO_STATUS_ERROR;
+    }
+#else
+    // Bare-metal mode: use state machine
     bus_set_state(bus, TSUMIKORO_BUS_STATE_WAIT_BUS_IDLE);
+#endif
 
     return TSUMIKORO_STATUS_OK;
 }
@@ -922,6 +1039,9 @@ tsumikoro_cmd_status_t tsumikoro_bus_send_command_blocking(tsumikoro_bus_handle_
     }
 
     tsumikoro_bus_t *bus = (tsumikoro_bus_t *)handle;
+
+    BUS_DEBUG("send_command_blocking: device=0x%02X, cmd=0x%04X, timeout=%ums\n",
+              packet->device_id, packet->command, timeout_ms);
 
     // Use bus default timeout if not specified
     if (timeout_ms == 0) {

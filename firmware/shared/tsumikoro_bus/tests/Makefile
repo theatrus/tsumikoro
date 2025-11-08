@@ -6,7 +6,7 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -std=c11 -g -O0
-CPPFLAGS = -I../include -I../hal/mock
+CPPFLAGS = -I../include -I../hal/mock -DTSUMIKORO_COLLISION_DETECTION=1 -DTSUMIKORO_BUS_DEBUG=1
 LDFLAGS =
 
 # Directories

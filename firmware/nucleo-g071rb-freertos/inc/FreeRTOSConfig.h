@@ -1,11 +1,8 @@
 /**
  * @file FreeRTOSConfig.h
- * @brief FreeRTOS configuration for Tsumikoro ministepper (STM32G071)
+ * @brief FreeRTOS configuration for NUCLEO-G071RB
  *
- * STM32G071G8U6: Cortex-M0+, 64 MHz, 64KB Flash, 36KB RAM, UFQFPN28 package
- *
- * Copyright (c) 2025 Yann Ramin
- * SPDX-License-Identifier: Apache-2.0
+ * STM32G071RBT6: Cortex-M0+, 64 MHz, 128KB Flash, 36KB RAM
  */
 
 #ifndef FREERTOS_CONFIG_H
@@ -22,7 +19,7 @@
 #define configTICK_RATE_HZ                      1000      /* 1 kHz (1 ms tick) */
 #define configMAX_PRIORITIES                    5
 #define configMINIMAL_STACK_SIZE                128       /* Words (512 bytes) */
-#define configTOTAL_HEAP_SIZE                   (12 * 1024)  /* 12 KB heap for bus threads */
+#define configTOTAL_HEAP_SIZE                   (18 * 1024)  /* 18 KB heap (increased for bus threads) */
 #define configMAX_TASK_NAME_LEN                 16
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1

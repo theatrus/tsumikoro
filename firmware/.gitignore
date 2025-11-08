@@ -28,6 +28,8 @@ cmake_install.cmake
 Makefile
 *.cmake
 !cmake/*.cmake
+!common/*.cmake
+!/Makefile
 
 # Backup files
 *~

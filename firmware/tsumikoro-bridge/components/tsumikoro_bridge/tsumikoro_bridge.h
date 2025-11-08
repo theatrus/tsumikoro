@@ -106,6 +106,31 @@ class TsumikoroBridge : public Component {
    */
   tsumikoro_bus_stats_t get_bus_stats() const;
 
+  /**
+   * @brief Set NUCLEO LED state (custom command 0xF001)
+   * @param device_id NUCLEO device ID (default: 0x10)
+   * @param state LED state: 0=off, 1=on, 2=auto-blink
+   * @return true if command sent successfully
+   */
+  bool nucleo_set_led(uint8_t device_id, uint8_t state);
+
+  /**
+   * @brief Get NUCLEO LED state (custom command 0xF002)
+   * @param device_id NUCLEO device ID (default: 0x10)
+   * @param led_state Output: LED state (0=off, 1=on)
+   * @param auto_blink Output: auto-blink enabled (0=disabled, 1=enabled)
+   * @return true if state received
+   */
+  bool nucleo_get_led(uint8_t device_id, uint8_t *led_state, uint8_t *auto_blink);
+
+  /**
+   * @brief Get NUCLEO button state (custom command 0xF003)
+   * @param device_id NUCLEO device ID (default: 0x10)
+   * @param button_state Output: button state (0=released, 1=pressed)
+   * @return true if state received
+   */
+  bool nucleo_get_button(uint8_t device_id, uint8_t *button_state);
+
  protected:
   /// Bus unsolicited message callback (static wrapper)
   static void bus_unsolicited_callback_(const tsumikoro_packet_t *packet, void *user_data);

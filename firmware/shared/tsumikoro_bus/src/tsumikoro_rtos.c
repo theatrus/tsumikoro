@@ -110,15 +110,6 @@ bool tsumikoro_semaphore_signal_from_isr(tsumikoro_semaphore_t sem)
     return result == pdTRUE;
 }
 
-static void thread_wrapper(void *arg)
-{
-    tsumikoro_thread_config_t *config = (tsumikoro_thread_config_t *)arg;
-    if (config && config->function) {
-        config->function(config->argument);
-    }
-    vTaskDelete(NULL);  // Delete self if function returns
-}
-
 tsumikoro_thread_t tsumikoro_thread_create(const tsumikoro_thread_config_t *config)
 {
     if (!config || !config->function) return NULL;
@@ -134,11 +125,13 @@ tsumikoro_thread_t tsumikoro_thread_create(const tsumikoro_thread_config_t *conf
     }
 
     TaskHandle_t handle = NULL;
+    // Pass function directly - no wrapper needed!
+    // Cast thread function to FreeRTOS TaskFunction_t type
     BaseType_t result = xTaskCreate(
-        thread_wrapper,
+        (TaskFunction_t)config->function,
         config->name ? config->name : "tsumikoro",
         config->stack_size / sizeof(StackType_t),
-        (void *)config,
+        config->argument,
         priority,
         &handle
     );

@@ -132,6 +132,9 @@ tsumikoro_hal_handle_t tsumikoro_hal_init(const tsumikoro_hal_config_t *config,
     device->baud_rate = config->baud_rate;
     device->turnaround_delay_bytes = config->turnaround_delay_bytes;
     device->rx_callback = rx_callback;
+
+    ESP_LOGI(TAG, "HAL init: device_id=0x%02X, controller=%d, baud=%u",
+             device->device_id, device->is_controller, device->baud_rate);
     device->user_data = user_data;
     device->rx_head = 0;
     device->rx_tail = 0;
@@ -165,23 +168,57 @@ tsumikoro_hal_status_t tsumikoro_hal_transmit(tsumikoro_hal_handle_t handle,
                                                size_t len)
 {
     if (!handle || !data || len == 0) {
+        ESP_LOGE(TAG, "TX: Invalid parameters (handle=%p, data=%p, len=%zu)", handle, data, len);
         return TSUMIKORO_HAL_ERROR;
     }
 
     tsumikoro_esp32_device_t *device = (tsumikoro_esp32_device_t *)handle;
 
     if (device->tx_active) {
+        ESP_LOGW(TAG, "TX: Already in progress");
         return TSUMIKORO_HAL_BUSY;  // TX already in progress
     }
+
+    // Log the packet being transmitted
+    ESP_LOGI(TAG, "TX: Sending %zu bytes", len);
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, len, ESP_LOG_INFO);
 
     device->tx_active = true;
     device->last_activity_tick = xTaskGetTickCount();
 
+#if TSUMIKORO_IGNORE_RX_DURING_TX
+    // Flush RX buffer before transmitting to avoid processing echo
+    size_t flushed = 0;
+    uart_get_buffered_data_len(device->esp32_config->uart_port, &flushed);
+    if (flushed > 0) {
+        ESP_LOGD(TAG, "TX: Flushing %zu bytes from RX buffer before TX", flushed);
+    }
+    uart_flush_input(device->esp32_config->uart_port);
+#endif
+
     // Transmit data using UART
     int written = uart_write_bytes(device->esp32_config->uart_port, data, len);
+    if (written != (int)len) {
+        ESP_LOGE(TAG, "TX: Write failed - wrote %d/%zu bytes", written, len);
+    }
 
     // Wait for transmission to complete
-    uart_wait_tx_done(device->esp32_config->uart_port, pdMS_TO_TICKS(100));
+    esp_err_t wait_result = uart_wait_tx_done(device->esp32_config->uart_port, pdMS_TO_TICKS(100));
+    if (wait_result != ESP_OK) {
+        ESP_LOGE(TAG, "TX: Wait for TX done failed: %s", esp_err_to_name(wait_result));
+    } else {
+        ESP_LOGD(TAG, "TX: Complete");
+    }
+
+#if TSUMIKORO_IGNORE_RX_DURING_TX
+    // Flush RX buffer after transmitting to discard echo data
+    flushed = 0;
+    uart_get_buffered_data_len(device->esp32_config->uart_port, &flushed);
+    if (flushed > 0) {
+        ESP_LOGD(TAG, "TX: Flushing %zu bytes from RX buffer after TX (echo)", flushed);
+    }
+    uart_flush_input(device->esp32_config->uart_port);
+#endif
 
     device->tx_active = false;
 
@@ -201,18 +238,34 @@ tsumikoro_hal_status_t tsumikoro_hal_receive(tsumikoro_hal_handle_t handle,
     tsumikoro_esp32_device_t *device = (tsumikoro_esp32_device_t *)handle;
     *received_len = 0;
 
+    // Check available data before reading
+    size_t available = 0;
+    uart_get_buffered_data_len(device->esp32_config->uart_port, &available);
+    if (available > 0) {
+        ESP_LOGD(TAG, "RX: %zu bytes available in UART buffer", available);
+    }
+
     // Check if RX callback is registered (RTOS mode)
     if (device->rx_callback) {
+        ESP_LOGD(TAG, "RX: RTOS mode, reading up to %zu bytes (timeout=%ums)", max_len, timeout_ms);
+
         // In RTOS mode with callback, read directly from UART and invoke callback
         int len = uart_read_bytes(device->esp32_config->uart_port,
                                    buffer, max_len,
                                    pdMS_TO_TICKS(timeout_ms));
 
         if (len > 0) {
+            ESP_LOGI(TAG, "RX: Received %d bytes", len);
+            ESP_LOG_BUFFER_HEX_LEVEL(TAG, buffer, len, ESP_LOG_INFO);
+
             device->last_activity_tick = xTaskGetTickCount();
             *received_len = len;
             device->rx_callback(buffer, len, device->user_data);
             return TSUMIKORO_HAL_OK;
+        } else if (len == 0) {
+            ESP_LOGD(TAG, "RX: Timeout (no data received)");
+        } else {
+            ESP_LOGE(TAG, "RX: Error reading UART (%d)", len);
         }
 
         return (len == 0) ? TSUMIKORO_HAL_TIMEOUT : TSUMIKORO_HAL_ERROR;

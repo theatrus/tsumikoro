@@ -2,12 +2,23 @@
  * @file tsumikoro_protocol.h
  * @brief Core protocol definitions for Tsumikoro multi-drop serial bus
  *
- * Wire Format:
- * [START(1)][ID(1)][CMD_HI(1)][CMD_LO(1)][LEN(1)][DATA(0-64)][CRC8(1)][END(1)]
+ * Wire Format (with byte stuffing for frame synchronization):
+ * [START(2)][STUFFED_PAYLOAD][END(1)]
  *
- * Packet size: 7-71 bytes
- * - Minimum (no data): 7 bytes
- * - Maximum (64 bytes data): 71 bytes
+ * Where:
+ * - START = 0xAA 0xAA (two-byte start delimiter)
+ * - STUFFED_PAYLOAD = byte-stuffed [ID][CMD_HI][CMD_LO][LEN][DATA(0-64)][CRC8]
+ * - END = 0x55 (end delimiter)
+ *
+ * Byte Stuffing Rules:
+ * - 0xAA in payload → 0xAA 0x01 (escaped)
+ * - 0x55 in payload → 0xAA 0x02 (escaped)
+ * - All other bytes → transmitted as-is
+ *
+ * Packet size (worst case with all bytes requiring escaping):
+ * - Minimum (no data): 8 bytes (START + 5 payload bytes + CRC + END)
+ * - Maximum (64 bytes data + escaping): 149 bytes
+ * - Typical (no escaping needed): 8-72 bytes
  *
  * Copyright (c) 2025 Yann Ramin
  * SPDX-License-Identifier: Apache-2.0
@@ -28,7 +39,49 @@ extern "C" {
  * @brief Protocol version
  */
 #define TSUMIKORO_PROTOCOL_VERSION_MAJOR 0
-#define TSUMIKORO_PROTOCOL_VERSION_MINOR 6
+#define TSUMIKORO_PROTOCOL_VERSION_MINOR 7  /* v0.7: Added byte stuffing for frame sync */
+
+/**
+ * @brief Feature flags
+ *
+ * TSUMIKORO_IGNORE_RX_DURING_TX:
+ * When enabled (default), the HAL will ignore all received data while
+ * transmitting. This prevents processing of echo data in RS-485 half-duplex
+ * systems and avoids collision detection overhead.
+ *
+ * Benefits:
+ * - No echo processing overhead
+ * - Simpler state machine (no collision detection needed)
+ * - Better for controlled bus environments where controller manages all traffic
+ *
+ * When to disable:
+ * - If you need collision detection
+ * - If you want to process simultaneous RX during TX
+ */
+#ifndef TSUMIKORO_IGNORE_RX_DURING_TX
+#define TSUMIKORO_IGNORE_RX_DURING_TX 1   /**< Default: enabled (ignore RX during TX) */
+#endif
+
+/**
+ * TSUMIKORO_COLLISION_DETECTION:
+ * When enabled, the bus layer will detect collisions by comparing received
+ * data against transmitted packets (echo detection). This adds memory and
+ * CPU overhead to buffer and compare transmitted packets.
+ *
+ * Benefits:
+ * - Can detect when multiple devices transmit simultaneously
+ * - Enables automatic collision recovery (if implemented)
+ *
+ * Drawbacks:
+ * - Requires buffering last transmitted packet (TSUMIKORO_MAX_PACKET_LEN bytes)
+ * - Requires byte-by-byte comparison of received data
+ * - Not needed when TSUMIKORO_IGNORE_RX_DURING_TX is enabled
+ *
+ * Default: disabled (collision detection not performed)
+ */
+#ifndef TSUMIKORO_COLLISION_DETECTION
+#define TSUMIKORO_COLLISION_DETECTION 0
+#endif
 
 /**
  * @brief Packet framing markers
@@ -37,11 +90,18 @@ extern "C" {
 #define TSUMIKORO_PACKET_END    0x55
 
 /**
+ * @brief Byte stuffing escape sequences
+ */
+#define TSUMIKORO_ESCAPE_BYTE   0xAA      /**< Escape byte (same as START) */
+#define TSUMIKORO_ESCAPE_AA     0x01      /**< Escaped 0xAA: 0xAA 0x01 */
+#define TSUMIKORO_ESCAPE_55     0x02      /**< Escaped 0x55: 0xAA 0x02 */
+
+/**
  * @brief Packet size limits
  */
 #define TSUMIKORO_MAX_DATA_LEN      64    /**< Maximum data payload size */
-#define TSUMIKORO_MIN_PACKET_LEN    7     /**< Minimum packet: START+ID+CMD_HI+CMD_LO+LEN+CRC+END */
-#define TSUMIKORO_MAX_PACKET_LEN    71    /**< Maximum packet with 64 bytes data */
+#define TSUMIKORO_MIN_PACKET_LEN    8     /**< Minimum: START(2)+ID+CMD_HI+CMD_LO+LEN+CRC+END */
+#define TSUMIKORO_MAX_PACKET_LEN    149   /**< Maximum with full escaping: 2+(5+64+1)*2+1 */
 
 /**
  * @brief Device address ranges
@@ -162,14 +222,17 @@ typedef struct {
  * @brief Encode a packet into wire format
  *
  * Converts a packet structure into the wire format with framing,
- * CRC8, and proper byte ordering.
+ * byte stuffing, CRC8, and proper byte ordering.
  *
  * Wire format:
- * [START][ID][CMD_HI][CMD_LO][LEN][DATA...][CRC8][END]
+ * [START(2)][STUFFED: ID+CMD_HI+CMD_LO+LEN+DATA+CRC8][END]
+ *
+ * Byte stuffing is applied to prevent 0xAA and 0x55 from appearing
+ * in the payload, ensuring reliable frame synchronization.
  *
  * @param packet Pointer to packet structure
- * @param buffer Output buffer for encoded packet
- * @param buffer_len Size of output buffer (must be >= packet size)
+ * @param buffer Output buffer for encoded packet (must be >= TSUMIKORO_MAX_PACKET_LEN)
+ * @param buffer_len Size of output buffer
  * @return Number of bytes written to buffer, or 0 on error
  */
 size_t tsumikoro_packet_encode(const tsumikoro_packet_t *packet,
@@ -180,26 +243,32 @@ size_t tsumikoro_packet_encode(const tsumikoro_packet_t *packet,
  * @brief Decode a packet from wire format
  *
  * Parses wire format data and converts to packet structure.
- * Validates framing markers and CRC8.
+ * Validates framing markers and CRC8. Searches for packet start
+ * marker and discards any preceding bytes.
  *
  * @param buffer Input buffer containing encoded packet
  * @param buffer_len Length of input buffer
  * @param packet Output packet structure
+ * @param bytes_consumed Output: number of bytes consumed from buffer (including discarded bytes)
  * @return TSUMIKORO_STATUS_OK on success, error code otherwise
  */
 tsumikoro_status_t tsumikoro_packet_decode(const uint8_t *buffer,
                                             size_t buffer_len,
-                                            tsumikoro_packet_t *packet);
+                                            tsumikoro_packet_t *packet,
+                                            size_t *bytes_consumed);
 
 /**
- * @brief Calculate packet size for given data length
+ * @brief Calculate minimum packet size for given data length
+ *
+ * Returns the minimum size without byte stuffing. Actual size may be
+ * larger if payload contains 0xAA or 0x55 bytes requiring escaping.
  *
  * @param data_len Data payload length (0-64)
- * @return Total packet size in bytes (7-71)
+ * @return Minimum packet size in bytes (8-72, without escaping)
  */
 static inline size_t tsumikoro_packet_size(uint8_t data_len)
 {
-    return 7 + data_len;  // START + ID + CMD_HI + CMD_LO + LEN + DATA + CRC + END
+    return 8 + data_len;  // START(2) + ID + CMD_HI + CMD_LO + LEN + DATA + CRC + END
 }
 
 /**
