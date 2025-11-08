@@ -24,17 +24,18 @@ void test_encode_minimum_packet(void)
     uint8_t buffer[TSUMIKORO_MAX_PACKET_LEN];
     size_t len = tsumikoro_packet_encode(&packet, buffer, sizeof(buffer));
 
-    // Should be 7 bytes: START + ID + CMD_HI + CMD_LO + LEN + CRC + END
-    TEST_ASSERT_EQUAL(7, len);
+    // Should be 8 bytes: START(2) + ID + CMD_HI + CMD_LO + LEN + CRC + END
+    TEST_ASSERT_EQUAL(8, len);
 
     // Verify structure
-    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_START, buffer[0]);  // START
-    TEST_ASSERT_EQUAL(0x01, buffer[1]);                     // ID
-    TEST_ASSERT_EQUAL(0x00, buffer[2]);                     // CMD_HI
-    TEST_ASSERT_EQUAL(0x01, buffer[3]);                     // CMD_LO
-    TEST_ASSERT_EQUAL(0x00, buffer[4]);                     // LEN
-    // buffer[5] is CRC
-    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_END, buffer[6]);     // END
+    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_START, buffer[0]);  // START 1
+    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_START, buffer[1]);  // START 2
+    TEST_ASSERT_EQUAL(0x01, buffer[2]);                     // ID
+    TEST_ASSERT_EQUAL(0x00, buffer[3]);                     // CMD_HI
+    TEST_ASSERT_EQUAL(0x01, buffer[4]);                     // CMD_LO
+    TEST_ASSERT_EQUAL(0x00, buffer[5]);                     // LEN
+    // buffer[6] is CRC
+    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_END, buffer[7]);     // END
 
     printf("    Encoded packet: ");
     for (size_t i = 0; i < len; i++) {
@@ -58,21 +59,22 @@ void test_encode_packet_with_data(void)
     uint8_t buffer[TSUMIKORO_MAX_PACKET_LEN];
     size_t len = tsumikoro_packet_encode(&packet, buffer, sizeof(buffer));
 
-    // Should be 11 bytes: START + ID + CMD_HI + CMD_LO + LEN + 4 DATA + CRC + END
-    TEST_ASSERT_EQUAL(11, len);
+    // Should be 12 bytes: START(2) + ID + CMD_HI + CMD_LO + LEN + 4 DATA + CRC + END
+    TEST_ASSERT_EQUAL(12, len);
 
     // Verify structure
-    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_START, buffer[0]);
-    TEST_ASSERT_EQUAL(0x02, buffer[1]);
-    TEST_ASSERT_EQUAL(0x00, buffer[2]);  // CMD_HI
-    TEST_ASSERT_EQUAL(0x0A, buffer[3]);  // CMD_LO (0x000A = CMD_GET_STATUS)
-    TEST_ASSERT_EQUAL(0x04, buffer[4]);  // LEN
-    TEST_ASSERT_EQUAL(0x10, buffer[5]);  // DATA[0]
-    TEST_ASSERT_EQUAL(0x20, buffer[6]);  // DATA[1]
-    TEST_ASSERT_EQUAL(0x30, buffer[7]);  // DATA[2]
-    TEST_ASSERT_EQUAL(0x40, buffer[8]);  // DATA[3]
-    // buffer[9] is CRC
-    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_END, buffer[10]);
+    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_START, buffer[0]);  // START 1
+    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_START, buffer[1]);  // START 2
+    TEST_ASSERT_EQUAL(0x02, buffer[2]);
+    TEST_ASSERT_EQUAL(0x00, buffer[3]);  // CMD_HI
+    TEST_ASSERT_EQUAL(0x0A, buffer[4]);  // CMD_LO (0x000A = CMD_GET_STATUS)
+    TEST_ASSERT_EQUAL(0x04, buffer[5]);  // LEN
+    TEST_ASSERT_EQUAL(0x10, buffer[6]);  // DATA[0]
+    TEST_ASSERT_EQUAL(0x20, buffer[7]);  // DATA[1]
+    TEST_ASSERT_EQUAL(0x30, buffer[8]);  // DATA[2]
+    TEST_ASSERT_EQUAL(0x40, buffer[9]);  // DATA[3]
+    // buffer[10] is CRC
+    TEST_ASSERT_EQUAL(TSUMIKORO_PACKET_END, buffer[11]);
 
     printf("    Encoded packet: ");
     for (size_t i = 0; i < len; i++) {
@@ -88,7 +90,8 @@ void test_decode_minimum_packet(void)
 {
     // Manually constructed packet: PING to device 0x01
     uint8_t buffer[] = {
-        TSUMIKORO_PACKET_START,  // START
+        TSUMIKORO_PACKET_START,  // START 1
+        TSUMIKORO_PACKET_START,  // START 2
         0x01,                     // ID
         0x00,                     // CMD_HI
         0x01,                     // CMD_LO (PING)
@@ -97,50 +100,54 @@ void test_decode_minimum_packet(void)
         TSUMIKORO_PACKET_END      // END
     };
 
-    // Calculate correct CRC (over bytes 1-4: ID + CMD_HI + CMD_LO + LEN)
-    buffer[5] = tsumikoro_crc8_calculate_table(&buffer[1], 4);
+    // Calculate correct CRC (over bytes 2-5: ID + CMD_HI + CMD_LO + LEN)
+    buffer[6] = tsumikoro_crc8_calculate_table(&buffer[2], 4);
 
     tsumikoro_packet_t packet;
-    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet, &bytes_consumed);
 
     TEST_ASSERT_EQUAL(TSUMIKORO_STATUS_OK, status);
     TEST_ASSERT_EQUAL(0x01, packet.device_id);
     TEST_ASSERT_EQUAL(TSUMIKORO_CMD_PING, packet.command);
     TEST_ASSERT_EQUAL(0, packet.data_len);
+    TEST_ASSERT_EQUAL(8, bytes_consumed);  // Full packet consumed
 }
 
 /**
- * Test: Decode packet with data
+ * Test: Decode packet with data (including byte stuffing test)
  */
 void test_decode_packet_with_data(void)
 {
-    // Manually constructed packet
-    uint8_t buffer[] = {
-        TSUMIKORO_PACKET_START,  // START
-        0x03,                     // ID
-        0x00,                     // CMD_HI
-        0x02,                     // CMD_LO (GET_INFO)
-        0x03,                     // LEN
-        0xAA,                     // DATA[0]
-        0xBB,                     // DATA[1]
-        0xCC,                     // DATA[2]
-        0x00,                     // CRC (placeholder)
-        TSUMIKORO_PACKET_END      // END
+    // Create packet with data that includes 0xAA (will be escaped)
+    tsumikoro_packet_t original = {
+        .device_id = 0x03,
+        .command = TSUMIKORO_CMD_GET_INFO,
+        .data_len = 3,
+        .data = { 0xAA, 0xBB, 0xCC }  // 0xAA will be escaped in wire format
     };
 
-    // Calculate correct CRC (over bytes 1-7: ID + CMD + LEN + DATA)
-    buffer[8] = tsumikoro_crc8_calculate_table(&buffer[1], 7);
+    // Encode to get properly stuffed wire format
+    uint8_t buffer[TSUMIKORO_MAX_PACKET_LEN];
+    size_t len = tsumikoro_packet_encode(&original, buffer, sizeof(buffer));
 
+    // Length should be 12 or 13 bytes depending on whether CRC needs escaping
+    // START(2) + ID + CMD_HI + CMD_LO + LEN + (0xAA->0xAA 0x01) + BB + CC + CRC(1-2) + END
+    TEST_ASSERT(len >= 12 && len <= 13, "Encoded length should be 12-13 bytes");
+
+    // Decode the packet
     tsumikoro_packet_t packet;
-    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, len, &packet, &bytes_consumed);
 
     TEST_ASSERT_EQUAL(TSUMIKORO_STATUS_OK, status);
     TEST_ASSERT_EQUAL(0x03, packet.device_id);
     TEST_ASSERT_EQUAL(TSUMIKORO_CMD_GET_INFO, packet.command);
     TEST_ASSERT_EQUAL(3, packet.data_len);
-    TEST_ASSERT_EQUAL(0xAA, packet.data[0]);
+    TEST_ASSERT_EQUAL(0xAA, packet.data[0]);  // Should be unstuffed correctly
     TEST_ASSERT_EQUAL(0xBB, packet.data[1]);
     TEST_ASSERT_EQUAL(0xCC, packet.data[2]);
+    TEST_ASSERT_EQUAL(len, bytes_consumed);
 }
 
 /**
@@ -163,13 +170,15 @@ void test_roundtrip_encode_decode(void)
 
     // Decode
     tsumikoro_packet_t decoded;
-    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, len, &decoded);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, len, &decoded, &bytes_consumed);
 
     // Verify
     TEST_ASSERT_EQUAL(TSUMIKORO_STATUS_OK, status);
     TEST_ASSERT_EQUAL(original.device_id, decoded.device_id);
     TEST_ASSERT_EQUAL(original.command, decoded.command);
     TEST_ASSERT_EQUAL(original.data_len, decoded.data_len);
+    TEST_ASSERT_EQUAL(len, bytes_consumed);
 
     if (original.data_len > 0) {
         TEST_ASSERT_EQUAL_BYTES(original.data, decoded.data, original.data_len);
@@ -182,7 +191,8 @@ void test_roundtrip_encode_decode(void)
 void test_decode_crc_error(void)
 {
     uint8_t buffer[] = {
-        TSUMIKORO_PACKET_START,
+        TSUMIKORO_PACKET_START,  // START 1
+        TSUMIKORO_PACKET_START,  // START 2
         0x01,
         0x00,
         0x01,
@@ -192,7 +202,8 @@ void test_decode_crc_error(void)
     };
 
     tsumikoro_packet_t packet;
-    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet, &bytes_consumed);
 
     TEST_ASSERT_EQUAL(TSUMIKORO_STATUS_CRC_ERROR, status);
 }
@@ -213,7 +224,8 @@ void test_decode_invalid_start(void)
     };
 
     tsumikoro_packet_t packet;
-    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet, &bytes_consumed);
 
     TEST_ASSERT_EQUAL(TSUMIKORO_STATUS_INVALID_PACKET, status);
 }
@@ -224,7 +236,8 @@ void test_decode_invalid_start(void)
 void test_decode_invalid_end(void)
 {
     uint8_t buffer[] = {
-        TSUMIKORO_PACKET_START,
+        TSUMIKORO_PACKET_START,  // START 1
+        TSUMIKORO_PACKET_START,  // START 2
         0x01,
         0x00,
         0x01,
@@ -234,10 +247,11 @@ void test_decode_invalid_end(void)
     };
 
     // Calculate correct CRC
-    buffer[5] = tsumikoro_crc8_calculate_table(&buffer[1], 4);
+    buffer[6] = tsumikoro_crc8_calculate_table(&buffer[2], 4);
 
     tsumikoro_packet_t packet;
-    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet, &bytes_consumed);
 
     TEST_ASSERT_EQUAL(TSUMIKORO_STATUS_INVALID_PACKET, status);
 }
@@ -248,7 +262,8 @@ void test_decode_invalid_end(void)
 void test_decode_buffer_too_small(void)
 {
     uint8_t buffer[] = {
-        TSUMIKORO_PACKET_START,
+        TSUMIKORO_PACKET_START,  // START 1
+        TSUMIKORO_PACKET_START,  // START 2
         0x01,
         0x00,
         0x01
@@ -256,7 +271,8 @@ void test_decode_buffer_too_small(void)
     };
 
     tsumikoro_packet_t packet;
-    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, sizeof(buffer), &packet, &bytes_consumed);
 
     TEST_ASSERT_EQUAL(TSUMIKORO_STATUS_INVALID_PACKET, status);
 }
@@ -280,16 +296,19 @@ void test_encode_max_data(void)
     uint8_t buffer[TSUMIKORO_MAX_PACKET_LEN];
     size_t len = tsumikoro_packet_encode(&packet, buffer, sizeof(buffer));
 
-    // Should be 71 bytes
-    TEST_ASSERT_EQUAL(TSUMIKORO_MAX_PACKET_LEN, len);
+    // Should encode successfully (size depends on whether any bytes need escaping)
+    TEST_ASSERT(len > 0, "Encode should succeed");
+    TEST_ASSERT(len <= TSUMIKORO_MAX_PACKET_LEN, "Should fit in max packet size");
 
     // Verify decode
     tsumikoro_packet_t decoded;
-    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, len, &decoded);
+    size_t bytes_consumed = 0;
+    tsumikoro_status_t status = tsumikoro_packet_decode(buffer, len, &decoded, &bytes_consumed);
 
     TEST_ASSERT_EQUAL(TSUMIKORO_STATUS_OK, status);
     TEST_ASSERT_EQUAL(TSUMIKORO_MAX_DATA_LEN, decoded.data_len);
     TEST_ASSERT_EQUAL_BYTES(packet.data, decoded.data, TSUMIKORO_MAX_DATA_LEN);
+    TEST_ASSERT_EQUAL(len, bytes_consumed);
 }
 
 /**
@@ -297,10 +316,10 @@ void test_encode_max_data(void)
  */
 void test_helper_functions(void)
 {
-    // Test packet size calculation
-    TEST_ASSERT_EQUAL(7, tsumikoro_packet_size(0));
-    TEST_ASSERT_EQUAL(8, tsumikoro_packet_size(1));
-    TEST_ASSERT_EQUAL(71, tsumikoro_packet_size(64));
+    // Test packet size calculation (minimum size without escaping)
+    TEST_ASSERT_EQUAL(8, tsumikoro_packet_size(0));   // 8 bytes minimum
+    TEST_ASSERT_EQUAL(9, tsumikoro_packet_size(1));   // 9 bytes with 1 data byte
+    TEST_ASSERT_EQUAL(72, tsumikoro_packet_size(64)); // 72 bytes with max data
 
     // Test device ID validation
     TEST_ASSERT(tsumikoro_is_valid_device_id(0x00), "Controller ID should be valid");

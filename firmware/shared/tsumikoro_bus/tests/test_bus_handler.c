@@ -32,7 +32,8 @@ static void auto_responder_callback(const uint8_t *data, size_t len, void *user_
 
     // Decode received packet
     tsumikoro_packet_t rx_packet;
-    if (tsumikoro_packet_decode(data, len, &rx_packet) != TSUMIKORO_STATUS_OK) {
+    size_t bytes_consumed = 0;
+    if (tsumikoro_packet_decode(data, len, &rx_packet, &bytes_consumed) != TSUMIKORO_STATUS_OK) {
         printf("    [AUTO-RESPONDER] Decode failed\n");
         return;
     }
