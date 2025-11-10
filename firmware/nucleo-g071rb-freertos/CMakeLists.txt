@@ -53,11 +53,20 @@ target_include_directories(tsumikoro_bus PRIVATE
 # Link FreeRTOS to tsumikoro_bus so it can find the headers
 target_link_libraries(tsumikoro_bus PUBLIC freertos_stm32g0)
 
-# Link libraries (add FreeRTOS)
+# Add tsumikoro_tmc_stepper library
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/tsumikoro_tmc_stepper ${CMAKE_CURRENT_BINARY_DIR}/tsumikoro_tmc_stepper)
+
+# TMC driver needs HAL config for STM32 platform layer
+target_include_directories(tsumikoro_tmc_stepper_stm32 PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+)
+
+# Link libraries (add FreeRTOS and TMC driver)
 target_link_libraries(${PROJECT_NAME}.elf
     stm32g0_hal
     freertos_stm32g0
     tsumikoro_bus
+    tsumikoro_tmc_stepper_stm32
 )
 
 # Include directories

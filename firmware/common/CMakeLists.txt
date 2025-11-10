@@ -20,6 +20,8 @@ file(GLOB HAL_SOURCES
     ${HAL_DIR}/Src/stm32g0xx_hal_tim_ex.c
     ${HAL_DIR}/Src/stm32g0xx_hal_uart.c
     ${HAL_DIR}/Src/stm32g0xx_hal_uart_ex.c
+    ${HAL_DIR}/Src/stm32g0xx_hal_spi.c
+    ${HAL_DIR}/Src/stm32g0xx_hal_spi_ex.c
 )
 
 # Create HAL library

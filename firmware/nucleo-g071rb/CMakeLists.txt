@@ -42,10 +42,19 @@ target_include_directories(tsumikoro_bus PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
 )
 
+# Add tsumikoro_tmc_stepper library
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/tsumikoro_tmc_stepper ${CMAKE_CURRENT_BINARY_DIR}/tsumikoro_tmc_stepper)
+
+# TMC driver needs HAL config for STM32 platform layer
+target_include_directories(tsumikoro_tmc_stepper_stm32 PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+)
+
 # Link libraries
 target_link_libraries(${PROJECT_NAME}.elf
     stm32g0_hal
     tsumikoro_bus
+    tsumikoro_tmc_stepper_stm32
 )
 
 # Include directories
