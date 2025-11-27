@@ -1,23 +1,28 @@
 /**
  * @file main.c
- * @brief NUCLEO-G071RB development board with bus protocol
+ * @brief NUCLEO-G071RB development board with bus protocol and TMC2130 stepper
  *
- * Development board firmware with bus protocol support.
+ * Development board firmware with bus protocol support and TMC2130 stepper control.
  * - LED blinks on PA5 (LD4) - can be controlled via bus
  * - Button monitored on PC13 (B1) - can be read via bus
  * - USART2 provides debug output via ST-Link VCP (115200 baud)
  * - USART1 provides bus protocol interface (1 Mbaud)
+ * - SPI1 controls TMC2130 stepper driver
  *
  * NUCLEO-G071RB pin mapping:
  * - LED (LD4): PA5
  * - User Button (B1): PC13
  * - USART2 (ST-Link VCP): PA2 (TX), PA3 (RX)
  * - USART1 (Bus): PC4 (TX/D1), PC5 (RX/D0), PA1 (DE - RS-485 Driver Enable)
+ * - SPI1: PB3 (SCK), PB4 (MISO), PB5 (MOSI)
+ * - TMC2130: PB0 (CS), PB1 (STEP), PB2 (DIR), PA0 (EN)
  */
 
 #include "stm32g0xx_hal.h"
 #include "tsumikoro_bus.h"
 #include "tsumikoro_hal_stm32.h"
+#include "tsumikoro_tmc_hal_stm32.h"
+#include "tsumikoro_tmc_motion.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -43,13 +48,36 @@
 #define BUS_DMA_TX_IRQn         DMA1_Channel1_IRQn
 #define BUS_DMA_RX_IRQn         DMA1_Channel2_3_IRQn
 
+/* SPI configuration for TMC2130 */
+#define TMC_SPI                 SPI1
+#define TMC_SPI_CLK_ENABLE()    __HAL_RCC_SPI1_CLK_ENABLE()
+
+/* TMC2130 GPIO pins */
+#define TMC_CS_PIN              GPIO_PIN_0
+#define TMC_CS_PORT             GPIOB
+#define TMC_STEP_PIN            GPIO_PIN_1
+#define TMC_STEP_PORT           GPIOB
+#define TMC_DIR_PIN             GPIO_PIN_2
+#define TMC_DIR_PORT            GPIOB
+#define TMC_EN_PIN              GPIO_PIN_0
+#define TMC_EN_PORT             GPIOA
+
+/* SPI pins */
+#define SPI1_SCK_PIN            GPIO_PIN_3
+#define SPI1_SCK_PORT           GPIOB
+#define SPI1_MISO_PIN           GPIO_PIN_4
+#define SPI1_MISO_PORT          GPIOB
+#define SPI1_MOSI_PIN           GPIO_PIN_5
+#define SPI1_MOSI_PORT          GPIOB
+
 /* Custom commands for LED/Button control */
 #define CMD_LED_SET             0xF001      /**< Set LED state: data[0] = 0/1 */
 #define CMD_LED_GET             0xF002      /**< Get LED state */
 #define CMD_BUTTON_GET          0xF003      /**< Get button state */
 
-/* UART Handles */
+/* Peripheral Handles */
 UART_HandleTypeDef huart2;  /* Debug UART (PA2/PA3 - ST-Link VCP) */
+SPI_HandleTypeDef hspi1;    /* SPI for TMC2130 */
 
 /* Redirect printf to debug UART for bus protocol debug */
 int _write(int file, char *ptr, int len)
@@ -62,6 +90,10 @@ int _write(int file, char *ptr, int len)
 /* Bus handles */
 static tsumikoro_bus_handle_t g_bus_handle = NULL;
 tsumikoro_hal_handle_t g_hal_handle = NULL;  /* Non-static for interrupt handlers */
+
+/* TMC2130 stepper driver */
+static tsumikoro_tmc_hal_stm32_t g_tmc_instance;
+static tsumikoro_tmc_motion_t g_tmc_motion;
 
 /* STM32 HAL configuration */
 static const tsumikoro_hal_stm32_config_t g_stm32_config = {
@@ -102,6 +134,8 @@ void Error_Handler(void);
 static void GPIO_Init(void);
 static void USART1_Init(void);
 static void USART2_Init(void);
+static void SPI1_Init(void);
+static void TMC_Init(void);
 static void Bus_Init(void);
 static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data);
 
@@ -152,7 +186,7 @@ void SystemClock_Config(void)
 
 /**
  * @brief GPIO Initialization
- * Configure GPIO pins for LED and button
+ * Configure GPIO pins for LED, button, SPI, and TMC2130
  */
 static void GPIO_Init(void)
 {
@@ -160,6 +194,7 @@ static void GPIO_Init(void)
 
     /* Enable GPIO clocks */
     __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
 
     /* Configure LED pin (PA5) */
@@ -191,6 +226,46 @@ static void GPIO_Init(void)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF1_USART1;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    /* Configure SPI1 pins (PB3=SCK, PB4=MISO, PB5=MOSI) */
+    GPIO_InitStruct.Pin = SPI1_SCK_PIN | SPI1_MISO_PIN | SPI1_MOSI_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF0_SPI1;
+    HAL_GPIO_Init(SPI1_SCK_PORT, &GPIO_InitStruct);
+
+    /* Configure TMC2130 CS pin (PB0) */
+    HAL_GPIO_WritePin(TMC_CS_PORT, TMC_CS_PIN, GPIO_PIN_SET);
+    GPIO_InitStruct.Pin = TMC_CS_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(TMC_CS_PORT, &GPIO_InitStruct);
+
+    /* Configure TMC2130 STEP pin (PB1) */
+    HAL_GPIO_WritePin(TMC_STEP_PORT, TMC_STEP_PIN, GPIO_PIN_RESET);
+    GPIO_InitStruct.Pin = TMC_STEP_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(TMC_STEP_PORT, &GPIO_InitStruct);
+
+    /* Configure TMC2130 DIR pin (PB2) */
+    HAL_GPIO_WritePin(TMC_DIR_PORT, TMC_DIR_PIN, GPIO_PIN_RESET);
+    GPIO_InitStruct.Pin = TMC_DIR_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(TMC_DIR_PORT, &GPIO_InitStruct);
+
+    /* Configure TMC2130 EN pin (PA0) - idle high = disabled */
+    HAL_GPIO_WritePin(TMC_EN_PORT, TMC_EN_PIN, GPIO_PIN_SET);
+    GPIO_InitStruct.Pin = TMC_EN_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(TMC_EN_PORT, &GPIO_InitStruct);
 }
 
 /**
@@ -247,6 +322,77 @@ static void USART2_Init(void)
     if (HAL_UART_Init(&huart2) != HAL_OK) {
         Error_Handler();
     }
+}
+
+/**
+ * @brief SPI1 Initialization
+ * PB3: SCK, PB4: MISO, PB5: MOSI
+ * 1 MHz, Mode 3 (CPOL=1, CPHA=1) for TMC2130
+ */
+static void SPI1_Init(void)
+{
+    /* Enable SPI clock */
+    TMC_SPI_CLK_ENABLE();
+
+    /* Configure SPI */
+    hspi1.Instance = TMC_SPI;
+    hspi1.Init.Mode = SPI_MODE_MASTER;
+    hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+    hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+    hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;     /* CPOL=1 for TMC */
+    hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;          /* CPHA=1 for TMC */
+    hspi1.Init.NSS = SPI_NSS_SOFT;
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;  /* 64 MHz / 64 = 1 MHz */
+    hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+    hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+    hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+    hspi1.Init.CRCPolynomial = 7;
+    hspi1.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
+    hspi1.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
+
+    if (HAL_SPI_Init(&hspi1) != HAL_OK) {
+        Error_Handler();
+    }
+}
+
+/**
+ * @brief TMC2130 stepper driver initialization
+ */
+static void TMC_Init(void)
+{
+    /* TMC hardware configuration */
+    tsumikoro_tmc_hal_stm32_config_t tmc_hw_config = {
+        .spi_handle = &hspi1,
+        .cs_port = TMC_CS_PORT,
+        .cs_pin = TMC_CS_PIN,
+        .step_port = TMC_STEP_PORT,
+        .step_pin = TMC_STEP_PIN,
+        .dir_port = TMC_DIR_PORT,
+        .dir_pin = TMC_DIR_PIN,
+        .en_port = TMC_EN_PORT,
+        .en_pin = TMC_EN_PIN
+    };
+
+    /* Initialize TMC driver */
+    if (!tsumikoro_tmc_hal_stm32_init(&g_tmc_instance, &tmc_hw_config, TMC_CHIP_TMC2130)) {
+        Error_Handler();
+    }
+
+    /* Get TMC driver handle */
+    tsumikoro_tmc_stepper_t *tmc = tsumikoro_tmc_hal_stm32_get_driver(&g_tmc_instance);
+
+    /* Configure TMC2130 parameters */
+    tsumikoro_tmc_set_current(tmc, 16, 31, 5);         /* IHOLD=16, IRUN=31, IHOLDDELAY=5 */
+    tsumikoro_tmc_set_microsteps(tmc, TMC_MRES_256, true);  /* 256 microsteps with interpolation */
+    tsumikoro_tmc_set_stealth_chop(tmc, true);         /* Enable StealthChop for quiet operation */
+
+    /* Initialize motion controller */
+    if (!tsumikoro_tmc_motion_init(&g_tmc_motion, tmc)) {
+        Error_Handler();
+    }
+
+    /* Set motion parameters */
+    tsumikoro_tmc_motion_set_params(&g_tmc_motion, 2000, 1000);  /* 2000 steps/sec, 1000 steps/sec^2 */
 }
 
 /**
@@ -388,6 +534,139 @@ static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *use
             HAL_UART_Transmit(&huart2, (uint8_t *)debug_buf, len, 100);
             break;
 
+        case TSUMIKORO_CMD_STEPPER_MOVE:
+            /* Move to absolute position */
+            if (packet->data_len >= 4) {
+                int32_t target_position = ((int32_t)packet->data[0] << 24) |
+                                         ((int32_t)packet->data[1] << 16) |
+                                         ((int32_t)packet->data[2] << 8) |
+                                         ((int32_t)packet->data[3]);
+                if (tsumikoro_tmc_motion_move_to(&g_tmc_motion, target_position)) {
+                    response.data[0] = 0x00;  /* Success */
+                    HAL_UART_Transmit(&huart2, (uint8_t *)"[BUS] STEPPER_MOVE\r\n", 20, 100);
+                } else {
+                    response.data[0] = 0xFF;  /* Error */
+                }
+            } else {
+                response.data[0] = 0xFF;  /* Invalid length */
+            }
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_STEPPER_MOVE_REL:
+            /* Move relative to current position */
+            if (packet->data_len >= 4) {
+                int32_t steps = ((int32_t)packet->data[0] << 24) |
+                               ((int32_t)packet->data[1] << 16) |
+                               ((int32_t)packet->data[2] << 8) |
+                               ((int32_t)packet->data[3]);
+                if (tsumikoro_tmc_motion_move_relative(&g_tmc_motion, steps)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error */
+                }
+            } else {
+                response.data[0] = 0xFF;  /* Invalid length */
+            }
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_STEPPER_STOP:
+            /* Stop motor */
+            if (tsumikoro_tmc_motion_stop(&g_tmc_motion)) {
+                response.data[0] = 0x00;  /* Success */
+            } else {
+                response.data[0] = 0xFF;  /* Error */
+            }
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_STEPPER_SET_SPEED:
+            /* Set maximum speed */
+            if (packet->data_len >= 4) {
+                uint32_t max_speed = ((uint32_t)packet->data[0] << 24) |
+                                    ((uint32_t)packet->data[1] << 16) |
+                                    ((uint32_t)packet->data[2] << 8) |
+                                    ((uint32_t)packet->data[3]);
+                if (tsumikoro_tmc_motion_set_params(&g_tmc_motion, max_speed, g_tmc_motion.acceleration)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error */
+                }
+            } else {
+                response.data[0] = 0xFF;  /* Invalid length */
+            }
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_STEPPER_SET_ACCEL:
+            /* Set acceleration */
+            if (packet->data_len >= 4) {
+                uint32_t accel = ((uint32_t)packet->data[0] << 24) |
+                                ((uint32_t)packet->data[1] << 16) |
+                                ((uint32_t)packet->data[2] << 8) |
+                                ((uint32_t)packet->data[3]);
+                if (tsumikoro_tmc_motion_set_params(&g_tmc_motion, g_tmc_motion.max_velocity, accel)) {
+                    response.data[0] = 0x00;  /* Success */
+                } else {
+                    response.data[0] = 0xFF;  /* Error */
+                }
+            } else {
+                response.data[0] = 0xFF;  /* Invalid length */
+            }
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_STEPPER_HOME:
+            /* Set current position to zero */
+            if (tsumikoro_tmc_motion_set_position(&g_tmc_motion, 0)) {
+                response.data[0] = 0x00;  /* Success */
+            } else {
+                response.data[0] = 0xFF;  /* Error */
+            }
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_STEPPER_ENABLE:
+            /* Enable motor */
+            if (tsumikoro_tmc_motion_enable(&g_tmc_motion, true)) {
+                response.data[0] = 0x00;  /* Success */
+                HAL_UART_Transmit(&huart2, (uint8_t *)"[BUS] STEPPER_ENABLE\r\n", 22, 100);
+            } else {
+                response.data[0] = 0xFF;  /* Error */
+            }
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_STEPPER_DISABLE:
+            /* Disable motor */
+            if (tsumikoro_tmc_motion_enable(&g_tmc_motion, false)) {
+                response.data[0] = 0x00;  /* Success */
+                HAL_UART_Transmit(&huart2, (uint8_t *)"[BUS] STEPPER_DISABLE\r\n", 23, 100);
+            } else {
+                response.data[0] = 0xFF;  /* Error */
+            }
+            response.data_len = 1;
+            break;
+
+        case TSUMIKORO_CMD_STEPPER_GET_POSITION:
+            /* Get current position */
+            {
+                int32_t position = 0;
+                if (tsumikoro_tmc_motion_get_position(&g_tmc_motion, &position)) {
+                    response.data[0] = (uint8_t)(position >> 24);
+                    response.data[1] = (uint8_t)(position >> 16);
+                    response.data[2] = (uint8_t)(position >> 8);
+                    response.data[3] = (uint8_t)(position);
+                    response.data[4] = tsumikoro_tmc_motion_is_moving(&g_tmc_motion) ? 0x01 : 0x00;
+                    response.data_len = 5;
+                } else {
+                    response.data[0] = 0xFF;  /* Error */
+                    response.data_len = 1;
+                }
+            }
+            break;
+
         default:
             /* Unknown command - no response */
             len = snprintf(debug_buf, sizeof(debug_buf),
@@ -420,6 +699,8 @@ int main(void)
     GPIO_Init();
     USART2_Init();
     USART1_Init();
+    SPI1_Init();
+    TMC_Init();
     Bus_Init();
 
     /* Startup message */
@@ -429,15 +710,18 @@ int main(void)
                      "128KB Flash, 36KB RAM\r\n"
                      "Bus ID: 0x10, Baud: 1 Mbaud\r\n"
                      "USART1: PC4(TX/D1), PC5(RX/D0), PA1(DE)\r\n"
+                     "TMC2130 Stepper: SPI1 + Motion Control\r\n"
                      "========================================\r\n\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 1000);
 
     uint32_t loop_count = 0;
     uint32_t last_process_time = HAL_GetTick();
+    uint32_t last_motion_time_us = 0;
 
     /* Main loop */
     while (1) {
         uint32_t now = HAL_GetTick();
+        uint32_t now_us = now * 1000;  /* Convert to microseconds (approximate) */
 
         /* Check for new DMA RX interrupts */
         if (g_dma_rx_irq_count != g_last_dma_rx) {
@@ -452,6 +736,12 @@ int main(void)
             g_bus_process_count++;
             tsumikoro_bus_process(g_bus_handle);
             last_process_time = now;
+        }
+
+        /* Process motion controller (high frequency for smooth motion) */
+        if (now_us - last_motion_time_us >= 100) {  /* Every 100us */
+            tsumikoro_tmc_motion_process(&g_tmc_motion, now_us);
+            last_motion_time_us = now_us;
         }
 
         /* Auto-blink LED if enabled */
