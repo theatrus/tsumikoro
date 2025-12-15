@@ -39,7 +39,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: protocol-test-results
           path: firmware/shared/tsumikoro_bus/tests/*.log
@@ -82,7 +82,7 @@ jobs:
           arm-none-eabi-size tsumikoro-ministepper/tsumikoro-ministepper.elf
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ministepper-firmware
           path: |
@@ -127,7 +127,7 @@ jobs:
           arm-none-eabi-size tsumikoro-servo/tsumikoro-servo.elf
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: servo-firmware
           path: |
@@ -172,7 +172,7 @@ jobs:
           arm-none-eabi-size nucleo-g071rb/nucleo-g071rb.elf
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: nucleo-g071rb-firmware
           path: |
@@ -217,7 +217,7 @@ jobs:
           arm-none-eabi-size nucleo-g071rb-freertos/nucleo-g071rb-freertos.elf
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: nucleo-g071rb-freertos-firmware
           path: |
@@ -274,7 +274,7 @@ jobs:
           find esphome/.esphome/build -name "*.bin" -exec ls -lh {} \;
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: esp32-bridge-firmware
           path: |
