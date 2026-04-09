@@ -793,7 +793,6 @@ static void vMotionTask(void *pvParameters)
 {
     (void)pvParameters;
     TickType_t xLastWakeTime = xTaskGetTickCount();
-    uint32_t last_time_us = 0;
 
     printf("[MOTION] Motion task started\r\n");
 
@@ -808,7 +807,6 @@ static void vMotionTask(void *pvParameters)
         /* Process motion with mutex protection */
         if (xSemaphoreTake(tmc_mutex, pdMS_TO_TICKS(1)) == pdTRUE) {
             tsumikoro_tmc_motion_process(&g_tmc_motion, now_us);
-            last_time_us = now_us;
             xSemaphoreGive(tmc_mutex);
         }
     }

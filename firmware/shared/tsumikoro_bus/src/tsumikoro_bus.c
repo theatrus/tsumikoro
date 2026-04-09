@@ -203,7 +203,7 @@ static void bus_complete_command(tsumikoro_bus_t *bus,
     }
 
     BUS_DEBUG("Command complete: cmd=0x%04X, status=%d, retry=%u\n",
-              bus->pending_cmd.packet.command, status, bus->pending_cmd.retry_count);
+              bus->pending_cmd.packet.command, status, (unsigned int)bus->pending_cmd.retry_count);
 
     // Update statistics
     if (status == TSUMIKORO_CMD_STATUS_SUCCESS) {
@@ -314,7 +314,7 @@ static void bus_retry_command(tsumikoro_bus_t *bus)
     bus->stats.retries++;
 
     BUS_DEBUG("Retry %u/%u for cmd=0x%04X\n",
-              bus->pending_cmd.retry_count, bus->config.retry_count,
+              (unsigned int)bus->pending_cmd.retry_count, (unsigned int)bus->config.retry_count,
               bus->pending_cmd.packet.command);
 
     if (bus->pending_cmd.retry_count >= bus->config.retry_count) {
@@ -505,7 +505,7 @@ static void bus_process_state_machine(tsumikoro_bus_t *bus)
                 }
             } else if (bus_get_state_elapsed_ms(bus) >= bus->config.bus_idle_timeout_ms) {
                 // Timeout waiting for bus idle
-                BUS_DEBUG("Timeout waiting for bus idle (%ums elapsed)\n", bus_get_state_elapsed_ms(bus));
+                BUS_DEBUG("Timeout waiting for bus idle (%ums elapsed)\n", (unsigned int)bus_get_state_elapsed_ms(bus));
                 if (bus->config.auto_retry) {
                     bus_retry_command(bus);
                 } else {
@@ -522,7 +522,7 @@ static void bus_process_state_machine(tsumikoro_bus_t *bus)
             // Check for timeout
             if (bus_get_state_elapsed_ms(bus) >= bus->config.response_timeout_ms) {
                 BUS_DEBUG("Response timeout (%ums elapsed, expected response from 0x%02X)\n",
-                         bus_get_state_elapsed_ms(bus), bus->pending_cmd.packet.device_id);
+                         (unsigned int)bus_get_state_elapsed_ms(bus), bus->pending_cmd.packet.device_id);
                 if (bus->config.auto_retry) {
                     bus_retry_command(bus);
                 } else {
@@ -578,6 +578,7 @@ static void bus_hal_rx_callback(const uint8_t *data, size_t len, void *user_data
 
     // Post to RX queue (non-blocking from ISR)
     bool posted = tsumikoro_queue_send_from_isr(bus->rx_queue, &rx_msg);
+    (void)posted;
 
 #ifdef TSUMIKORO_BUS_DEBUG
     printf("[BUS RX CB] Queue send result: %s\n", posted ? "success" : "FAILED");
@@ -1047,7 +1048,7 @@ tsumikoro_cmd_status_t tsumikoro_bus_send_command_blocking(tsumikoro_bus_handle_
     tsumikoro_bus_t *bus = (tsumikoro_bus_t *)handle;
 
     BUS_DEBUG("send_command_blocking: device=0x%02X, cmd=0x%04X, timeout=%ums\n",
-              packet->device_id, packet->command, timeout_ms);
+              packet->device_id, packet->command, (unsigned int)timeout_ms);
 
     // Use bus default timeout if not specified
     if (timeout_ms == 0) {

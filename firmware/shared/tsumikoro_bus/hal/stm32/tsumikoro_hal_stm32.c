@@ -303,7 +303,7 @@ tsumikoro_hal_status_t tsumikoro_hal_transmit(tsumikoro_hal_handle_t handle,
         }
 #ifdef TSUMIKORO_HAL_MOCK_DEBUG
         printf("[HAL_TX] ERROR: HAL_UART_Transmit_DMA failed, status=%d, UART gState=%d\n",
-               status, device->uart_handle.gState);
+               status, (int)device->uart_handle.gState);
 #endif
         return TSUMIKORO_HAL_ERROR;
     }
