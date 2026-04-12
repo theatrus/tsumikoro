@@ -1,0 +1,16 @@
+(kicad_sch
+  (version 20231120)
+  (generator "claude")
+  (generator_version "1.0")
+  (uuid "b7c2e1a3-4d5f-6e7a-8b9c-0d1e2f3a4b5c")
+  (paper "A3")
+  (title_block
+    (title "Tsumikoro Ministepper Controller")
+    (date "2026-04-11")
+    (rev "0.1")
+    (comment 1 "STM32G071G8U6 + TMC2130 + SIT3088E + TPS54061")
+    (comment 2 "4-Layer PCB for JLCPCB")
+  )
+  (lib_symbols)
+  (symbol_instances)
+)
