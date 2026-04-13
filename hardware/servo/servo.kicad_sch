@@ -1553,6 +1553,138 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Jumper:SolderJumper_2_Open"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "JP"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "SolderJumper_2_Open"
+				(at 0 -2.032 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 -1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Solder Jumper, 2-pole, open"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "SolderJumper_2_Open_0_1"
+				(arc
+					(start 1.0922 0.8636)
+					(mid 0 0.3302)
+					(end -1.0922 0.8636)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(arc
+					(start -1.0922 0.8636)
+					(mid 0 1.397)
+					(end 1.0922 0.8636)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+			)
+			(symbol "SolderJumper_2_Open_1_1"
+				(pin passive line
+					(at -2.54 0 0)
+					(length 1.27)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 2.54 0 180)
+					(length 1.27)
+					(name "B"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Mechanical:MountingHole"
 			(pin_names
 				(offset 1.016)
@@ -3369,6 +3501,18 @@
 		(uuid "89be04d6-c10f-4535-80db-220c1bd6a121")
 	)
 	(junction
+		(at 360.68 205.74)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "8ac10ad4-beb0-499f-bdbc-5be40f84f136")
+	)
+	(junction
+		(at 379.73 210.82)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "8c7fc7fb-c551-4dc8-be71-3f6a5c05c5f3")
+	)
+	(junction
 		(at 367.03 205.74)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3421,6 +3565,16 @@
 			(type default)
 		)
 		(uuid "00f8e389-56b7-42ef-90e4-5ac536ab8536")
+	)
+	(wire
+		(pts
+			(xy 379.73 210.82) (xy 369.57 210.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "01548db6-71fa-4536-ac1e-198746e8301f")
 	)
 	(wire
 		(pts
@@ -3764,6 +3918,16 @@
 	)
 	(wire
 		(pts
+			(xy 360.68 220.98) (xy 367.03 220.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4442d87e-052e-4e9e-ba63-965c523d5bf3")
+	)
+	(wire
+		(pts
 			(xy 340.36 148.59) (xy 344.17 148.59)
 		)
 		(stroke
@@ -3914,7 +4078,17 @@
 	)
 	(wire
 		(pts
-			(xy 327.66 205.74) (xy 367.03 205.74)
+			(xy 360.68 205.74) (xy 367.03 205.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "63bfff76-1732-4c2d-b360-4acf2a0565cf")
+	)
+	(wire
+		(pts
+			(xy 327.66 205.74) (xy 360.68 205.74)
 		)
 		(stroke
 			(width 0)
@@ -4061,6 +4235,16 @@
 			(type default)
 		)
 		(uuid "730c2db7-6a13-42d5-be79-deaa25aa576f")
+	)
+	(wire
+		(pts
+			(xy 379.73 220.98) (xy 379.73 210.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "73a82fae-c35c-484a-bd04-b5493e363561")
 	)
 	(wire
 		(pts
@@ -4354,6 +4538,26 @@
 	)
 	(wire
 		(pts
+			(xy 360.68 205.74) (xy 360.68 214.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "90e8899f-7277-4f24-9dd6-ce7443fa0a61")
+	)
+	(wire
+		(pts
+			(xy 360.68 219.71) (xy 360.68 220.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "91778f8c-24fc-4d5d-8a68-459983d89460")
+	)
+	(wire
+		(pts
 			(xy 283.21 187.96) (xy 283.21 176.53)
 		)
 		(stroke
@@ -4584,7 +4788,7 @@
 	)
 	(wire
 		(pts
-			(xy 389.89 210.82) (xy 369.57 210.82)
+			(xy 389.89 210.82) (xy 379.73 210.82)
 		)
 		(stroke
 			(width 0)
@@ -4621,6 +4825,16 @@
 			(type default)
 		)
 		(uuid "b447e629-aa2b-4d1b-811e-03952b18ad85")
+	)
+	(wire
+		(pts
+			(xy 374.65 220.98) (xy 379.73 220.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b555de6a-e3f2-43da-88fa-ca636c36042d")
 	)
 	(wire
 		(pts
@@ -5112,6 +5326,16 @@
 		)
 		(uuid "00c5f659-e6f9-4ae3-864a-62dd065e354f")
 	)
+	(label "B"
+		(at 345.44 210.82 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "149ae982-3b08-4138-b5d2-1220f4167c10")
+	)
 	(label "SERVO1"
 		(at 138.43 210.82 0)
 		(effects
@@ -5251,6 +5475,16 @@
 			(justify left bottom)
 		)
 		(uuid "e47add99-53a0-4f45-8449-91c989d5f831")
+	)
+	(label "A"
+		(at 345.44 205.74 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "e5c4c1f8-5213-4428-808f-3ff5d7da2210")
 	)
 	(label "DE"
 		(at 240.03 128.27 0)
@@ -9820,6 +10054,85 @@
 		)
 	)
 	(symbol
+		(lib_id "Jumper:SolderJumper_2_Open")
+		(at 360.68 217.17 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9350a36b-5c06-4218-9e21-abbb417ac5ba")
+		(property "Reference" "JPTERM"
+			(at 354.076 217.17 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "TERM"
+			(at 363.22 217.17 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
+			(at 360.68 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 360.68 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Solder jumper to enable RS-485 bus termination (normally open)"
+			(at 360.68 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4eb3dcda-c44c-49bd-b852-a1960e92dfc2")
+		)
+		(pin "2"
+			(uuid "925a0834-2de2-4620-9cec-ad912e1650aa")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "JPTERM")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 318.77 222.25 0)
 		(unit 1)
@@ -12495,6 +12808,118 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "C7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 370.84 220.98 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "d94b495f-8854-4083-8a8a-44cfed626165")
+		(property "Reference" "R21"
+			(at 370.84 215.9 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "120R"
+			(at 370.84 226.06 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 370.84 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 370.84 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "RS-485 termination 120R 1% 1206 (series with JP1)"
+			(at 370.84 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C114928"
+			(at 370.84 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RC1206FR-07120RL"
+			(at 370.84 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 370.84 220.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ec9fcdbd-afcb-4ea6-82ba-58d940b823c5")
+		)
+		(pin "2"
+			(uuid "ed9bd74e-4bf9-4716-9aba-96eef9a4895b")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "R21")
 					(unit 1)
 				)
 			)

@@ -1755,6 +1755,12 @@
 		(uuid "7e9b8581-c497-4403-abce-3bedeab84eba")
 	)
 	(junction
+		(at 201.93 102.87)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "8e8ebf57-f20c-4034-b5b1-62e31d2fea3d")
+	)
+	(junction
 		(at 123.19 127)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1858,6 +1864,16 @@
 	)
 	(wire
 		(pts
+			(xy 212.09 95.25) (xy 212.09 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4005dc7b-fb10-4a2e-ad3f-c4b2d18889de")
+	)
+	(wire
+		(pts
 			(xy 153.67 85.09) (xy 160.02 85.09)
 		)
 		(stroke
@@ -1875,6 +1891,16 @@
 			(type default)
 		)
 		(uuid "4aa2e0a9-4c58-4e47-b53e-44c2c7f69ad3")
+	)
+	(wire
+		(pts
+			(xy 201.93 102.87) (xy 212.09 102.87)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4d70346d-7c1b-4fb2-9312-3c3864e82f00")
 	)
 	(wire
 		(pts
@@ -2005,6 +2031,16 @@
 			(type default)
 		)
 		(uuid "78adbd75-e72a-4d9d-beb8-ce1f6a75e7cf")
+	)
+	(wire
+		(pts
+			(xy 201.93 92.71) (xy 212.09 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "79d5fb33-b10f-47c8-80d5-559ca62abc43")
 	)
 	(wire
 		(pts
@@ -2604,6 +2640,120 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/a1b2c3d4-e5f6-7890-abcd-ef0123456789"
 					(reference "#PWR02")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 212.09 99.06 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3890322f-6e9b-4046-8c21-bc7ecc7e56f6")
+		(property "Reference" "C14"
+			(at 214.63 96.52 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10uF"
+			(at 214.63 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 212.09 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 212.09 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Output capacitor 10V X5R"
+			(at 212.09 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C315248"
+			(at 212.09 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05A106MP5NUNC"
+			(at 212.09 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 212.09 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ae214925-8292-4824-b317-ab44aee8c66a")
+		)
+		(pin "2"
+			(uuid "1d9eb7fb-684f-44d1-a591-764b5194c9c6")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55/a1b2c3d4-e5f6-7890-abcd-ef0123456789"
+					(reference "C14")
 					(unit 1)
 				)
 			)
