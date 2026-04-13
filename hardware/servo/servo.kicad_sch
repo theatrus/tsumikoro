@@ -1123,6 +1123,162 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:D_Schottky"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "D_Schottky"
+				(at 0 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Schottky diode"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "D_Schottky_0_1"
+				(polyline
+					(pts
+						(xy -1.27 1.27) (xy -1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 0) (xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 1.27) (xy 1.27 0.635) (xy 1.905 0.635)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -1.27) (xy 1.27 -0.635) (xy 0.635 -0.635)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "D_Schottky_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Device:LED"
 			(pin_numbers
 				(hide yes)
@@ -1392,6 +1548,105 @@
 								(size 1.27 1.27)
 							)
 						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Mechanical:MountingHole"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom no)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "H"
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "MountingHole"
+				(at 0 3.175 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Mounting Hole without connection"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "mounting hole"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "MountingHole*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "MountingHole_0_1"
+				(circle
+					(center 0 0)
+					(radius 1.27)
+					(stroke
+						(width 1.27)
+						(type default)
+					)
+					(fill
+						(type none)
 					)
 				)
 			)
@@ -3084,6 +3339,12 @@
 		)
 	)
 	(junction
+		(at 369.57 210.82)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "191c9381-66eb-4447-b960-553270794e6c")
+	)
+	(junction
 		(at 332.74 102.87)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3106,6 +3367,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "89be04d6-c10f-4535-80db-220c1bd6a121")
+	)
+	(junction
+		(at 367.03 205.74)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a85efe78-d614-4204-ae0e-3699be9bc975")
 	)
 	(junction
 		(at 288.29 205.74)
@@ -3184,6 +3451,16 @@
 			(type default)
 		)
 		(uuid "09ddbb60-161a-4c92-af9e-3381857c05bb")
+	)
+	(wire
+		(pts
+			(xy 387.35 196.85) (xy 387.35 205.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0b1a961e-010d-4dd3-bc8e-39560e3fd50a")
 	)
 	(wire
 		(pts
@@ -3377,6 +3654,16 @@
 	)
 	(wire
 		(pts
+			(xy 99.06 125.73) (xy 99.06 132.08)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2de55099-88f8-45d2-90ca-13b6e739ff9b")
+	)
+	(wire
+		(pts
 			(xy 236.22 153.67) (xy 256.54 153.67)
 		)
 		(stroke
@@ -3417,6 +3704,16 @@
 	)
 	(wire
 		(pts
+			(xy 392.43 196.85) (xy 392.43 199.39)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "39b073be-a776-478d-bf55-3b6d508edd20")
+	)
+	(wire
+		(pts
 			(xy 284.48 135.89) (xy 284.48 130.81)
 		)
 		(stroke
@@ -3447,6 +3744,16 @@
 	)
 	(wire
 		(pts
+			(xy 114.3 123.19) (xy 114.3 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3e9dd1e0-2f31-4e17-af94-7c2b7997ac10")
+	)
+	(wire
+		(pts
 			(xy 299.72 109.22) (xy 299.72 111.76)
 		)
 		(stroke
@@ -3464,6 +3771,16 @@
 			(type default)
 		)
 		(uuid "44670e54-8766-4eba-917d-1dfe37cdc029")
+	)
+	(wire
+		(pts
+			(xy 95.25 125.73) (xy 99.06 125.73)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "473ebe12-8039-44a1-bfa7-dc97579dc4a5")
 	)
 	(wire
 		(pts
@@ -3557,6 +3874,16 @@
 	)
 	(wire
 		(pts
+			(xy 369.57 210.82) (xy 369.57 196.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "61964da8-cd13-4258-8a57-4107fe79b187")
+	)
+	(wire
+		(pts
 			(xy 236.22 143.51) (xy 243.84 143.51)
 		)
 		(stroke
@@ -3584,6 +3911,16 @@
 			(type default)
 		)
 		(uuid "63563d26-8bee-441c-8eec-c5dd98a649bd")
+	)
+	(wire
+		(pts
+			(xy 327.66 205.74) (xy 367.03 205.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "64ae5357-417d-4cb7-82f9-2e2261c8f5e3")
 	)
 	(wire
 		(pts
@@ -3654,6 +3991,16 @@
 			(type default)
 		)
 		(uuid "6a4e3224-963a-43a9-bc62-ebb5e8a74d1a")
+	)
+	(wire
+		(pts
+			(xy 384.81 196.85) (xy 384.81 198.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6a9b0190-e487-4d73-a254-7af5c1829f89")
 	)
 	(wire
 		(pts
@@ -4127,6 +4474,16 @@
 	)
 	(wire
 		(pts
+			(xy 387.35 205.74) (xy 367.03 205.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a515498c-cd4b-442f-b190-dbc12370692a")
+	)
+	(wire
+		(pts
 			(xy 271.78 157.48) (xy 271.78 160.02)
 		)
 		(stroke
@@ -4227,6 +4584,16 @@
 	)
 	(wire
 		(pts
+			(xy 389.89 210.82) (xy 369.57 210.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "af86231c-9470-402c-950f-d4819f785d77")
+	)
+	(wire
+		(pts
 			(xy 119.38 203.2) (xy 119.38 205.74)
 		)
 		(stroke
@@ -4287,6 +4654,16 @@
 	)
 	(wire
 		(pts
+			(xy 95.25 123.19) (xy 101.6 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c0de176a-4921-4ed3-90a2-384b11892b1b")
+	)
+	(wire
+		(pts
 			(xy 260.35 95.25) (xy 260.35 93.98)
 		)
 		(stroke
@@ -4304,6 +4681,16 @@
 			(type default)
 		)
 		(uuid "c1ec044f-c6b0-4983-ad76-5c1b012ed44f")
+	)
+	(wire
+		(pts
+			(xy 367.03 205.74) (xy 367.03 196.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c4936457-30c9-41c6-9950-c2592e31c1dd")
 	)
 	(wire
 		(pts
@@ -4367,6 +4754,26 @@
 	)
 	(wire
 		(pts
+			(xy 109.22 123.19) (xy 114.3 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ceb7d4d2-d317-489d-8ada-87afb3817406")
+	)
+	(wire
+		(pts
+			(xy 389.89 196.85) (xy 389.89 210.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ceba179d-387a-4aa1-bc7d-ef42eea0323c")
+	)
+	(wire
+		(pts
 			(xy 236.22 133.35) (xy 243.84 133.35)
 		)
 		(stroke
@@ -4374,6 +4781,16 @@
 			(type default)
 		)
 		(uuid "d08c1882-f01f-4c4a-9ae5-6ccd11aeac41")
+	)
+	(wire
+		(pts
+			(xy 372.11 196.85) (xy 372.11 199.39)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d0a445a3-2ca4-4963-a79b-b3811c26463e")
 	)
 	(wire
 		(pts
@@ -4437,7 +4854,7 @@
 	)
 	(wire
 		(pts
-			(xy 337.82 198.12) (xy 337.82 200.66)
+			(xy 337.82 195.58) (xy 337.82 198.12)
 		)
 		(stroke
 			(width 0)
@@ -4447,7 +4864,7 @@
 	)
 	(wire
 		(pts
-			(xy 337.82 187.96) (xy 337.82 190.5)
+			(xy 337.82 185.42) (xy 337.82 187.96)
 		)
 		(stroke
 			(width 0)
@@ -4577,6 +4994,16 @@
 	)
 	(wire
 		(pts
+			(xy 364.49 196.85) (xy 364.49 198.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eb76a85a-f15a-4c8c-b3cf-8c113262adbb")
+	)
+	(wire
+		(pts
 			(xy 256.54 201.93) (xy 309.88 201.93)
 		)
 		(stroke
@@ -4584,6 +5011,16 @@
 			(type default)
 		)
 		(uuid "ec85c00a-bc11-4744-a687-253fbffcfe40")
+	)
+	(wire
+		(pts
+			(xy 327.66 210.82) (xy 369.57 210.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f4a620dd-d998-4bef-8dd1-3f67c9bfda7d")
 	)
 	(wire
 		(pts
@@ -5079,6 +5516,202 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "J2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x04")
+		(at 388.62 191.77 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0841702e-d814-4e3f-bfe0-ccd1fe51f094")
+		(property "Reference" "JBUS1"
+			(at 396.24 191.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x04_XH"
+			(at 381 191.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal"
+			(at 388.62 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.jst-mfg.com/product/pdf/eng/eXH.pdf"
+			(at 388.62 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "JST-XH 4-pin right-angle TH connector, 2.50mm pitch"
+			(at 388.62 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C157925"
+			(at 388.62 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "S4B-XH-A(LF)(SN)"
+			(at 388.62 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "JST"
+			(at 388.62 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5b2ba54a-9311-42c7-a0d6-b05b3cb7ce5f")
+		)
+		(pin "2"
+			(uuid "2a50bac4-6d00-4254-b93f-488a9af63afc")
+		)
+		(pin "3"
+			(uuid "7c0f49e2-0f33-40ff-a4ac-65565f5e0d2c")
+		)
+		(pin "4"
+			(uuid "aeda84c8-636a-4f56-99d4-e8b12868347c")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "JBUS1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 99.06 132.08 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "09dd9a61-adc2-4fb6-b9a4-e9dd08555f8d")
+		(property "Reference" "#PWR056"
+			(at 99.06 138.43 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 99.06 137.16 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 99.06 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 99.06 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 99.06 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "b352f09a-3148-46c3-a7eb-78454c2c5b7a")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR056")
 					(unit 1)
 				)
 			)
@@ -5783,6 +6416,203 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector_Generic:Conn_01x04")
+		(at 368.3 191.77 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2357f6b1-90a5-4e71-a431-3ba7449fbff8")
+		(property "Reference" "JBUS2"
+			(at 375.92 191.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x04_XH"
+			(at 360.68 191.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal"
+			(at 368.3 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.jst-mfg.com/product/pdf/eng/eXH.pdf"
+			(at 368.3 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "JST-XH 4-pin right-angle TH connector, 2.50mm pitch"
+			(at 368.3 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C157925"
+			(at 368.3 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "S4B-XH-A(LF)(SN)"
+			(at 368.3 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "JST"
+			(at 368.3 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "177cf9f4-68e3-4605-a7cc-522c93f83d6c")
+		)
+		(pin "2"
+			(uuid "97db2d8b-195e-4cd2-b6a6-419611d87532")
+		)
+		(pin "3"
+			(uuid "4106be15-2af5-48f9-a026-abcfcf0c82b8")
+		)
+		(pin "4"
+			(uuid "07f5c2fc-f84a-45ab-9354-0296f16becee")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "JBUS2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VPP")
+		(at 392.43 199.39 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2436ae77-1837-48fe-890a-51602dda0579")
+		(property "Reference" "#PWR061"
+			(at 388.62 199.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "VPP"
+			(at 396.24 199.3899 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 392.43 199.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 392.43 199.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"VPP\""
+			(at 392.43 199.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4a205492-4d60-4c78-bad0-4781de811b03")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR061")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 288.29 191.77 0)
 		(unit 1)
@@ -6323,6 +7153,82 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "#PWR043")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 27.94 264.16 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "32db3bca-5885-45eb-9a7e-9ebc88cda341")
+		(property "Reference" "H2"
+			(at 30.48 262.8899 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 30.48 265.4299 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3_Pad_TopBottom"
+			(at 27.94 264.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 27.94 264.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 27.94 264.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "H2")
 					(unit 1)
 				)
 			)
@@ -7104,6 +8010,84 @@
 		)
 	)
 	(symbol
+		(lib_id "power:VPP")
+		(at 114.3 120.65 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4c14b3ae-3d0e-41de-a76a-5f70edeea54f")
+		(property "Reference" "#PWR057"
+			(at 114.3 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "VPP"
+			(at 114.3 115.57 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 114.3 120.65 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 114.3 120.65 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"VPP\""
+			(at 114.3 120.65 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "8d94a7d4-5864-4965-97f5-1445dce78829")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR057")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 123.19 223.52 90)
 		(unit 1)
@@ -7488,7 +8472,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 337.82 200.66 0)
+		(at 337.82 198.12 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -7499,7 +8483,7 @@
 		(fields_autoplaced yes)
 		(uuid "55699636-982a-4132-b3e3-85b8a6d102c4")
 		(property "Reference" "#PWR028"
-			(at 337.82 207.01 0)
+			(at 337.82 204.47 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7510,7 +8494,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 337.82 205.74 0)
+			(at 337.82 203.2 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7520,7 +8504,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 337.82 200.66 0)
+			(at 337.82 198.12 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7531,7 +8515,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 337.82 200.66 0)
+			(at 337.82 198.12 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7542,7 +8526,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 337.82 200.66 0)
+			(at 337.82 198.12 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8297,7 +9281,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
-		(at 337.82 187.96 0)
+		(at 337.82 185.42 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -8308,7 +9292,7 @@
 		(fields_autoplaced yes)
 		(uuid "7c1146c6-a294-49f9-b9b6-88cf9592c0fe")
 		(property "Reference" "#PWR027"
-			(at 337.82 191.77 0)
+			(at 337.82 189.23 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8319,7 +9303,7 @@
 			)
 		)
 		(property "Value" "+3.3V"
-			(at 337.82 182.88 0)
+			(at 337.82 180.34 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8329,7 +9313,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 337.82 187.96 0)
+			(at 337.82 185.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8340,7 +9324,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 337.82 187.96 0)
+			(at 337.82 185.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8351,7 +9335,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 337.82 187.96 0)
+			(at 337.82 185.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8679,6 +9663,85 @@
 		)
 	)
 	(symbol
+		(lib_id "power:VPP")
+		(at 372.11 199.39 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8e5cca21-0727-41a8-b75b-91b3eea6020c")
+		(property "Reference" "#PWR060"
+			(at 368.3 199.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "VPP"
+			(at 375.92 199.3899 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 372.11 199.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 372.11 199.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"VPP\""
+			(at 372.11 199.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4b084372-5d6a-41a5-90a3-6d61afe304b7")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR060")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 118.11 228.6 0)
 		(unit 1)
@@ -8829,6 +9892,270 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "#PWR022")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 90.17 123.19 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "988de950-3a1a-4a26-a01d-735beba11aad")
+		(property "Reference" "JPWR2"
+			(at 90.17 118.11 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x02_XH"
+			(at 90.17 128.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_XH_S2B-XH-A_1x02_P2.50mm_Horizontal"
+			(at 90.17 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.jst-mfg.com/product/pdf/eng/eXH.pdf"
+			(at 90.17 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "JST-XH 2-pin right-angle TH connector - Power input"
+			(at 90.17 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C157931"
+			(at 90.17 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "S2B-XH-A(LF)(SN)"
+			(at 90.17 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "JST"
+			(at 90.17 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2b8c951b-f0cf-4999-ae90-37cc53505d88")
+		)
+		(pin "2"
+			(uuid "3556f362-3d44-41d3-93ef-a7d38e74082d")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "JPWR2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 27.94 274.32 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "99f6315f-cadc-4f84-a2b9-309210da6d49")
+		(property "Reference" "H4"
+			(at 30.48 273.0499 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 30.48 275.5899 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3_Pad_TopBottom"
+			(at 27.94 274.32 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 27.94 274.32 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 27.94 274.32 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "H4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 27.94 279.4 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9a434955-e1bf-419f-bd1f-e2563ee39f59")
+		(property "Reference" "H5"
+			(at 30.48 278.1299 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 30.48 280.6699 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3_Pad_TopBottom"
+			(at 27.94 279.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 27.94 279.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 27.94 279.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "H5")
 					(unit 1)
 				)
 			)
@@ -10211,6 +11538,84 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 384.81 198.12 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c7787655-962a-43eb-8e1b-2dc9024817fd")
+		(property "Reference" "#PWR059"
+			(at 384.81 204.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 384.81 203.2 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 384.81 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 384.81 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 384.81 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "506ad338-88c4-43b5-ae94-16cf51dcf13c")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR059")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:+3.3V")
 		(at 318.77 193.04 0)
 		(unit 1)
@@ -10669,6 +12074,194 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 105.41 123.19 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "d2000001-0000-0000-0000-000000000002")
+		(property "Reference" "D2"
+			(at 105.41 127 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SS36"
+			(at 105.41 119.38 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Diode_SMD:D_SMA"
+			(at 105.41 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 105.41 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Schottky 3A 60V SMA - reverse polarity protection for JPWR (JLCPCB BASIC)"
+			(at 105.41 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C7420367"
+			(at 105.41 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SS36"
+			(at 105.41 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Multiple"
+			(at 105.41 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d2000001-0001-0000-0000-000000000002")
+		)
+		(pin "2"
+			(uuid "d2000001-0002-0000-0000-000000000002")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "D2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 27.94 269.24 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d2c2a9d5-e88c-4864-9f54-ff0eed87b3c6")
+		(property "Reference" "H3"
+			(at 30.48 267.9699 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 30.48 270.5099 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_3.2mm_M3_Pad_TopBottom"
+			(at 27.94 269.24 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 27.94 269.24 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 27.94 269.24 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "H3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Power_Protection:SRV05-4")
 		(at 154.94 213.36 0)
 		(unit 1)
@@ -10795,7 +12388,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 337.82 194.31 0)
+		(at 337.82 191.77 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -10805,7 +12398,7 @@
 		(dnp no)
 		(uuid "d4337f50-6b12-451e-9ca8-79eab563ace6")
 		(property "Reference" "C7"
-			(at 340.36 191.77 0)
+			(at 340.36 189.23 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10816,7 +12409,7 @@
 			)
 		)
 		(property "Value" "100nF"
-			(at 340.36 196.85 0)
+			(at 340.36 194.31 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10827,7 +12420,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 337.82 194.31 0)
+			(at 337.82 191.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10838,7 +12431,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 337.82 194.31 0)
+			(at 337.82 191.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10849,7 +12442,7 @@
 			)
 		)
 		(property "Description" "MCU VDD decoupling 16V X7R 0402 (BASIC)"
-			(at 337.82 194.31 0)
+			(at 337.82 191.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10860,7 +12453,7 @@
 			)
 		)
 		(property "LCSC" "C1525"
-			(at 337.82 194.31 0)
+			(at 337.82 191.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10871,7 +12464,7 @@
 			)
 		)
 		(property "MPN" "CL05B104KO5NNNC"
-			(at 337.82 194.31 0)
+			(at 337.82 191.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10882,7 +12475,7 @@
 			)
 		)
 		(property "Manufacturer" "Samsung"
-			(at 337.82 194.31 0)
+			(at 337.82 191.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11172,6 +12765,84 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "#PWR045")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 364.49 198.12 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e62fc56b-b67a-4490-901b-e889b4b6dbe9")
+		(property "Reference" "#PWR058"
+			(at 364.49 204.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 364.49 203.2 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 364.49 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 364.49 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 364.49 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "8bf43e1b-bf17-49bc-906b-299ca7375a30")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR058")
 					(unit 1)
 				)
 			)
