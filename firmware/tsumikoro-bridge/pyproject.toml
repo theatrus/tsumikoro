@@ -10,7 +10,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff>=0.8.0",
+    "ruff>=0.15.10",
 ]
 
 [build-system]
