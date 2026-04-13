@@ -24,7 +24,9 @@
 #define SERVO_DEFAULT_MAX_PULSE_US  2000    /**< Default maximum pulse width (2ms = 180°) */
 #define SERVO_DEFAULT_CENTER_US     1500    /**< Default center position (1.5ms = 90°) */
 
-#define SERVO_MAX_CHANNELS          6       /**< Maximum number of servo channels */
+#define SERVO_MAX_CHANNELS          4       /**< Maximum number of servo channels (was 6; reduced
+                                                 to free PA4/PA6 for DRV8876 motor control and
+                                                 PB7/PB8/PB9 for nFAULT + I2C1 on rev 0.1 PCB). */
 
 /* Position range: 0-1800 represents 0-180 degrees (tenths of degrees) */
 #define SERVO_MIN_POSITION          0

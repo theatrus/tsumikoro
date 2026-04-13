@@ -119,7 +119,17 @@ static void GPIO_Init(void)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
 
-    /* Configure LED pin (example: PA5) */
+    /* Enable SYSCFG clock and remap pins 17/18 from PA11/PA12 to PA9/PA10.
+     *
+     * On the STM32G030F6P6 (TSSOP-20 package), pins 17 and 18 are shared
+     * between PA11/PA12 (default) and PA9/PA10 (after SYSCFG remap). USART1
+     * TX/RX are only reachable via PA9/PA10, so the remap bits MUST be set
+     * before configuring pin 17 as AF1 USART1_TX. See ST RM0454 10.3.
+     */
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
+    SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_RMP | SYSCFG_CFGR1_PA12_RMP;
+
+    /* Configure LED pin (PA5) */
     GPIO_InitTypeDef gpio_init = {0};
     gpio_init.Pin = GPIO_PIN_5;
     gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
@@ -127,7 +137,9 @@ static void GPIO_Init(void)
     gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOA, &gpio_init);
 
-    /* Configure UART pins (TX=PA9, RX=PA10 for USART1) */
+    /* Configure UART pins (TX=PA9, RX=PA10 for USART1).
+     * These are physical pins 17/18 after the SYSCFG remap above.
+     */
     gpio_init.Pin = GPIO_PIN_9 | GPIO_PIN_10;
     gpio_init.Mode = GPIO_MODE_AF_PP;
     gpio_init.Pull = GPIO_PULLUP;

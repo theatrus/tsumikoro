@@ -96,6 +96,55 @@ The NUCLEO board has two serial ports:
 
 User should monitor USART2 for debug output using their preferred serial tool.
 
+## Servo PCB Pin Map (STM32G030F6P6 TSSOP-20, rev 0.1)
+
+Custom PCB (`hardware/servo/`) using the STM32G030F6P6 as the servo/motor
+controller. Pin count is tight; every GPIO is assigned.
+
+| Pin | MCU         | Function       | AF / notes                                 |
+|-----|-------------|----------------|--------------------------------------------|
+| 1   | PB7         | DRV8876 nFAULT | GPIO input, 10k pull-up to 3V3 (open-drain) |
+| 2   | PB8         | I2C1 SCL       | AF6                                        |
+| 3   | PB9         | I2C1 SDA       | AF6                                        |
+| 4   | NRST        | Reset          | —                                          |
+| 5   | VDDA        | 3V3 analog     | —                                          |
+| 6   | PA0         | Servo 0        | AF1 TIM3_CH1                               |
+| 7   | PA1         | RS-485 DE      | GPIO output                                |
+| 8   | PA2         | Servo 1        | AF1 TIM3_CH3                               |
+| 9   | VSS         | GND            | —                                          |
+| 10  | VDD         | 3V3            | —                                          |
+| 11  | PA3         | Servo 2        | AF1 TIM3_CH4                               |
+| 12  | PA4         | Motor PH (DIR) | GPIO output → DRV8876 PH                   |
+| 13  | PA5         | Status LED     | GPIO output                                |
+| 14  | PA6         | Motor EN (PWM) | AF5 TIM16_CH1 → DRV8876 EN, 20 kHz          |
+| 15  | PA7         | Servo 3        | AF5 TIM17_CH1                              |
+| 16  | PA8/PB0-2   | Limit switch   | GPIO input, internal pull-up                |
+| 17  | PA9  (rmp)  | USART1 TX      | AF1, RS-485 @ 1 Mbaud                      |
+| 18  | PA10 (rmp)  | USART1 RX      | AF1                                        |
+| 19  | PA13        | SWDIO          | protected                                  |
+| 20  | PA14        | SWCLK          | protected                                  |
+
+**Important — SYSCFG remap:** On the TSSOP-20, pins 17/18 default to
+PA11/PA12. To reach USART1 on PA9/PA10, firmware must set
+`SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_RMP | SYSCFG_CFGR1_PA12_RMP`
+*before* configuring AF1 USART1 on those pins. See `src/main.c::GPIO_Init`.
+
+**DRV8876 strapping on this board (PH/EN mode):**
+- `PMODE` → VCC (PH/EN mode)
+- `nSLEEP` → VCC (always enabled; no software shutdown)
+- `IMODE` → GND (current regulation disabled)
+- `VREF` → GND (unused)
+- `IPROPI` → no connect
+- `nFAULT` → 10k pull-up to 3V3, routed to PB7
+
+Because `nSLEEP` is hard-tied high, `MOTOR_DIR_COAST` and `MOTOR_DIR_BRAKE`
+are hardware-equivalent — EN=0 gives a synchronous low-side brake. This
+is documented in `inc/motor_hbridge.h`.
+
+**Hardware ID / addressing:** There are no HW-ID strap pins on this rev.
+Per-unit addressing is expected to live in the last 2 KB flash config
+sector (0x08007800–0x08007FFF), provisioned at manufacturing time.
+
 ## GDB Debugging
 
 ### Standard debugging:

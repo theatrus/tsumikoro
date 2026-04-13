@@ -2,6 +2,17 @@
  * @file motor_hbridge.c
  * @brief H-Bridge motor driver implementation using STM32 LL drivers
  *
+ * Hardware: DRV8876 in PH/EN mode (PMODE pin tied to VCC / left floating).
+ * Pin mapping (see board schematic):
+ *   - PA6: TIM16_CH1 PWM -> DRV EN (speed)
+ *   - PA4: GPIO         -> DRV PH (direction)
+ *
+ * Note: In PH/EN mode, the DRV8876 does not support a true coast state.
+ * Setting EN=0 activates synchronous low-side brake. MOTOR_DIR_COAST and
+ * MOTOR_DIR_BRAKE therefore behave identically at the hardware level.
+ * For full coast support, the DRV8876 nSLEEP line would need to be pulled
+ * low, but that line is hard-tied to VCC on this board.
+ *
  * Copyright (c) 2025 Yann Ramin
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -20,47 +31,47 @@ static struct {
 };
 
 /**
- * @brief Initialize TIM1 for PWM output
+ * @brief Initialize TIM16 for PWM output (CH1)
  */
 static void motor_init_timer(void)
 {
-    /* Enable TIM1 clock */
-    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
+    /* Enable TIM16 clock */
+    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM16);
 
     /* Disable timer before configuration */
-    LL_TIM_DisableCounter(TIM1);
+    LL_TIM_DisableCounter(TIM16);
 
-    /* Configure TIM1 for 20kHz PWM
+    /* Configure TIM16 for 20kHz PWM
      * Timer clock = 64 MHz (system clock)
-     * Prescaler = 64 - 1 = 63 → Timer frequency = 1 MHz
-     * ARR = 50 - 1 = 49 → PWM frequency = 20 kHz (50µs period)
+     * Prescaler = 64 - 1 = 63 -> Timer frequency = 1 MHz
+     * ARR = 50 - 1 = 49 -> PWM frequency = 20 kHz (50us period)
      */
-    LL_TIM_SetPrescaler(TIM1, 64 - 1);                  /* 64 MHz / 64 = 1 MHz */
-    LL_TIM_SetCounterMode(TIM1, LL_TIM_COUNTERMODE_UP);
-    LL_TIM_SetAutoReload(TIM1, MOTOR_PWM_PERIOD - 1);   /* 50 - 1 = 49 */
-    LL_TIM_SetClockDivision(TIM1, LL_TIM_CLOCKDIVISION_DIV1);
+    LL_TIM_SetPrescaler(TIM16, 64 - 1);                  /* 64 MHz / 64 = 1 MHz */
+    LL_TIM_SetCounterMode(TIM16, LL_TIM_COUNTERMODE_UP);
+    LL_TIM_SetAutoReload(TIM16, MOTOR_PWM_PERIOD - 1);   /* 50 - 1 = 49 */
+    LL_TIM_SetClockDivision(TIM16, LL_TIM_CLOCKDIVISION_DIV1);
 
     /* Disable ARR preload for immediate updates */
-    LL_TIM_DisableARRPreload(TIM1);
+    LL_TIM_DisableARRPreload(TIM16);
 
     /* Reset counter */
-    LL_TIM_SetCounter(TIM1, 0);
+    LL_TIM_SetCounter(TIM16, 0);
 
-    /* Configure CH4 for PWM mode 1 */
-    LL_TIM_OC_SetMode(TIM1, LL_TIM_CHANNEL_CH4, LL_TIM_OCMODE_PWM1);
-    LL_TIM_OC_SetCompareCH4(TIM1, 0);  /* Start at 0% duty cycle */
-    LL_TIM_OC_SetPolarity(TIM1, LL_TIM_CHANNEL_CH4, LL_TIM_OCPOLARITY_HIGH);
-    LL_TIM_OC_EnablePreload(TIM1, LL_TIM_CHANNEL_CH4);
-    LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH4);
+    /* Configure CH1 for PWM mode 1 */
+    LL_TIM_OC_SetMode(TIM16, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_PWM1);
+    LL_TIM_OC_SetCompareCH1(TIM16, 0);  /* Start at 0% duty cycle */
+    LL_TIM_OC_SetPolarity(TIM16, LL_TIM_CHANNEL_CH1, LL_TIM_OCPOLARITY_HIGH);
+    LL_TIM_OC_EnablePreload(TIM16, LL_TIM_CHANNEL_CH1);
+    LL_TIM_CC_EnableChannel(TIM16, LL_TIM_CHANNEL_CH1);
 
-    /* Enable main output (required for advanced timers like TIM1) */
-    LL_TIM_EnableAllOutputs(TIM1);
+    /* Enable main output (required for TIM16/TIM17 - they have BDTR like advanced timers) */
+    LL_TIM_EnableAllOutputs(TIM16);
 
     /* Enable timer */
-    LL_TIM_EnableCounter(TIM1);
+    LL_TIM_EnableCounter(TIM16);
 
     /* Generate update event to load values */
-    LL_TIM_GenerateEvent_UPDATE(TIM1);
+    LL_TIM_GenerateEvent_UPDATE(TIM16);
 }
 
 /**
@@ -70,64 +81,50 @@ static void motor_init_gpio(void)
 {
     /* Enable GPIO clocks */
     LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
-    LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOB);
 
-    /* PA11: TIM1_CH4 (PWM output) */
-    uint32_t pa11_pin_pos = __builtin_ctz(LL_GPIO_PIN_11);
-    LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_11, LL_GPIO_MODE_ALTERNATE);
-    if (pa11_pin_pos < 8) {
-        LL_GPIO_SetAFPin_0_7(GPIOA, LL_GPIO_PIN_11, LL_GPIO_AF_2);  /* AF2 = TIM1 */
-    } else {
-        LL_GPIO_SetAFPin_8_15(GPIOA, LL_GPIO_PIN_11, LL_GPIO_AF_2);
-    }
-    LL_GPIO_SetPinOutputType(GPIOA, LL_GPIO_PIN_11, LL_GPIO_OUTPUT_PUSHPULL);
-    LL_GPIO_SetPinSpeed(GPIOA, LL_GPIO_PIN_11, LL_GPIO_SPEED_FREQ_HIGH);  /* High speed for 20kHz */
-    LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_11, LL_GPIO_PULL_NO);
+    /* PA6: TIM16_CH1 (PWM output -> DRV8876 EN) - AF5 */
+    LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_6, LL_GPIO_MODE_ALTERNATE);
+    LL_GPIO_SetAFPin_0_7(GPIOA, LL_GPIO_PIN_6, LL_GPIO_AF_5);  /* AF5 = TIM16 */
+    LL_GPIO_SetPinOutputType(GPIOA, LL_GPIO_PIN_6, LL_GPIO_OUTPUT_PUSHPULL);
+    LL_GPIO_SetPinSpeed(GPIOA, LL_GPIO_PIN_6, LL_GPIO_SPEED_FREQ_HIGH);  /* High speed for 20kHz */
+    LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_6, LL_GPIO_PULL_NO);
 
-    /* PA12: IN1 (direction control - GPIO output) */
-    LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_12, LL_GPIO_MODE_OUTPUT);
-    LL_GPIO_SetPinOutputType(GPIOA, LL_GPIO_PIN_12, LL_GPIO_OUTPUT_PUSHPULL);
-    LL_GPIO_SetPinSpeed(GPIOA, LL_GPIO_PIN_12, LL_GPIO_SPEED_FREQ_LOW);
-    LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_12, LL_GPIO_PULL_NO);
-    LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_12);  /* Start low */
-
-    /* PB9: IN2 (direction control - GPIO output) */
-    LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_9, LL_GPIO_MODE_OUTPUT);
-    LL_GPIO_SetPinOutputType(GPIOB, LL_GPIO_PIN_9, LL_GPIO_OUTPUT_PUSHPULL);
-    LL_GPIO_SetPinSpeed(GPIOB, LL_GPIO_PIN_9, LL_GPIO_SPEED_FREQ_LOW);
-    LL_GPIO_SetPinPull(GPIOB, LL_GPIO_PIN_9, LL_GPIO_PULL_NO);
-    LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_9);  /* Start low */
+    /* PA4: PH (direction control -> DRV8876 PH) - GPIO output */
+    LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_4, LL_GPIO_MODE_OUTPUT);
+    LL_GPIO_SetPinOutputType(GPIOA, LL_GPIO_PIN_4, LL_GPIO_OUTPUT_PUSHPULL);
+    LL_GPIO_SetPinSpeed(GPIOA, LL_GPIO_PIN_4, LL_GPIO_SPEED_FREQ_LOW);
+    LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_4, LL_GPIO_PULL_NO);
+    LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_4);  /* Start with PH low (forward) */
 }
 
 /**
- * @brief Update direction control pins based on direction
+ * @brief Update direction control pin (PH) based on direction
+ *
+ * In PH/EN mode on the DRV8876:
+ *   PH=0, EN=PWM -> forward
+ *   PH=1, EN=PWM -> reverse
+ *   EN=0         -> brake (synchronous low-side short)
+ *
+ * BRAKE and COAST both map to "zero out PWM" at the caller; this function
+ * only sets the PH pin. The EN pin is controlled via the PWM duty cycle.
  */
 static void motor_update_direction(motor_direction_t direction)
 {
     switch (direction) {
         case MOTOR_DIR_FORWARD:
-            /* IN1 = HIGH, IN2 = LOW */
-            LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_12);
-            LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_9);
+            /* PH = LOW -> forward */
+            LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_4);
             break;
 
         case MOTOR_DIR_REVERSE:
-            /* IN1 = LOW, IN2 = HIGH */
-            LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_12);
-            LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_9);
+            /* PH = HIGH -> reverse */
+            LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_4);
             break;
 
         case MOTOR_DIR_BRAKE:
-            /* IN1 = HIGH, IN2 = HIGH (or both LOW for some drivers) */
-            LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_12);
-            LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_9);
-            break;
-
         case MOTOR_DIR_COAST:
         default:
-            /* IN1 = LOW, IN2 = LOW */
-            LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_12);
-            LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_9);
+            /* PH irrelevant - EN=0 (set at caller) causes synchronous brake */
             break;
     }
 }
@@ -161,20 +158,31 @@ bool motor_hbridge_set(uint16_t speed, motor_direction_t direction)
         return false;
     }
 
-    /* Update direction pins */
+    /* For BRAKE/COAST, force PWM to 0 (EN=0 -> DRV synchronous brake).
+     * In PH/EN mode the DRV8876 cannot truly coast without pulling nSLEEP
+     * low, which is hard-tied to VCC on this board. Both states are
+     * therefore hardware-equivalent and documented as such.
+     */
+    uint16_t effective_speed = speed;
+    if (direction == MOTOR_DIR_BRAKE || direction == MOTOR_DIR_COAST) {
+        effective_speed = 0;
+    }
+
+    /* Update direction pin */
     motor_update_direction(direction);
     g_motor_state.current_direction = direction;
 
     /* Update PWM duty cycle
      * Speed range: 0-1000 (0-100%)
-     * PWM period: MOTOR_PWM_PERIOD (50µs @ 20kHz)
+     * PWM period: MOTOR_PWM_PERIOD (50us @ 20kHz)
      * CCR = (speed * MOTOR_PWM_PERIOD) / 1000
      */
-    uint16_t ccr_value = (speed * MOTOR_PWM_PERIOD) / 1000;
-    LL_TIM_OC_SetCompareCH4(TIM1, ccr_value);
+    uint16_t ccr_value = (effective_speed * MOTOR_PWM_PERIOD) / 1000;
+    LL_TIM_OC_SetCompareCH1(TIM16, ccr_value);
 
     g_motor_state.current_speed = speed;
-    g_motor_state.enabled = (speed > 0 && direction != MOTOR_DIR_COAST);
+    g_motor_state.enabled = (speed > 0 && direction != MOTOR_DIR_COAST &&
+                             direction != MOTOR_DIR_BRAKE);
 
     return true;
 }

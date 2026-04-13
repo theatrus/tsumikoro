@@ -191,27 +191,26 @@ static void servo_pwm_update_channel(servo_channel_t *channel)
 bool servo_pwm_init(void)
 {
     /* Initialize servo channels with configuration
-     * Pin mapping (STM32G030F6P6 TSSOP20):
-     * Channel 0: PA0 - TIM3_CH1 (AF1)
-     * Channel 1: PA2 - TIM3_CH3 (AF1)
-     * Channel 2: PA3 - TIM3_CH4 (AF1)
-     * Channel 3: PA4 - TIM14_CH1 (AF4)
-     * Channel 4: PA6 - TIM16_CH1 (AF5)
-     * Channel 5: PA7 - TIM17_CH1 (AF5)
+     * Pin mapping (STM32G030F6P6 TSSOP20, servo PCB rev 0.1):
+     * Channel 0: PA0 - TIM3_CH1  (AF1)
+     * Channel 1: PA2 - TIM3_CH3  (AF1)
+     * Channel 2: PA3 - TIM3_CH4  (AF1)
+     * Channel 3: PA7 - TIM17_CH1 (AF5)
      *
-     * Hardware ID pins (moved from PA6/PA7):
-     * - PB7, PB8: Hardware ID generation (inputs with pull-up/down)
+     * Former servo channels now reassigned for motor control / I2C / fault:
+     * - PA4 (was Servo 3, TIM14_CH1) -> DRV8876 PH pin (direction)
+     * - PA6 (was Servo 4, TIM16_CH1) -> DRV8876 EN pin (PWM, via TIM16_CH1)
+     * - PA7 (was Servo 5)            -> now Servo 3 on this channel
      *
-     * H-Bridge motor driver pins:
-     * - PA11: TIM1_CH4 (PWM speed control)
-     * - PA12: Direction/brake control (GPIO)
-     * - PB9: Optional second direction pin (GPIO)
-     *
-     * Protected pins:
+     * Protected / reserved pins:
      * - PA13, PA14: SWD (SWDIO, SWCLK) - DO NOT USE
-     * - PA9, PA10: USART1 (bus communication)
-     * - PA1: RS-485 DE
-     * - PA5: Status LED
+     * - PA9,  PA10: USART1 for RS-485 bus (requires SYSCFG remap on TSSOP20)
+     * - PA1:        RS-485 DE
+     * - PA5:        Status LED
+     * - PA8:        Limit switch input
+     * - PB7:        DRV8876 nFAULT input (open-drain, 10k pull-up to 3V3)
+     * - PB8:        I2C1_SCL (AF6)
+     * - PB9:        I2C1_SDA (AF6)
      */
 
     memset(g_servo_channels, 0, sizeof(g_servo_channels));
@@ -255,12 +254,12 @@ bool servo_pwm_init(void)
     g_servo_channels[2].speed = 10;
     g_servo_channels[2].enabled = false;
 
-    /* Channel 3: PA4 - TIM14_CH1 (AF4) */
-    g_servo_channels[3].timer = TIM14;
+    /* Channel 3: PA7 - TIM17_CH1 (AF5) */
+    g_servo_channels[3].timer = TIM17;
     g_servo_channels[3].channel = LL_TIM_CHANNEL_CH1;
     g_servo_channels[3].gpio_port = GPIOA;
-    g_servo_channels[3].gpio_pin = LL_GPIO_PIN_4;
-    g_servo_channels[3].gpio_af = LL_GPIO_AF_4;
+    g_servo_channels[3].gpio_pin = LL_GPIO_PIN_7;
+    g_servo_channels[3].gpio_af = LL_GPIO_AF_5;
     g_servo_channels[3].min_pulse_us = SERVO_DEFAULT_MIN_PULSE_US;
     g_servo_channels[3].max_pulse_us = SERVO_DEFAULT_MAX_PULSE_US;
     g_servo_channels[3].current_position = 900;
@@ -268,37 +267,12 @@ bool servo_pwm_init(void)
     g_servo_channels[3].speed = 10;
     g_servo_channels[3].enabled = false;
 
-    /* Channel 4: PA6 - TIM16_CH1 (AF5) */
-    g_servo_channels[4].timer = TIM16;
-    g_servo_channels[4].channel = LL_TIM_CHANNEL_CH1;
-    g_servo_channels[4].gpio_port = GPIOA;
-    g_servo_channels[4].gpio_pin = LL_GPIO_PIN_6;
-    g_servo_channels[4].gpio_af = LL_GPIO_AF_5;
-    g_servo_channels[4].min_pulse_us = SERVO_DEFAULT_MIN_PULSE_US;
-    g_servo_channels[4].max_pulse_us = SERVO_DEFAULT_MAX_PULSE_US;
-    g_servo_channels[4].current_position = 900;
-    g_servo_channels[4].target_position = 900;
-    g_servo_channels[4].speed = 10;
-    g_servo_channels[4].enabled = false;
-
-    /* Channel 5: PA7 - TIM17_CH1 (AF5) */
-    g_servo_channels[5].timer = TIM17;
-    g_servo_channels[5].channel = LL_TIM_CHANNEL_CH1;
-    g_servo_channels[5].gpio_port = GPIOA;
-    g_servo_channels[5].gpio_pin = LL_GPIO_PIN_7;
-    g_servo_channels[5].gpio_af = LL_GPIO_AF_5;
-    g_servo_channels[5].min_pulse_us = SERVO_DEFAULT_MIN_PULSE_US;
-    g_servo_channels[5].max_pulse_us = SERVO_DEFAULT_MAX_PULSE_US;
-    g_servo_channels[5].current_position = 900;
-    g_servo_channels[5].target_position = 900;
-    g_servo_channels[5].speed = 10;
-    g_servo_channels[5].enabled = false;
-
-    /* Initialize timers (unique timers only) */
+    /* Initialize timers (unique timers only)
+     * TIM16 is no longer used here - reassigned to motor_hbridge (PA6).
+     * TIM14 is no longer used - PA4 is now motor DIR GPIO.
+     */
     servo_pwm_init_timer(TIM3);   /* Used by channels 0, 1, 2 */
-    servo_pwm_init_timer(TIM14);  /* Used by channel 3 */
-    servo_pwm_init_timer(TIM16);  /* Used by channel 4 */
-    servo_pwm_init_timer(TIM17);  /* Used by channel 5 */
+    servo_pwm_init_timer(TIM17);  /* Used by channel 3 */
 
     /* Initialize channels and GPIO pins */
     for (uint8_t i = 0; i < SERVO_MAX_CHANNELS; i++) {
