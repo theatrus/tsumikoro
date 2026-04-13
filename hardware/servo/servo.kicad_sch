@@ -10064,7 +10064,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "9350a36b-5c06-4218-9e21-abbb417ac5ba")
-		(property "Reference" "JPTERM"
+		(property "Reference" "JPTERM2"
 			(at 354.076 217.17 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10126,7 +10126,7 @@
 		(instances
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-					(reference "JPTERM")
+					(reference "JPTERM2")
 					(unit 1)
 				)
 			)
