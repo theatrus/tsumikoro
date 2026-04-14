@@ -5,7 +5,9 @@
 #   make docs-servo      regenerate docs for the servo board only
 #   make bom-servo       regenerate the JLCPCB BOM for the servo board only
 #   make images-servo    regenerate schematic/PCB images for the servo board
+#   make jlc-servo       build the JLCPCB fab/assembly zip for the servo board
 #   make clean-docs      remove generated images and BOMs
+#   make clean-jlc       remove generated JLCPCB packages
 #
 # Requires kicad-cli (KiCad 9+/10) on PATH.
 
@@ -21,7 +23,10 @@ SERVO_BOM   := $(SERVO_DIR)/jlcpcb_bom.csv
 BOM_FIELDS  := $${ITEM_NUMBER},Reference,Value,Footprint,$${QUANTITY},LCSC,MPN,Manufacturer
 BOM_LABELS  := Item,Designator,Comment,Footprint,Qty,LCSC Part \#,MPN,Manufacturer
 
-.PHONY: all docs docs-servo images-servo bom-servo clean-docs help
+SCRIPTS_DIR := scripts
+JLC_SCRIPT  := $(SCRIPTS_DIR)/jlcpcb-package.sh
+
+.PHONY: all docs docs-servo images-servo bom-servo jlc jlc-servo clean-docs clean-jlc help
 
 all: docs
 
@@ -33,7 +38,10 @@ help:
 	@echo "  docs-servo    Same but only for the servo board"
 	@echo "  images-servo  Just the schematic/PCB images for servo"
 	@echo "  bom-servo     Just the JLCPCB BOM for servo"
+	@echo "  jlc           Build JLCPCB fab+assembly zips for every PCB project"
+	@echo "  jlc-servo     JLCPCB zip for servo only"
 	@echo "  clean-docs    Remove generated docs"
+	@echo "  clean-jlc     Remove generated JLCPCB packages"
 
 docs: docs-servo
 
@@ -70,3 +78,16 @@ bom-servo: $(SERVO_SCH)
 clean-docs:
 	rm -rf $(SERVO_IMG)
 	rm -f  $(SERVO_BOM)
+
+# --- JLCPCB manufacturing packages -------------------------------------------
+
+jlc: jlc-servo
+
+jlc-servo: $(JLC_SCRIPT) $(SERVO_PCB) $(SERVO_SCH)
+	@echo "[jlcpcb] building package for servo"
+	cd $(SERVO_DIR) && KICAD_CLI=$(KICAD_CLI) ../$(JLC_SCRIPT) \
+	    servo.kicad_pcb servo.kicad_sch
+
+clean-jlc:
+	rm -rf $(SERVO_DIR)/jlcpcb
+	rm -f  $(SERVO_DIR)/*-jlcpcb.zip
