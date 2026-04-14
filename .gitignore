@@ -14,7 +14,3 @@ fp-info-cache
 
 # Editor history / temp
 .history/
-
-# Generated manufacturing packages (regenerate with `make jlc`)
-hardware/*/jlcpcb/
-hardware/*/*-jlcpcb.zip
