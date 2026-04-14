@@ -1,5 +1,22 @@
 # Third-party library parts
 
+## XKB TS-1187A tact switch — footprint only
+
+KiCad's stock `Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A` references a
+3D STEP file that is missing from the KiCad assets. We vendor the
+footprint as `tsumikoro:SW_Push_1P1T_XKB_TS-1187A` and repoint the 3D
+model at `3dmodels/SW_Push_1P1T_XKB_TS-1187A_approx.step`, which is a
+**copy of `SW_Push_1P1T_NO_CK_KMR2.step`** (CK KMR2 tact switch, 4.2×3.2
+mm) from the KiCad stock library. The KMR2 body is a visually close
+approximation of the TS-1187A (4.5×4.5 mm) — fine for general 3D render
+purposes, not dimensionally exact. Footprint pad layout is correct.
+
+Both files are from KiCad's upstream libraries, CC-BY-SA 4.0.
+
+Replace `SW_Push_1P1T_XKB_TS-1187A_approx.step` with a real TS-1187A
+STEP (from XKB Connectivity, GrabCAD, or SnapEDA) if pixel-perfect 3D
+preview matters for mechanical fit checks.
+
 ## Espressif — ESP32 symbols, footprints, 3D models
 
 The following parts in this library are vendored from the upstream
