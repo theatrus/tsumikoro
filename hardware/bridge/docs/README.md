@@ -18,7 +18,7 @@ Target manufacturing: **JLCPCB 4-layer (JLC04161H)**, Standard assembly
 | Block | Part | Notes |
 |-------|------|-------|
 | MCU module | **ESP32-S3-MINI-1-N8** (LCSC C2913206) | Soldered directly; native USB 2.0 on GPIO19/20, 8 MB flash, PCB antenna |
-| USB-C | USB-TYPE-C-019 (LCSC C2927039) | 16-pin standard receptacle for programming + optional 5 V power; `Connector_USB:USB_C_Receptacle_GCT_USB4085` footprint (3D model available) |
+| USB-C | USB-TYPE-C-019 (LCSC C2927039) | 16-pin standard receptacle for programming + optional 5 V power; `Connector_USB:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal` footprint (3D model available) |
 | Buttons | 2 × TS-1187A-B-A-B (LCSC C318884) | BOOT + RESET tact switches |
 | CC resistors | 2 × 5.1 kΩ 0402 (C25905) | USB-C sink-device marking on CC1 / CC2 |
 | Strapping | R_EN 10k, R_BOOT 10k (C25744, BASIC) | Pull-ups on EN and GPIO0 |

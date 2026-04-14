@@ -695,7 +695,7 @@
         "uuid": "c1d2e3f4-a5b6-7890-1234-567890abcdef"
       }
     ],
-    "used_designators": "J_ESP_R2,J_ESP_L2",
+    "used_designators": "SW_RESET2,SW_BOOT2,R_EN2,R_BOOT2,J_USB2",
     "variants": []
   },
   "sheets": [

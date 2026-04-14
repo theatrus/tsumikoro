@@ -8,7 +8,7 @@
 "7","JDC1,JDC2","DC-005 2.0mm","Connector_BarrelJack:BarrelJack_GCT_DCJ200-10-A_Horizontal","2","C2880546","DC-005K-5A-2.0","XKB Connectivity"
 "8","JPTERM1","TERM1","Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm","1","","",""
 "9","JPTERM2","TERM2","Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm","1","","",""
-"10","J_USB?","USB-TYPE-C-019","Connector_USB:USB_C_Receptacle_GCT_USB4085","1","C2927039","USB-TYPE-C-019","Generic"
+"10","J_USB?","USB-TYPE-C-019","Connector_USB:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal","1","C2927039","USB-TYPE-C-019","Generic"
 "11","L1","10uH","Inductor_SMD:L_Changjiang_FNR4030S","1","C167879","FNR4030S100MT","Sunlord"
 "12","R1","100k","Resistor_SMD:R_0402_1005Metric","1","C25741","0402WGF1003TCE","UNI-ROYAL"
 "13","R2","22k","Resistor_SMD:R_0402_1005Metric","1","C25768","0402WGF2202TCE","UNI-ROYAL"
