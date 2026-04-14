@@ -15,6 +15,6 @@ fp-info-cache
 # Editor history / temp
 .history/
 
-# JLCPCB output is regenerable via `make jlc` — not tracked
-hardware/*/jlcpcb/
+# JLCPCB: track the staging directory (gerbers/drill/BOM/CPL) for versioning,
+# but not the zip — it's regenerable from the directory by `make jlc`.
 hardware/*/*-jlcpcb.zip
