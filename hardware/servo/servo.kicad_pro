@@ -50,7 +50,7 @@
         "silk_text_thickness": 0.125,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.2
+          "min_clearance": 0.15
         }
       },
       "diff_pair_dimensions": [
@@ -695,7 +695,7 @@
         "uuid": "e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
       }
     ],
-    "used_designators": "JPTERM2",
+    "used_designators": "C12,#PWR26,#PWR35,#PWR50-52,#PWR60,#PWR69-70,JP2-4,JPTERM3,D3",
     "variants": []
   },
   "sheets": [
@@ -706,6 +706,10 @@
     [
       "a1b2c3d4-e5f6-7890-abcd-ef0123456789",
       "PSU"
+    ],
+    [
+      "b2c3d4e5-f6a7-8901-bcde-f01234567890",
+      "PSU_SERVO"
     ]
   ],
   "text_variables": {},
