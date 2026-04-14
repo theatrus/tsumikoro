@@ -1,1 +1,16 @@
 .DS_Store
+
+# KiCad lock / autosave / backups
+*~*.lck
+~*.lck
+*-backups/
+_autosave-*
+fp-info-cache
+*.kicad_pcb-bak
+*.kicad_sch-bak
+
+# KiCad local project settings (user-specific UI state)
+*.kicad_prl
+
+# Editor history / temp
+.history/
