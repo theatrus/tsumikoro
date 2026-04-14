@@ -17,7 +17,11 @@ Target manufacturing: **JLCPCB 4-layer (JLC04161H)**, Standard assembly
 
 | Block | Part | Notes |
 |-------|------|-------|
-| MCU | **ESP32-DevKitC-V4** (user-supplied module) | Plugs into two 1×19 female headers at 1" row spacing |
+| MCU module | **ESP32-S3-MINI-1-N8** (LCSC C2913206) | Soldered directly; native USB 2.0 on GPIO19/20, 8 MB flash, PCB antenna |
+| USB-C | USB-TYPE-C-019 (LCSC C2927039) | 16-pin standard receptacle for programming + optional 5 V power; `Connector_USB:USB_C_Receptacle_GCT_USB4085` footprint (3D model available) |
+| Buttons | 2 × TS-1187A-B-A-B (LCSC C318884) | BOOT + RESET tact switches |
+| CC resistors | 2 × 5.1 kΩ 0402 (C25905) | USB-C sink-device marking on CC1 / CC2 |
+| Strapping | R_EN 10k, R_BOOT 10k (C25744, BASIC) | Pull-ups on EN and GPIO0 |
 | RS-485 transceivers | 2 × SIT3088EEUA (MSOP-8) | U1 for Bus 1, U3 for Bus 2 — each on its own ESP32 UART |
 | Terminations | 2 × 120 Ω 1206 + solder jumper | `R4`/`JPTERM1` for Bus 1, `R5`/`JPTERM2` for Bus 2 — close the jumper at each bus endpoint |
 | 3.3 V PSU | LMR38020SDDAR (SOIC-8-EP) | 3.8–80 V in, 2 A out — see `psu.kicad_sch` |
@@ -68,69 +72,53 @@ The LMR38020 feedback divider is retuned for 3.3 V:
 ## Recommended ESP32 pinout
 
 Two independent RS-485 buses need two UARTs plus a DE/~RE control line
-each. The ESP32 has three hardware UARTs; UART0 is used for USB serial
-(programming and log output), leaving UART1 and UART2 free. UART1's
-default pins (GPIO 9/10) land on the SPI flash pads of most ESP32
-modules and **must not** be used — they have to be remapped via the
-GPIO matrix.
+each. The ESP32-S3 has a fully programmable UART matrix — any GPIO can
+serve any UART. UART0 is used for USB serial (ROM bootloader / console
+fallback), leaving UART1 and UART2 for the RS-485 channels.
 
-| Signal | ESP32 GPIO | Wire to | Notes |
-|--------|-----------|---------|-------|
-| **Bus 1 — UART2 (default pins)** |  |  |  |
-| U2 TX | GPIO 17 | U1 pin 4 (DI) | Default UART2 TX |
-| U2 RX | GPIO 16 | U1 pin 1 (RO) | Default UART2 RX |
+Native USB 2.0 lives on GPIO 19 (D-) and GPIO 20 (D+) — those go to
+the USB-C receptacle (J_USB) directly, no USB-UART chip required.
+
+| Signal | ESP32-S3 GPIO | Wire to | Notes |
+|--------|---------------|---------|-------|
+| **Bus 1 — UART1** |  |  |  |
+| U1 TX | GPIO 17 | U1 pin 4 (DI) |  |
+| U1 RX | GPIO 16 | U1 pin 1 (RO) |  |
 | Bus 1 DE/~RE | GPIO 4 | U1 pin 3 (DE) + pin 2 (~RE) | Tie DE+~RE together; high = drive, low = receive |
-| **Bus 2 — UART1 (remapped)** |  |  |  |
-| U1 TX | GPIO 25 | U3 pin 4 (DI) | Any free GPIO works — remap via `uart_set_pin()` |
-| U1 RX | GPIO 26 | U3 pin 1 (RO) |  |
-| Bus 2 DE/~RE | GPIO 27 | U3 pin 3 (DE) + pin 2 (~RE) |  |
-| **Power** |  |  |  |
-| 3V3 pin (J_ESP_L pin 1) | 3V3 | +3V3 from LMR38020 | **Bypass the DevKit's onboard AMS1117** by feeding 3V3 directly — see caveat below |
-| GND | GND | GND | Shared with everything |
-| EN | — | pull-up + optional reset button | Leave NC for now; break out later |
+| **Bus 2 — UART2** |  |  |  |
+| U2 TX | GPIO 15 | U3 pin 4 (DI) |  |
+| U2 RX | GPIO 14 | U3 pin 1 (RO) |  |
+| Bus 2 DE/~RE | GPIO 7 | U3 pin 3 (DE) + pin 2 (~RE) |  |
+| **USB (native, no external chip)** |  |  |  |
+| USB D- | GPIO 19 | J_USB D- (A7 / B7 tied) |  |
+| USB D+ | GPIO 20 | J_USB D+ (A6 / B6 tied) |  |
+| **Power / strapping** |  |  |  |
+| VCC | 3V3 | Decouple with 10 µF + 100 nF near U4 |  |
+| EN | via R_EN 10 kΩ to 3V3, also to SW_RESET | Low = reset | 100 nF filter cap to GND optional |
+| GPIO 0 | via R_BOOT 10 kΩ to 3V3, also to SW_BOOT | Hold low during reset to enter DFU | Used by esptool auto-reset |
+| GND | — | Large plane / 65-pin module thermal pad |  |
 
-**Avoid on ESP32 (don't route GPIOs to these):**
+**Avoid on ESP32-S3 (don't use as application GPIOs):**
 
-- **GPIO 0, 2, 12, 15** — boot strapping pins (affect flash/boot mode)
-- **GPIO 1, 3** — UART0 (USB serial programming)
-- **GPIO 5, 18, 19, 23** — default VSPI (safe as GPIO if you're not using SPI peripherals, but ESP-IDF libraries may claim them)
-- **GPIO 6–11** — SPI flash, physically inaccessible on most DevKitC boards
-- **GPIO 34–39** — input-only pins (no TX, no DE output)
+- **GPIO 0, 3, 45, 46** — boot strapping pins
+- **GPIO 19, 20** — native USB D-/D+ (reserved for J_USB)
+- **GPIO 26–32** — internal SPI flash on most ESP32-S3 modules
+- **GPIO 33–37** — reserved for octal PSRAM on S3R8 variants (S3-MINI-1-N8 doesn't have PSRAM, so these are free on this module but still treat as if reserved if you ever swap to an -R8 variant)
+- **GPIO 43, 44** — UART0 (USB-Serial-JTAG + bootloader console)
 
-## ESP32-DevKitC-V4 pinout reference
+## Module variant: soldered vs DevKit-socketed
 
-The board accepts a standard ESP32-DevKitC-V4 (38-pin) module on two 1×19
-female headers (`J_ESP_L`, `J_ESP_R`) spaced 1" (25.4 mm) apart — same as
-the DevKitC reference carrier.
+This rev uses a **soldered ESP32-S3-MINI-1-N8** module (U4). The
+alternative — mounting an Espressif ESP32-S3-DevKitC-1 module into
+headers — has its footprint vendored in `hardware/lib/` for future
+use (`tsumikoro:ESP32-S3-DevKitC`) but isn't placed on the current
+schematic.
 
-Planned signal assignment (to be wired in the schematic):
-
-| Header pin (left row, GPIO side) | ESP32 pin | Wire to |
-|---|---|---|
-| 3V3 (pin 1) | +3V3 out from DevKit's own regulator | **leave NC** (we power DevKit via VIN) |
-| EN | EN (reset) | optional: user button via pull-up |
-| GPIO 17 (UART2 TX) | U2TXD | SIT3088E DI |
-| GPIO 16 (UART2 RX) | U2RXD | SIT3088E RO |
-| GPIO 4 (any free) | — | SIT3088E DE + ~RE (tied together) |
-| GND | GND | GND |
-
-| Header pin (right row, USB/power side) | ESP32 pin | Wire to |
-|---|---|---|
-| VIN (pin 1) | 5 V in | +3.3 V out from our LMR38020, or leave NC if the ESP32 must see 5 V — see note |
-| GND | GND | GND |
-| Other GPIOs | — | Broken out to a header for expansion (optional) |
-
-**Note on VIN vs 3V3**: the ESP32-DevKitC-V4 has its own AMS1117 LDO on
-the VIN rail expecting ~5 V. If we feed our regulated 3.3 V directly into
-VIN, the module's internal LDO will drop to ~2.5 V — under-voltage for
-the ESP32. **Options**:
-
-1. **Wire our 3.3 V to the DevKit's 3V3 pin directly** (bypass the onboard LDO) — simplest, works with most clone boards.
-2. **Retune our PSU to 5 V** and feed the VIN pin — lets the DevKit's LDO do its job. Needs R2 = 40.2 kΩ instead of 22 kΩ (both pads fit the 0402 footprint).
-
-The current rev targets option 1 (3.3 V direct to the 3V3 pin). If you
-choose option 2, swap R2 in `psu.kicad_sch` and rewire the header
-connection.
+The soldered MINI-1 variant is cheaper in volume, takes less board
+area, has a proper 3D model, and needs fewer external parts (we add
+our own USB-C, buttons, and strapping). The DevKit variant would drop
+in as a full assembled dev board and save integration work but is
+larger.
 
 ## Connectors
 
@@ -140,8 +128,9 @@ connection.
 | JBUS2 | JST-XH 4-pin RA | **Bus 2** — RS-485 segment B (electrically separate) | 1: V+, 2: B, 3: A, 4: GND |
 | JDC1 | DC barrel (2.0 mm center) | Bus 1 power input | Tip: V+, Sleeve: GND, Switch: NC |
 | JDC2 | DC barrel (2.0 mm center) | Bus 2 power input | Tip: V+, Sleeve: GND, Switch: NC |
-| J_ESP_L | 1×19 female pin socket, 2.54 mm | ESP32-DevKitC-V4 left row | see module datasheet |
-| J_ESP_R | 1×19 female pin socket, 2.54 mm | ESP32-DevKitC-V4 right row | see module datasheet |
+| J_USB | USB-C receptacle (16-pin standard) | ESP32-S3 native USB + 5 V power | pin numbering per USB-C spec |
+| SW_BOOT | SMD tact switch | Hold during reset → DFU/download mode | connected between GPIO0 and GND |
+| SW_RESET | SMD tact switch | System reset | pulls EN low |
 | JPTERM1 | 2-pin solder jumper | Bus 1 120 Ω termination enable (series with R4) | Open by default; close at endpoint |
 | JPTERM2 | 2-pin solder jumper | Bus 2 120 Ω termination enable (series with R5) | Open by default; close at endpoint |
 

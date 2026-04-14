@@ -695,6 +695,7 @@
         "uuid": "c1d2e3f4-a5b6-7890-1234-567890abcdef"
       }
     ],
+    "used_designators": "J_ESP_R2,J_ESP_L2",
     "variants": []
   },
   "sheets": [
