@@ -18,27 +18,56 @@ Target manufacturing: **JLCPCB 4-layer (JLC04161H)**, Standard assembly.
 | 3.3 V logic PSU | TPS54061DRBT (VSON-8-EP) | ~50 mA logic load, 60 V Vin capable — see `psu.kicad_sch` |
 | 5 V servo PSU | LMR38020SDDAR (SOIC-8-EP) | 2 A synchronous, up to 80 V Vin — see `psu_servo.kicad_sch` |
 | ESD protection | SRV05-4 (SOT-23-6) | 4-channel clamp on servo outputs |
-| Reverse polarity | SS36 (SMA) | Schottky 3 A / 60 V in series with JPWR |
+| Reverse polarity | D2 — SS36 (SMA) | Schottky on JPWR input → VPP |
+| Bus isolation   | D3 — SS36 (SMA) | Schottky on VPP → bus V+ (prevents back-powering other nodes) |
+| Rail select     | JP2, JP3, JP4 (3-pin solder jumpers) | Per-pair 5 V ↔ VPP selection — see power architecture |
+| RS-485 termination | JPTERM2 (2-pin solder jumper) + 120 Ω 1206 | Series jumper enables bus termination at end-of-line |
 | Bulk | 220 µF 50 V SMD (Lelon RVT) | Motor-rail bulk near DRV8876 |
 | Status | Red LED 0603 | Driven from PA5 |
 
 ## Power architecture
 
 ```
-       JPWR ─┬── D2 (SS36, reverse-polarity) ──┬── VPP (motor rail)
-             │                                  ├── DRV8876 VM (pin 11)
-             │                                  ├── C12 bulk (220 µF / 50 V)
-             │                                  ├── TPS54061 VIN ── psu.kicad_sch ──► +3.3 V logic
-             │                                  └── LMR38020  VIN ── psu_servo.kicad_sch ──► +5 V servo
-             └── GND (common)
+  JPWR ─► D2 (SS36) ──┬── VPP (motor rail, after reverse-polarity drop)
+                      ├── DRV8876 VM (pin 11)
+                      ├── C12 bulk (220 µF / 50 V)
+                      ├── TPS54061 VIN ──► psu.kicad_sch       ──► +3.3 V (logic)
+                      ├── LMR38020  VIN ──► psu_servo.kicad_sch ──► +5 V (servo)
+                      │
+                      ├── JP2 ┐
+                      │       ├── SP1 ──► JSERVO0, JSERVO1 V+    (5 V or VPP, user-selectable)
+                      │   +5V ┘
+                      │
+                      ├── JP3 ┐
+                      │       ├── SP2 ──► JSERVO2, JSERVO3 V+    (5 V or VPP, user-selectable)
+                      │   +5V ┘
+                      │
+                      ├── JP4 ┐
+                      │       ├── (bus V+ feed) ─► D3 (SS36) ─► JBUS1/JBUS2 pin 1
+                      │   +5V ┘                                   (bus can draw power; D3 blocks
+                      │                                            back-feed from other nodes)
+                      └── GND (common)
 
-       +3.3 V ──► MCU, SIT3088E, SRV05-4 VCC, I²C pull-ups
-       +5 V   ──► JSERVO0..3 Vcc
+  +3.3 V ──► MCU, SIT3088E, SRV05-4 VCC, I²C pull-ups
 ```
 
-Reverse-polarity protection uses a series Schottky (simple, ~0.5 V drop @ 3 A).
-Not an ideal-diode — sufficient for this current class but lossy for larger
-builds.
+Three 3-pin **solder jumpers** (JP2, JP3, JP4) choose per rail whether to power
+servo pairs — and the bus power feed — from the regulated 5 V rail or directly
+from VPP (motor supply, typically 5–24 V). Left-bridged = 5 V; right-bridged =
+VPP. **Only one side of each jumper should be bridged at a time.**
+
+Bridging guide:
+
+| Jumper | Left (pin 1) | Middle (pin 2) | Right (pin 3) | Feeds |
+|--------|-------------|----------------|---------------|-------|
+| JP2 | +5 V | SP1 | VPP | JSERVO0, JSERVO1 |
+| JP3 | +5 V | SP2 | VPP | JSERVO2, JSERVO3 |
+| JP4 | +5 V | (bus V+) | VPP | JBUS1/JBUS2 pin 1 (via D3) |
+
+Reverse-polarity protection (D2) uses a series Schottky SS36 — simple, ~0.5 V
+drop at 3 A, not an ideal-diode. Bus back-feed isolation (D3) uses the same
+part so two powered boards on the same bus won't fight over which supplies VPP.
+Both rails share the GND return, so the diode only isolates the V+ line.
 
 ## STM32G030F6P6 pin map (rev 0.1)
 
@@ -89,13 +118,15 @@ hardware-equivalent — EN = 0 gives a synchronous low-side brake. See
 
 | Ref | Connector | Function | Pinout |
 |-----|-----------|----------|--------|
-| JPWR | JST-XH 2-pin RA | Power input (≥6 V) | 1: V+, 2: GND |
-| JBUS1/JBUS2 | JST-XH 4-pin RA | RS-485 daisy chain | 1: V+, 2: GND, 3: A, 4: B |
-| JSERVO0..3 | JST-PH 3-pin vert | Servo outputs | 1: GND, 2: +5 V, 3: signal |
+| JPWR2 | JST-XH 2-pin RA | Power input (≥6 V, up to 37 V) | 1: V+, 2: GND |
+| JBUS1, JBUS2 | JST-XH 4-pin RA | RS-485 daisy chain | 1: bus V+ (see JP4), 2: B, 3: A, 4: GND |
+| JSERVO0, JSERVO1 | JST-PH 3-pin vert | Servo pair 1 (power via JP2) | 1: SP1 (5 V/VPP), 2: signal, 3: GND |
+| JSERVO2, JSERVO3 | JST-PH 3-pin vert | Servo pair 2 (power via JP3) | 1: SP2 (5 V/VPP), 2: signal, 3: GND |
 | JMOTOR2 | JST-PH 2-pin vert | Motor output | 1: OUT1, 2: OUT2 |
-| JI2C1 | JST-PH 4-pin vert | I²C expansion | 1: 3V3, 2: GND, 3: SCL, 4: SDA |
+| JI2C1 | JST-PH 4-pin vert | I²C expansion | 1: +3V3, 2: GND, 3: SCL, 4: SDA |
 | JLIM2 | JST-PH 2-pin vert | Limit switch | 1: PA8 input, 2: GND |
-| JP1 | Solder jumper | RS-485 termination (120 Ω in series) | Open by default |
+| JP2, JP3, JP4 | 3-pin solder jumper | Rail select (5 V / VPP) | see Power architecture |
+| JPTERM2 | 2-pin solder jumper | RS-485 termination enable (series 120 Ω) | Open by default; solder closed at the two bus endpoints |
 
 ## Board layout
 
