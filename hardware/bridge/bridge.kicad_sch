@@ -12,6 +12,52 @@
 		(comment 2 "4-Layer PCB for JLCPCB")
 	)
 	(lib_symbols
+		(symbol "Connector:Barrel_Jack_Switch"
+			(pin_names (offset 1.016) hide)
+			(exclude_from_sim no) (in_bom yes) (on_board yes)
+			(property "Reference" "J" (at 0 5.08 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "Barrel_Jack_Switch" (at 0 -7.62 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+			(property "Description" "DC Barrel Jack with internal switch" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+			(symbol "Barrel_Jack_Switch_0_1"
+				(rectangle (start -7.62 2.54) (end -6.35 -2.54) (stroke (width 0.254) (type default)) (fill (type none)))
+				(polyline (pts (xy -5.08 -5.08) (xy -5.08 -3.81) (xy -3.81 -2.54) (xy -1.27 -2.54)) (stroke (width 0.254) (type default)) (fill (type none)))
+				(polyline (pts (xy -1.27 2.54) (xy -6.35 2.54)) (stroke (width 0.254) (type default)) (fill (type none)))
+				(polyline (pts (xy -1.27 -2.54) (xy -6.35 -2.54)) (stroke (width 0.254) (type default)) (fill (type none)))
+				(polyline (pts (xy -5.08 -5.08) (xy -1.27 -5.08)) (stroke (width 0.254) (type default)) (fill (type none)))
+			)
+			(symbol "Barrel_Jack_Switch_1_1"
+				(pin passive line (at 5.08 2.54 180) (length 6.35)
+					(name "TIP" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+				(pin passive line (at 5.08 -2.54 180) (length 6.35)
+					(name "SLEEVE" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+				(pin passive line (at 5.08 -5.08 180) (length 6.35)
+					(name "SWITCH" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))
+			)
+		)
+		(symbol "Device:D_Schottky"
+			(pin_numbers (hide yes))
+			(pin_names (offset 1.016) hide)
+			(exclude_from_sim no) (in_bom yes) (on_board yes)
+			(property "Reference" "D" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Value" "D_Schottky" (at 0 -2.54 0) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+			(property "Description" "Schottky diode" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+			(symbol "D_Schottky_0_1"
+				(polyline (pts (xy -1.27 1.27) (xy -1.27 -1.27)) (stroke (width 0.254) (type default)) (fill (type none)))
+				(polyline (pts (xy 1.27 1.27) (xy 1.27 0.635) (xy 1.905 0.635)) (stroke (width 0.254) (type default)) (fill (type none)))
+				(polyline (pts (xy 1.27 -1.27) (xy 1.27 -0.635) (xy 0.635 -0.635)) (stroke (width 0.254) (type default)) (fill (type none)))
+				(polyline (pts (xy -1.27 0) (xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0)) (stroke (width 0.254) (type default)) (fill (type outline)))
+			)
+			(symbol "D_Schottky_1_1"
+				(pin passive line (at -3.81 0 0) (length 2.54)
+					(name "K" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+				(pin passive line (at 3.81 0 180) (length 2.54)
+					(name "A" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+			)
+		)
 		(symbol "Connector_Generic:Conn_01x04"
 			(pin_names (offset 1.016) hide)
 			(exclude_from_sim no)
@@ -396,6 +442,200 @@
 		(property "Sheetfile" "psu.kicad_sch" (at 25.4 92.0146 0) (effects (font (size 1.27 1.27)) (justify left top)))
 	)
 
+	(symbol
+		(lib_id "Connector:Barrel_Jack_Switch")
+		(at 228.6 91.44 0)
+		(unit 1)
+		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
+		(uuid "jdc10001-0000-0000-0000-000000000001")
+		(property "Reference" "JDC1"
+			(at 228.6 83.82 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "DC-005 2.0mm"
+			(at 228.6 99.06 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Connector_BarrelJack:BarrelJack_CUI_PJ-063AH_Horizontal"
+			(at 228.6 91.44 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" "~"
+			(at 228.6 91.44 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "DC barrel jack, 2.0mm center pin, 5A — alternate power input parallel to JBUS1"
+			(at 228.6 91.44 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "LCSC" "C2880546"
+			(at 228.6 91.44 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "MPN" "DC-005K-5A-2.0"
+			(at 228.6 91.44 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Manufacturer" "XKB Connectivity"
+			(at 228.6 91.44 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(pin "1" (uuid "jdc10001-0001-0000-0000-000000000001"))
+		(pin "2" (uuid "jdc10001-0002-0000-0000-000000000001"))
+		(pin "3" (uuid "jdc10001-0003-0000-0000-000000000001"))
+		(instances
+			(project "bridge"
+				(path "/c1d2e3f4-a5b6-7890-1234-567890abcdef"
+					(reference "JDC1") (unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 210.82 88.9 0)
+		(unit 1)
+		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
+		(uuid "d1000001-0000-0000-0000-000000000001")
+		(property "Reference" "D1"
+			(at 210.82 85.09 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "MBRD10200"
+			(at 210.82 92.71 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
+			(at 210.82 88.9 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" "https://www.onsemi.com/pdf/datasheet/mbrd1035ct-d.pdf"
+			(at 210.82 88.9 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "Schottky 10A 200V DPAK — reverse polarity on JDC1"
+			(at 210.82 88.9 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "LCSC" "C260297"
+			(at 210.82 88.9 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "MPN" "MBRD10200"
+			(at 210.82 88.9 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Manufacturer" "onsemi"
+			(at 210.82 88.9 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(pin "1" (uuid "d1000001-0001-0000-0000-000000000001"))
+		(pin "2" (uuid "d1000001-0002-0000-0000-000000000001"))
+		(instances
+			(project "bridge"
+				(path "/c1d2e3f4-a5b6-7890-1234-567890abcdef"
+					(reference "D1") (unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Barrel_Jack_Switch")
+		(at 228.6 124.46 0)
+		(unit 1)
+		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
+		(uuid "jdc20001-0000-0000-0000-000000000002")
+		(property "Reference" "JDC2"
+			(at 228.6 116.84 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "DC-005 2.0mm"
+			(at 228.6 132.08 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Connector_BarrelJack:BarrelJack_CUI_PJ-063AH_Horizontal"
+			(at 228.6 124.46 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" "~"
+			(at 228.6 124.46 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "DC barrel jack, 2.0mm center pin, 5A — alternate power input parallel to JBUS2"
+			(at 228.6 124.46 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "LCSC" "C2880546"
+			(at 228.6 124.46 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "MPN" "DC-005K-5A-2.0"
+			(at 228.6 124.46 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Manufacturer" "XKB Connectivity"
+			(at 228.6 124.46 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(pin "1" (uuid "jdc20001-0001-0000-0000-000000000002"))
+		(pin "2" (uuid "jdc20001-0002-0000-0000-000000000002"))
+		(pin "3" (uuid "jdc20001-0003-0000-0000-000000000002"))
+		(instances
+			(project "bridge"
+				(path "/c1d2e3f4-a5b6-7890-1234-567890abcdef"
+					(reference "JDC2") (unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:D_Schottky")
+		(at 210.82 121.92 0)
+		(unit 1)
+		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
+		(uuid "d2000001-0000-0000-0000-000000000002")
+		(property "Reference" "D2"
+			(at 210.82 118.11 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "MBRD10200"
+			(at 210.82 125.73 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:TO-252-2"
+			(at 210.82 121.92 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" "https://www.onsemi.com/pdf/datasheet/mbrd1035ct-d.pdf"
+			(at 210.82 121.92 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "Schottky 10A 200V DPAK — reverse polarity on JDC2"
+			(at 210.82 121.92 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "LCSC" "C260297"
+			(at 210.82 121.92 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "MPN" "MBRD10200"
+			(at 210.82 121.92 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Manufacturer" "onsemi"
+			(at 210.82 121.92 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(pin "1" (uuid "d2000001-0001-0000-0000-000000000002"))
+		(pin "2" (uuid "d2000001-0002-0000-0000-000000000002"))
+		(instances
+			(project "bridge"
+				(path "/c1d2e3f4-a5b6-7890-1234-567890abcdef"
+					(reference "D2") (unit 1)
+				)
+			)
+		)
+	)
 	(sheet_instances
 		(path "/"
 			(page "1")
