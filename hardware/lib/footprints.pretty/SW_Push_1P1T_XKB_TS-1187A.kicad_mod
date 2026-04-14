@@ -458,7 +458,7 @@
 		(uuid "0320eeb2-6a91-4d2d-9032-8bc9cc0cb72d")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/../lib/3dmodels/SW_Push_1P1T_XKB_TS-1187A_approx.step"
+	(model "${KIPRJMOD}/../lib/3dmodels/SW_Push_1P1T_XKB_TS-1187A.step"
 		(offset
 			(xyz 0 0 0)
 		)

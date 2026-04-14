@@ -1,21 +1,24 @@
 # Third-party library parts
 
-## XKB TS-1187A tact switch — footprint only
+## XKB TS-1187A-B-A-B tact switch
 
-KiCad's stock `Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A` references a
-3D STEP file that is missing from the KiCad assets. We vendor the
-footprint as `tsumikoro:SW_Push_1P1T_XKB_TS-1187A` and repoint the 3D
-model at `3dmodels/SW_Push_1P1T_XKB_TS-1187A_approx.step`, which is a
-**copy of `SW_Push_1P1T_NO_CK_KMR2.step`** (CK KMR2 tact switch, 4.2×3.2
-mm) from the KiCad stock library. The KMR2 body is a visually close
-approximation of the TS-1187A (4.5×4.5 mm) — fine for general 3D render
-purposes, not dimensionally exact. Footprint pad layout is correct.
+- `footprints.pretty/SW_Push_1P1T_XKB_TS-1187A.kicad_mod` — copied from
+  KiCad's stock `Button_Switch_SMD` library. KiCad's upstream footprint
+  references a 3D STEP that was never shipped with the installer, so we
+  vendor the footprint and repoint it at a working model.
+- `3dmodels/SW_Push_1P1T_XKB_TS-1187A.step` — real TS-1187A 3D model
+  (body size ~5.1×5.1×3.8 mm).
 
-Both files are from KiCad's upstream libraries, CC-BY-SA 4.0.
+Source for the STEP:
+<https://github.com/MaloufSleep/ME-ESP8266/blob/master/3D_Models/Button_Switch_SMD.3dShapes/TS-1187A-B-A-B.step>
 
-Replace `SW_Push_1P1T_XKB_TS-1187A_approx.step` with a real TS-1187A
-STEP (from XKB Connectivity, GrabCAD, or SnapEDA) if pixel-perfect 3D
-preview matters for mechanical fit checks.
+The ME-ESP8266 repo is a public MIT-licensed project that embeds the
+switch model alongside its KiCad design. FreeCAD authored the STEP
+(`FILE_DESCRIPTION(('FreeCAD Model')`). Treat as practical-to-use for
+our in-house design previews; if you need a canonical datasheet-verified
+model, pull from XKB Connectivity directly.
+
+The KiCad footprint itself is CC-BY-SA 4.0 (upstream KiCad library).
 
 ## Espressif — ESP32 symbols, footprints, 3D models
 
