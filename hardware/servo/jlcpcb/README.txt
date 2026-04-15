@@ -1,5 +1,5 @@
 JLCPCB manufacturing package for servo
-Generated: 2026-04-15T03:45:53Z
+Generated: 2026-04-15T16:38:55Z
 
 Files:
   gerbers/*.gbr           Gerber files (top/inner/bottom copper, mask, silk, paste)
