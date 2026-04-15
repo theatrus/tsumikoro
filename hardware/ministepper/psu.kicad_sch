@@ -2799,7 +2799,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "60022823-f6f2-41fb-a661-c0e664d16b22")
-		(property "Reference" "U2"
+		(property "Reference" "U9"
 			(at 144.3833 77.47 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2906,7 +2906,7 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/f2e3d4c5-b6a7-8901-bcde-f09876543210"
-					(reference "U2")
+					(reference "U9")
 					(unit 1)
 				)
 			)
