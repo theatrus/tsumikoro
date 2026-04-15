@@ -2693,7 +2693,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "0d697d57-33ca-4b35-bb08-99d64021b88e")
-		(property "Reference" "C_BRB_FILT"
+		(property "Reference" "C_BRB_FILT2"
 			(at 219.25 137.97 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2790,11 +2790,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_BRB_FILT")
+					(reference "C_BRB_FILT2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_BRB_FILT")
+					(reference "C_BRB_FILT3")
 					(unit 1)
 				)
 			)
@@ -3141,8 +3141,8 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "2e3eeb56-4039-41c9-bada-3a66e7d3659c")
-		(property "Reference" "U1"
-			(at 154.13 98.6 0)
+		(property "Reference" "U2"
+			(at 136.652 53.34 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3343,11 +3343,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "U1")
+					(reference "U2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "U1")
+					(reference "U3")
 					(unit 1)
 				)
 			)
@@ -3364,7 +3364,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "3466178f-005f-4e90-93c2-dfddb1142098")
-		(property "Reference" "C_5VOUT"
+		(property "Reference" "C_5VOUT2"
 			(at 173.53 57.96 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3461,11 +3461,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_5VOUT")
+					(reference "C_5VOUT2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_5VOUT")
+					(reference "C_5VOUT3")
 					(unit 1)
 				)
 			)
@@ -3482,7 +3482,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "3be466a4-4479-474a-9464-59b44d6d3dc5")
-		(property "Reference" "C_VCC"
+		(property "Reference" "C_VCC2"
 			(at 154.13 24.94 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3579,94 +3579,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_VCC")
+					(reference "C_VCC2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_VCC")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+3V3")
-		(at 129.54 88.9 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "3e0a4a4f-f1bd-486a-ab0c-8504958605db")
-		(property "Reference" "#PWR025"
-			(at 133.35 88.9 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "+3V3"
-			(at 125.73 88.8999 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 129.54 88.9 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 129.54 88.9 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 129.54 88.9 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "d214930d-2a4f-4112-8cbd-f1e622fff9d6")
-		)
-		(instances
-			(project "ministepper"
-				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "#PWR025")
-					(unit 1)
-				)
-				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "#PWR026")
+					(reference "C_VCC3")
 					(unit 1)
 				)
 			)
@@ -3683,7 +3600,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "5215a4c7-1bc2-4765-9017-6ffbccf76764")
-		(property "Reference" "RSA"
+		(property "Reference" "RSA2"
 			(at 196.39 103.68 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3780,11 +3697,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "RSA")
+					(reference "RSA2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "RSA")
+					(reference "RSA3")
 					(unit 1)
 				)
 			)
@@ -3884,7 +3801,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "5a5e8656-18b6-401a-943e-8a7ba8f42b24")
-		(property "Reference" "R_VCC"
+		(property "Reference" "R_VCC2"
 			(at 186.69 63.5 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3981,11 +3898,94 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "R_VCC")
+					(reference "R_VCC2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "R_VCC")
+					(reference "R_VCC3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
+		(at 129.54 88.9 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5b48b737-8627-46f0-b216-442387f15b4b")
+		(property "Reference" "#PWR063"
+			(at 133.35 88.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 125.73 88.8999 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 129.54 88.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 129.54 88.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
+			(at 129.54 88.9 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "bb749b7d-2f11-4c39-b91b-d4a801808874")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "#PWR063")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "#PWR064")
 					(unit 1)
 				)
 			)
@@ -4085,7 +4085,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "67533eff-a477-4199-8370-ebc0f72bfa3a")
-		(property "Reference" "C_BRA_FILT"
+		(property "Reference" "C_BRA_FILT2"
 			(at 219.25 89.71 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4182,11 +4182,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_BRA_FILT")
+					(reference "C_BRA_FILT2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_BRA_FILT")
+					(reference "C_BRA_FILT3")
 					(unit 1)
 				)
 			)
@@ -4367,7 +4367,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "77456eb6-16b4-4cf2-b306-10ab7bd45e62")
-		(property "Reference" "RSB"
+		(property "Reference" "RSB2"
 			(at 196.39 116.38 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4464,11 +4464,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "RSB")
+					(reference "RSB2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "RSB")
+					(reference "RSB3")
 					(unit 1)
 				)
 			)
@@ -4727,11 +4727,11 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp yes)
 		(uuid "8a1720df-ebe8-46bb-ad8d-71d96d99e8cf")
-		(property "Reference" "RSA_M"
+		(property "Reference" "RSA_M2"
 			(at 196.39 93.52 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4828,11 +4828,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "RSA_M")
+					(reference "RSA_M2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "RSA_M")
+					(reference "RSA_M3")
 					(unit 1)
 				)
 			)
@@ -4849,7 +4849,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "90b613da-bb8b-4966-a3db-b71961eed479")
-		(property "Reference" "C_CP"
+		(property "Reference" "C_CP2"
 			(at 179.53 130.35 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4946,11 +4946,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_CP")
+					(reference "C_CP2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_CP")
+					(reference "C_CP3")
 					(unit 1)
 				)
 			)
@@ -4967,7 +4967,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "9ab96b35-8dd7-4023-be06-0fe0acb9a632")
-		(property "Reference" "C_VCC_IO"
+		(property "Reference" "C_VCC_IO2"
 			(at 130 37.64 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5064,11 +5064,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_VCC_IO")
+					(reference "C_VCC_IO2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_VCC_IO")
+					(reference "C_VCC_IO3")
 					(unit 1)
 				)
 			)
@@ -5186,7 +5186,7 @@
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "R_DIAG1")
+					(reference "R_DIAG2")
 					(unit 1)
 				)
 			)
@@ -5286,7 +5286,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "a9a317cf-cabc-4cbf-ab35-52155fc53c6f")
-		(property "Reference" "C_VSA"
+		(property "Reference" "C_VSA2"
 			(at 227.79 28.75 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5383,11 +5383,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_VSA")
+					(reference "C_VSA2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_VSA")
+					(reference "C_VSA3")
 					(unit 1)
 				)
 			)
@@ -5400,11 +5400,11 @@
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
+		(on_board no)
 		(in_pos_files yes)
 		(dnp yes)
 		(uuid "aa80419b-b159-4394-95d3-94e89856b97f")
-		(property "Reference" "RSB_M"
+		(property "Reference" "RSB_M2"
 			(at 196.39 127.81 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5501,11 +5501,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "RSB_M")
+					(reference "RSB_M2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "RSB_M")
+					(reference "RSB_M3")
 					(unit 1)
 				)
 			)
@@ -5522,7 +5522,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "ab9b825a-6fdb-4b53-a733-a2f3cd224f10")
-		(property "Reference" "C_VS_BULK"
+		(property "Reference" "C_VS_BULK2"
 			(at 212.55 28.75 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5619,11 +5619,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_VS_BULK")
+					(reference "C_VS_BULK2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_VS_BULK")
+					(reference "C_VS_BULK3")
 					(unit 1)
 				)
 			)
@@ -5804,7 +5804,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b14ca3c0-994f-40a9-87f3-00ef5bdc34b1")
-		(property "Reference" "C_VS"
+		(property "Reference" "C_VS2"
 			(at 201.12 28.75 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5901,11 +5901,11 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_VS")
+					(reference "C_VS2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_VS")
+					(reference "C_VS3")
 					(unit 1)
 				)
 			)
@@ -6666,7 +6666,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "f01bda24-e224-46b7-bef5-01453018bc06")
-		(property "Reference" "C_VCP"
+		(property "Reference" "C_VCP2"
 			(at 179.53 37.64 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6763,20 +6763,14 @@
 		(instances
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
-					(reference "C_VCP")
+					(reference "C_VCP2")
 					(unit 1)
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
-					(reference "C_VCP")
+					(reference "C_VCP3")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(sheet_instances
-		(path "/"
-			(page "3")
-		)
-	)
-	(embedded_fonts no)
 )

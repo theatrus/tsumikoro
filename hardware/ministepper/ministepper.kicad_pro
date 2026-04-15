@@ -695,7 +695,7 @@
         "uuid": "e1d2c3b4-a5f6-7890-abcd-ef9876543210"
       }
     ],
-    "used_designators": "RSA_M2-3,C_VS2-3,C_VSA2-3,C_VS_BULK2-3,C_VCP2-3,C_BRA_FILT2-3,C_VCC_IO2-3,RSB2-3,C_VCC2-3,RSB_M2-3,C_CP2-3,C_BRB_FILT2-3,RSA2-3,C_5VOUT2-3,R_VCC2-3,#PWR55-62",
+    "used_designators": "RSA_M2-3,C_VS2-3,C_VSA2-3,C_VS_BULK2-3,C_VCP2-3,C_BRA_FILT2-3,C_VCC_IO2-3,RSB2-3,C_VCC2-3,RSB_M2-3,C_CP2-3,C_BRB_FILT2-3,RSA2-3,C_5VOUT2-3,R_VCC2-3,#PWR55-64",
     "variants": []
   },
   "sheets": [
