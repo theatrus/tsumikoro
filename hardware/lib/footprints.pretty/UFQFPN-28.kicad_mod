@@ -64,7 +64,7 @@
   (pad "29" smd rect (at 0 0) (size 2.7 2.7) (layers "F.Cu" "F.Paste" "F.Mask")
     (zone_connect 1)
   )
-  (model "${KICAD9_3DMODEL_DIR}/Package_DFN_QFN.3dshapes/QFN-28-1EP_4x4mm_P0.5mm_EP2.7x2.7mm.step"
+  (model "${KIPRJMOD}/../lib/3dmodels/STM32_UFQFPN-28_4x4mm_P0.5mm.step"
     (offset (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))
