@@ -1,7 +1,7 @@
 (kicad_sch
-	(version 20231120)
-	(generator "claude")
-	(generator_version "1.0")
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
 	(uuid "c3d4e5f6-a7b8-9012-cdef-1234567890ab")
 	(paper "A4")
 	(title_block
@@ -12,579 +12,2947 @@
 	)
 	(lib_symbols
 		(symbol "Device:C"
-			(pin_numbers hide) (pin_names (offset 0.254))
-			(exclude_from_sim no) (in_bom yes) (on_board yes)
-			(property "Reference" "C" (at 0.635 2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
-			(property "Value" "C" (at 0.635 -2.54 0) (effects (font (size 1.27 1.27)) (justify left)))
-			(property "Footprint" "" (at 0.9652 -3.81 0) (effects (font (size 1.27 1.27)) hide))
-			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
-			(property "Description" "Unpolarized capacitor" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C"
+				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Unpolarized capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
 			(symbol "C_0_1"
-				(polyline (pts (xy -2.032 -0.762) (xy 2.032 -0.762)) (stroke (width 0.508) (type default)) (fill (type none)))
-				(polyline (pts (xy -2.032 0.762) (xy 2.032 0.762)) (stroke (width 0.508) (type default)) (fill (type none)))
+				(polyline
+					(pts
+						(xy -2.032 0.762) (xy 2.032 0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.032 -0.762) (xy 2.032 -0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
 			)
 			(symbol "C_1_1"
-				(pin passive line (at 0 3.81 270) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
-				(pin passive line (at 0 -3.81 90) (length 2.794) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
 			)
+			(embedded_fonts no)
 		)
 		(symbol "Device:R"
-			(pin_numbers hide) (pin_names (offset 0))
-			(exclude_from_sim no) (in_bom yes) (on_board yes)
-			(property "Reference" "R" (at 2.032 0 90) (effects (font (size 1.27 1.27))))
-			(property "Value" "R" (at 0 0 90) (effects (font (size 1.27 1.27))))
-			(property "Footprint" "" (at -1.778 0 90) (effects (font (size 1.27 1.27)) hide))
-			(property "Datasheet" "~" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
-			(property "Description" "Resistor" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
 			(symbol "R_0_1"
-				(rectangle (start -1.016 -2.54) (end 1.016 2.54) (stroke (width 0.254) (type default)) (fill (type none)))
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
 			)
 			(symbol "R_1_1"
-				(pin passive line (at 0 3.81 270) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
-				(pin passive line (at 0 -3.81 90) (length 1.27) (name "~" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
 			)
+			(embedded_fonts no)
 		)
 		(symbol "tsumikoro:TMC2130-LA"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "U"
 				(at 0 48.26 0)
-				(effects (font (size 1.27 1.27)))
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
 			)
 			(property "Value" "TMC2130-LA"
 				(at 0 -48.26 0)
-				(effects (font (size 1.27 1.27)))
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
 			)
 			(property "Footprint" "Package_DFN_QFN:QFN-36-1EP_5x6mm_P0.5mm_EP3.6x4.6mm"
 				(at 0 -50.8 0)
-				(effects (font (size 1.27 1.27)) hide)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
 			)
 			(property "Datasheet" "https://www.analog.com/media/en/technical-documentation/data-sheets/TMC2130_datasheet_rev1.09.pdf"
 				(at 0 0 0)
-				(effects (font (size 1.27 1.27)) hide)
-			)
-			(property "LCSC" "C915795"
-				(at 0 -53.34 0)
-				(effects (font (size 1.27 1.27)) hide)
-			)
-			(property "MPN" "TMC2130-LA-T"
-				(at 0 -55.88 0)
-				(effects (font (size 1.27 1.27)) hide)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
 			)
 			(property "Description" "Stepper Motor Driver, 4.75-46V, 2A, 256 microstep, QFN-36"
 				(at 0 0 0)
-				(effects (font (size 1.27 1.27)) hide)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "LCSC" "C915795"
+				(at 0 -53.34 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "MPN" "TMC2130-LA-T"
+				(at 0 -55.88 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
 			)
 			(symbol "TMC2130-LA_0_1"
 				(rectangle
 					(start -15.24 46.99)
 					(end 15.24 -46.99)
-					(stroke (width 0.254) (type default))
-					(fill (type background))
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
 				)
 			)
 			(symbol "TMC2130-LA_1_1"
 				(pin input line
 					(at -17.78 40.64 0)
 					(length 2.54)
-					(name "CLK" (effects (font (size 1.27 1.27))))
-					(number "1" (effects (font (size 1.27 1.27))))
+					(name "CLK"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 35.56 0)
 					(length 2.54)
-					(name "CSN" (effects (font (size 1.27 1.27))))
-					(number "2" (effects (font (size 1.27 1.27))))
+					(name "CSN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 33.02 0)
 					(length 2.54)
-					(name "SCK" (effects (font (size 1.27 1.27))))
-					(number "3" (effects (font (size 1.27 1.27))))
+					(name "SCK"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 30.48 0)
 					(length 2.54)
-					(name "SDI" (effects (font (size 1.27 1.27))))
-					(number "4" (effects (font (size 1.27 1.27))))
+					(name "SDI"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin output line
 					(at -17.78 27.94 0)
 					(length 2.54)
-					(name "SDO" (effects (font (size 1.27 1.27))))
-					(number "5" (effects (font (size 1.27 1.27))))
+					(name "SDO"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 20.32 0)
 					(length 2.54)
-					(name "STEP" (effects (font (size 1.27 1.27))))
-					(number "6" (effects (font (size 1.27 1.27))))
+					(name "STEP"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 17.78 0)
 					(length 2.54)
-					(name "DIR" (effects (font (size 1.27 1.27))))
-					(number "7" (effects (font (size 1.27 1.27))))
+					(name "DIR"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at -5.08 49.53 270)
 					(length 2.54)
-					(name "VCC_IO" (effects (font (size 1.27 1.27))))
-					(number "8" (effects (font (size 1.27 1.27))))
+					(name "VCC_IO"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin passive line
 					(at -17.78 -40.64 0)
 					(length 2.54)
-					(name "DNC" (effects (font (size 1.27 1.27))))
-					(number "9" (effects (font (size 1.27 1.27))))
+					(name "DNC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 12.7 0)
 					(length 2.54)
-					(name "SPI_MODE" (effects (font (size 1.27 1.27))))
-					(number "10" (effects (font (size 1.27 1.27))))
+					(name "SPI_MODE"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin passive line
 					(at -17.78 -43.18 0)
 					(length 2.54)
-					(name "N.C." (effects (font (size 1.27 1.27))))
-					(number "11" (effects (font (size 1.27 1.27))))
+					(name "N.C."
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at 2.54 -49.53 90)
 					(length 2.54)
-					(name "GNDP" (effects (font (size 1.27 1.27))))
-					(number "12" (effects (font (size 1.27 1.27))))
+					(name "GNDP"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin output line
 					(at 17.78 -10.16 180)
 					(length 2.54)
-					(name "OB1" (effects (font (size 1.27 1.27))))
-					(number "13" (effects (font (size 1.27 1.27))))
+					(name "OB1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin passive line
 					(at 17.78 -17.78 180)
 					(length 2.54)
-					(name "BRB" (effects (font (size 1.27 1.27))))
-					(number "14" (effects (font (size 1.27 1.27))))
+					(name "BRB"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin output line
 					(at 17.78 -12.7 180)
 					(length 2.54)
-					(name "OB2" (effects (font (size 1.27 1.27))))
-					(number "15" (effects (font (size 1.27 1.27))))
+					(name "OB2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "15"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at 5.08 49.53 270)
 					(length 2.54)
-					(name "VS" (effects (font (size 1.27 1.27))))
-					(number "16" (effects (font (size 1.27 1.27))))
+					(name "VS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "16"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin output line
 					(at 17.78 22.86 180)
 					(length 2.54)
-					(name "DCO" (effects (font (size 1.27 1.27))))
-					(number "17" (effects (font (size 1.27 1.27))))
+					(name "DCO"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "17"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 7.62 0)
 					(length 2.54)
-					(name "DCEN" (effects (font (size 1.27 1.27))))
-					(number "18" (effects (font (size 1.27 1.27))))
+					(name "DCEN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "18"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 5.08 0)
 					(length 2.54)
-					(name "DCIN" (effects (font (size 1.27 1.27))))
-					(number "19" (effects (font (size 1.27 1.27))))
+					(name "DCIN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "19"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin output line
 					(at 17.78 27.94 180)
 					(length 2.54)
-					(name "DIAG0" (effects (font (size 1.27 1.27))))
-					(number "20" (effects (font (size 1.27 1.27))))
+					(name "DIAG0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "20"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin output line
 					(at 17.78 25.4 180)
 					(length 2.54)
-					(name "DIAG1" (effects (font (size 1.27 1.27))))
-					(number "21" (effects (font (size 1.27 1.27))))
+					(name "DIAG1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "21"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 0 0)
 					(length 2.54)
-					(name "DRV_ENN" (effects (font (size 1.27 1.27))))
-					(number "22" (effects (font (size 1.27 1.27))))
+					(name "DRV_ENN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "22"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 -5.08 0)
 					(length 2.54)
-					(name "AIN_IREF" (effects (font (size 1.27 1.27))))
-					(number "23" (effects (font (size 1.27 1.27))))
+					(name "AIN_IREF"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "23"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at -2.54 -49.53 90)
 					(length 2.54)
-					(name "GNDA" (effects (font (size 1.27 1.27))))
-					(number "24" (effects (font (size 1.27 1.27))))
+					(name "GNDA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "24"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_out line
 					(at 17.78 40.64 180)
 					(length 2.54)
-					(name "5VOUT" (effects (font (size 1.27 1.27))))
-					(number "25" (effects (font (size 1.27 1.27))))
+					(name "5VOUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "25"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at 0 49.53 270)
 					(length 2.54)
-					(name "VCC" (effects (font (size 1.27 1.27))))
-					(number "26" (effects (font (size 1.27 1.27))))
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "26"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin passive line
 					(at 17.78 -27.94 180)
 					(length 2.54)
-					(name "CPO" (effects (font (size 1.27 1.27))))
-					(number "27" (effects (font (size 1.27 1.27))))
+					(name "CPO"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "27"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin passive line
 					(at 17.78 -25.4 180)
 					(length 2.54)
-					(name "CPI" (effects (font (size 1.27 1.27))))
-					(number "28" (effects (font (size 1.27 1.27))))
+					(name "CPI"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "28"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at 17.78 -22.86 180)
 					(length 2.54)
-					(name "VCP" (effects (font (size 1.27 1.27))))
-					(number "29" (effects (font (size 1.27 1.27))))
+					(name "VCP"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "29"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at 10.16 49.53 270)
 					(length 2.54)
-					(name "VSA" (effects (font (size 1.27 1.27))))
-					(number "30" (effects (font (size 1.27 1.27))))
+					(name "VSA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "30"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at 7.62 49.53 270)
 					(length 2.54)
-					(name "VS_2" (effects (font (size 1.27 1.27))))
-					(number "31" (effects (font (size 1.27 1.27))))
+					(name "VS_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "31"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin output line
 					(at 17.78 2.54 180)
 					(length 2.54)
-					(name "OA2" (effects (font (size 1.27 1.27))))
-					(number "32" (effects (font (size 1.27 1.27))))
+					(name "OA2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "32"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin passive line
 					(at 17.78 -5.08 180)
 					(length 2.54)
-					(name "BRA" (effects (font (size 1.27 1.27))))
-					(number "33" (effects (font (size 1.27 1.27))))
+					(name "BRA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "33"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin output line
 					(at 17.78 5.08 180)
 					(length 2.54)
-					(name "OA1" (effects (font (size 1.27 1.27))))
-					(number "34" (effects (font (size 1.27 1.27))))
+					(name "OA1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "34"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at 5.08 -49.53 90)
 					(length 2.54)
-					(name "GNDP_2" (effects (font (size 1.27 1.27))))
-					(number "35" (effects (font (size 1.27 1.27))))
+					(name "GNDP_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "35"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin input line
 					(at -17.78 -35.56 0)
 					(length 2.54)
-					(name "TST_MODE" (effects (font (size 1.27 1.27))))
-					(number "36" (effects (font (size 1.27 1.27))))
+					(name "TST_MODE"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "36"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 				(pin power_in line
 					(at 0 -49.53 90)
 					(length 2.54)
-					(name "EP" (effects (font (size 1.27 1.27))))
-					(number "37" (effects (font (size 1.27 1.27))))
+					(name "EP"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "37"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
 				)
 			)
+			(embedded_fonts no)
 		)
 	)
-
-	(text "ONE TMC2130 STEPPER CHANNEL\n\nThis sheet represents a single channel of TMC2130 motor driving with\nall the per-driver support passives from the datasheet.\n\nInstantiate this sheet twice on the ministepper root — KiCad auto-\nrenumbers refs per instance (U1->U1/U2, C1->C1/C13, R1->R1/R8, etc.).\n\nHierarchical ports:\n  SCK, MOSI, MISO, DRV_ENN  - shared SPI bus + shared enable\n  CS, STEP, DIR, DIAG1      - per-channel signals\n  MOT_A+/-, MOT_B+/-        - bipolar motor phases to JMOTx\n\nGlobal power nets (no port needed, use power symbols):\n  +3V3  (logic / VCC_IO)\n  VPP   (motor supply, 5-37V)\n  GND"
-		(at 15 20 0)
-		(effects (font (size 1.27 1.27)) (justify left))
-	)
-
-	(text "Sense-resistor variants (assembly-time choice):\n  STANDARD populated: RSA/RSB = 0.1 ohm 1210 (NEMA17-class, up to 1.5A RMS)\n  MICRO populated:    RSA_M/RSB_M = 0.68 ohm 1210 (50-200mA, 28BYJ-48)\n\nOnly ONE pair should be populated at a time. The micro variant requires\nthe firmware to set CHOPCONF.VSENSE=1 (see firmware/tsumikoro-ministepper).\n\nStrapping (firmware-agnostic, tied via power symbols inside this sheet):\n  CLK (pin 1)        -> GND (use internal 12 MHz oscillator)\n  SPI_MODE (pin 10)  -> +3V3 (hardware SPI mode)\n  TST_MODE (pin 36)  -> GND\n  DCEN (pin 18), DCIN (pin 19) -> GND (dcStep disabled)\n  DNC (pin 9), N.C. (pin 11)   -> open"
-		(at 15 70 0)
-		(effects (font (size 1.27 1.27)) (justify left))
-	)
-
 	(text "Components to wire in KiCad (placed unwired here):\n  U1        TMC2130-LA\n  RSA, RSB  0.1 ohm 1210 (sense, standard variant)\n  RSA_M, RSB_M   0.68 ohm 1210 DNP (sense, micro variant)\n  C_VS_BULK 10 uF 50V 1210 (motor supply bulk near VS pins 16+31)\n  C_VS      100 nF 0402 (VS HF bypass)\n  C_VSA     100 nF 0402 (VSA filter, pin 30)\n  C_CP      22 nF 50V 0402 (CPH<->CPL charge pump flying cap)\n  C_VCP     100 nF 50V 0402 (VCP->VS charge pump storage)\n  C_5VOUT   2.2 uF 6.3V 0603 (5VOUT->GNDA internal LDO)\n  C_VCC     100 nF 0402 (VCC->GND digital supply)\n  C_AIN     100 nF 0402 (AIN_IREF->GNDA reference filter)\n  R_DIAG1   47 k 0402 pull-up to +3V3 on DIAG1"
+		(exclude_from_sim no)
 		(at 110 20 0)
-		(effects (font (size 1.27 1.27)) (justify left))
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "1d912666-0f32-4d96-b735-7666b5f14159")
 	)
-
-	(hierarchical_label "SCK"
-		(shape input)
-		(at 40 110 180)
-		(effects (font (size 1.27 1.27)))
+	(text "ONE TMC2130 STEPPER CHANNEL\n\nThis sheet represents a single channel of TMC2130 motor driving with\nall the per-driver support passives from the datasheet.\n\nInstantiate this sheet twice on the ministepper root — KiCad auto-\nrenumbers refs per instance (U1->U1/U2, C1->C1/C13, R1->R1/R8, etc.).\n\nHierarchical ports:\n  SCK, MOSI, MISO, DRV_ENN  - shared SPI bus + shared enable\n  CS, STEP, DIR, DIAG1      - per-channel signals\n  MOT_A+/-, MOT_B+/-        - bipolar motor phases to JMOTx\n\nGlobal power nets (no port needed, use power symbols):\n  +3V3  (logic / VCC_IO)\n  VPP   (motor supply, 5-37V)\n  GND"
+		(exclude_from_sim no)
+		(at 15 20 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2d0bb7f8-ee6c-4949-bdcb-aba6c147329a")
 	)
-	(hierarchical_label "MOSI"
-		(shape input)
-		(at 40 115 180)
-		(effects (font (size 1.27 1.27)))
-	)
-	(hierarchical_label "MISO"
-		(shape output)
-		(at 40 120 180)
-		(effects (font (size 1.27 1.27)))
-	)
-	(hierarchical_label "CS"
-		(shape input)
-		(at 40 125 180)
-		(effects (font (size 1.27 1.27)))
-	)
-	(hierarchical_label "STEP"
-		(shape input)
-		(at 40 130 180)
-		(effects (font (size 1.27 1.27)))
-	)
-	(hierarchical_label "DIR"
-		(shape input)
-		(at 40 135 180)
-		(effects (font (size 1.27 1.27)))
-	)
-	(hierarchical_label "DRV_ENN"
-		(shape input)
-		(at 40 140 180)
-		(effects (font (size 1.27 1.27)))
+	(text "Sense-resistor variants (assembly-time choice):\n  STANDARD populated: RSA/RSB = 0.1 ohm 1210 (NEMA17-class, up to 1.5A RMS)\n  MICRO populated:    RSA_M/RSB_M = 0.68 ohm 1210 (50-200mA, 28BYJ-48)\n\nOnly ONE pair should be populated at a time. The micro variant requires\nthe firmware to set CHOPCONF.VSENSE=1 (see firmware/tsumikoro-ministepper).\n\nStrapping (firmware-agnostic, tied via power symbols inside this sheet):\n  CLK (pin 1)        -> GND (use internal 12 MHz oscillator)\n  SPI_MODE (pin 10)  -> +3V3 (hardware SPI mode)\n  TST_MODE (pin 36)  -> GND\n  DCEN (pin 18), DCIN (pin 19) -> GND (dcStep disabled)\n  DNC (pin 9), N.C. (pin 11)   -> open"
+		(exclude_from_sim no)
+		(at 15 70 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "61a42839-8b8d-453c-b3bc-653a7bcb1035")
 	)
 	(hierarchical_label "DIAG1"
 		(shape output)
 		(at 40 145 180)
-		(effects (font (size 1.27 1.27)))
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "04f84da5-cf79-43a8-9cd1-b413c74d06d9")
 	)
-	(hierarchical_label "MOT_A+"
-		(shape output)
-		(at 230 110 0)
-		(effects (font (size 1.27 1.27)))
-	)
-	(hierarchical_label "MOT_A-"
-		(shape output)
-		(at 230 115 0)
-		(effects (font (size 1.27 1.27)))
+	(hierarchical_label "SCK"
+		(shape input)
+		(at 40.64 110.49 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "056355e3-960e-4256-9d34-3d964640dbc5")
 	)
 	(hierarchical_label "MOT_B+"
 		(shape output)
 		(at 230 120 0)
-		(effects (font (size 1.27 1.27)))
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "15fb5695-1815-43ff-92e3-86d073af3675")
+	)
+	(hierarchical_label "STEP"
+		(shape input)
+		(at 40 130 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "202530ea-4f89-48f5-8307-9bf06a937430")
+	)
+	(hierarchical_label "MOT_A+"
+		(shape output)
+		(at 230 110 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2bceece2-aeba-4d1a-8114-301758b2884b")
+	)
+	(hierarchical_label "DIR"
+		(shape input)
+		(at 40 135 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "2dbb2985-d741-4eb1-a986-95903b2f630e")
 	)
 	(hierarchical_label "MOT_B-"
 		(shape output)
 		(at 230 125 0)
-		(effects (font (size 1.27 1.27)))
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2f78b015-6dda-4c92-ab2e-7110f655fc95")
+	)
+	(hierarchical_label "MISO"
+		(shape output)
+		(at 40 120 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "34ec524d-b88f-4007-94f9-22bbda8a3d2d")
+	)
+	(hierarchical_label "MOT_A-"
+		(shape output)
+		(at 230 115 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "3ab294f3-b27f-45ec-85b0-e5f066094627")
+	)
+	(hierarchical_label "CS"
+		(shape input)
+		(at 40 125 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "407fc9ec-ab4a-49d3-942b-5a0281a21879")
+	)
+	(hierarchical_label "DRV_ENN"
+		(shape input)
+		(at 40 140 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "5ad3405a-56cb-47a3-a399-1fef622596cb")
+	)
+	(hierarchical_label "MOSI"
+		(shape input)
+		(at 40 115 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "792d8a2c-4454-4211-9372-219e89da1eb6")
 	)
 	(symbol
-		(lib_id "tsumikoro:TMC2130-LA") (at 140 130 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "u1ch0001-0000-0000-0000-000000000001")
-		(property "Reference" "U1" (at 143 127 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "TMC2130-LA" (at 143 133 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Package_DFN_QFN:QFN-36-1EP_5x6mm_P0.5mm_EP3.6x4.6mm" (at 140 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 140 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "Stepper driver QFN-36" (at 140 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C915795" (at 140 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "TMC2130-LA-T" (at 140 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Trinamic/ADI" (at 140 130 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "U1") (unit 1))))
+		(lib_id "tsumikoro:TMC2130-LA")
+		(at 140 130 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2e3eeb56-4039-41c9-bada-3a66e7d3659c")
+		(property "Reference" "U1"
+			(at 143 127 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TMC2130-LA"
+			(at 143 133 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_DFN_QFN:QFN-36-1EP_5x6mm_P0.5mm_EP3.6x4.6mm"
+			(at 140 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 140 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Stepper driver QFN-36"
+			(at 140 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C915795"
+			(at 140 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TMC2130-LA-T"
+			(at 140 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Trinamic/ADI"
+			(at 140 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "17"
+			(uuid "0db4b0b3-c202-4178-8f81-fd2982921923")
+		)
+		(pin "18"
+			(uuid "dea3cae5-6464-42c3-87c6-83230029c6be")
+		)
+		(pin "19"
+			(uuid "3c396d40-c596-44d0-a906-115d991ed19b")
+		)
+		(pin "20"
+			(uuid "3df42987-342a-4165-8421-c3ddb6eab826")
+		)
+		(pin "21"
+			(uuid "49c75dda-6335-40f4-b981-6b742dfbc495")
+		)
+		(pin "22"
+			(uuid "46995679-5b25-402c-85f9-cd2d555d6a26")
+		)
+		(pin "23"
+			(uuid "f34e14fd-8ded-4e9f-a807-a929937fa715")
+		)
+		(pin "24"
+			(uuid "a66cc3bf-0cc7-4d77-b523-187473355307")
+		)
+		(pin "25"
+			(uuid "52f73e76-d059-45ea-96d6-ea03eaba3703")
+		)
+		(pin "26"
+			(uuid "31c69433-e33e-4e7f-969c-36ebff684890")
+		)
+		(pin "27"
+			(uuid "90b0c4f7-3039-4ec2-a528-2cbdf960c711")
+		)
+		(pin "28"
+			(uuid "aeddb4f5-ad8f-4ccb-872a-5130ab520f46")
+		)
+		(pin "29"
+			(uuid "d721c2eb-6a76-4452-baea-b0e231b508a5")
+		)
+		(pin "30"
+			(uuid "685bf7e0-344e-41ee-9852-c324e760fbf1")
+		)
+		(pin "31"
+			(uuid "c532bda4-4650-466f-868f-2a9e12567097")
+		)
+		(pin "32"
+			(uuid "267f98c4-dff1-4563-97f7-28c7e22bfd0d")
+		)
+		(pin "33"
+			(uuid "c191ec3b-1cd0-4805-8140-17e4bd48890b")
+		)
+		(pin "34"
+			(uuid "4256b648-5fd1-4d55-b498-d60645836454")
+		)
+		(pin "35"
+			(uuid "4932aaa9-8786-4a6c-9820-8d62bbe8cdb6")
+		)
+		(pin "36"
+			(uuid "c9ea334c-188c-463f-b22c-d21162dfb00f")
+		)
+		(pin "37"
+			(uuid "ce2f2bfc-593a-4350-8e2e-c0cfe69ea5ea")
+		)
+		(pin "1"
+			(uuid "24ee9775-daaf-4021-9d85-6b94d17f9999")
+		)
+		(pin "2"
+			(uuid "306035bd-156f-4d07-8775-8359ee8c7fb8")
+		)
+		(pin "3"
+			(uuid "162cdcb6-1d98-4017-b5ea-509f4687a999")
+		)
+		(pin "4"
+			(uuid "1b6af0b0-280e-4416-8323-70b34063649f")
+		)
+		(pin "5"
+			(uuid "3dcc11fd-9c4a-472e-bc84-40ce76bd68dc")
+		)
+		(pin "6"
+			(uuid "846344af-6edc-401f-8951-29b907fda6a2")
+		)
+		(pin "7"
+			(uuid "f0b80b0b-ea70-465c-938e-5f6d92b9d82a")
+		)
+		(pin "8"
+			(uuid "ae1acde5-850a-425e-a4da-b89d145d9ad3")
+		)
+		(pin "9"
+			(uuid "81b23689-95ef-4879-b478-f4509dd9f822")
+		)
+		(pin "10"
+			(uuid "5533f195-5730-42e9-af17-b902933afd54")
+		)
+		(pin "11"
+			(uuid "f3cc9656-ef4f-4a45-bf5f-0c4c03bba75e")
+		)
+		(pin "12"
+			(uuid "f00e4b4a-bf1f-4106-88f5-af6df4fe67a6")
+		)
+		(pin "13"
+			(uuid "dac0ff98-a86f-4596-a2c2-2c68fa60ba4e")
+		)
+		(pin "14"
+			(uuid "04675791-5dc0-4128-a036-e5b9702d2c69")
+		)
+		(pin "15"
+			(uuid "44ada467-50b3-420f-b98f-878c14dbe679")
+		)
+		(pin "16"
+			(uuid "99973856-a979-4844-b829-1b59c35e32a7")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "U1")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "U1")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:R") (at 170 155 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "rsac0001-0000-0000-0000-000000000001")
-		(property "Reference" "RSA" (at 173 152 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "0.1R" (at 173 158 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Resistor_SMD:R_1210_3225Metric" (at 170 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 170 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "Sense coil A, 0.1 ohm 1% 1210 (standard)" (at 170 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C2974119" (at 170 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "FRL1210FR100TS" (at 170 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "UNI-ROYAL" (at 170 155 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "RSA") (unit 1))))
+		(lib_id "Device:C")
+		(at 140 150 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3466178f-005f-4e90-93c2-dfddb1142098")
+		(property "Reference" "C_5VOUT"
+			(at 143 147 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "2.2uF"
+			(at 143 153 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 140 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 140 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Internal LDO output 5VOUT->GNDA, 2.2 uF 6.3V 0603"
+			(at 140 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C380323"
+			(at 140 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TCC0603X5R226M6R3CT"
+			(at 140 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "TDK"
+			(at 140 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "19e0a36e-b288-436b-884d-7c87cace0f31")
+		)
+		(pin "2"
+			(uuid "8a715cd3-285c-404f-b143-cae8776dbb78")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_5VOUT")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_5VOUT")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:R") (at 175 155 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "rsbc0001-0000-0000-0000-000000000001")
-		(property "Reference" "RSB" (at 178 152 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "0.1R" (at 178 158 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Resistor_SMD:R_1210_3225Metric" (at 175 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 175 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "Sense coil B, 0.1 ohm 1% 1210 (standard)" (at 175 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C2974119" (at 175 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "FRL1210FR100TS" (at 175 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "UNI-ROYAL" (at 175 155 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "RSB") (unit 1))))
+		(lib_id "Device:C")
+		(at 145 150 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3be466a4-4479-474a-9464-59b44d6d3dc5")
+		(property "Reference" "C_VCC"
+			(at 148 147 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 148 153 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 145 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 145 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Internal digital VCC->GND, 100 nF 0402 (BASIC)"
+			(at 145 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 145 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 145 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 145 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "993e5cf7-3612-461e-a050-73c010168149")
+		)
+		(pin "2"
+			(uuid "93a9a6a4-e75b-482f-85c5-d1a70260d0bd")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_VCC")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_VCC")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:R") (at 170 165 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp yes)
-		(uuid "rsam0001-0000-0000-0000-000000000001")
-		(property "Reference" "RSA_M" (at 173 162 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "0.68R" (at 173 168 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Resistor_SMD:R_1210_3225Metric" (at 170 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 170 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "Sense coil A, 0.68 ohm 1% 1210 (micro, DNP)" (at 170 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C3000593" (at 170 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "FRC1210F68R0TS" (at 170 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "UNI-ROYAL" (at 170 165 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "RSA_M") (unit 1))))
+		(lib_id "Device:R")
+		(at 170 155 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "5215a4c7-1bc2-4765-9017-6ffbccf76764")
+		(property "Reference" "RSA"
+			(at 173 152 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0.1R"
+			(at 173 158 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1210_3225Metric"
+			(at 170 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 170 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Sense coil A, 0.1 ohm 1% 1210 (standard)"
+			(at 170 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2974119"
+			(at 170 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "FRL1210FR100TS"
+			(at 170 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 170 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "890ef354-013e-42be-853e-9600c010db0b")
+		)
+		(pin "2"
+			(uuid "c2259d96-2d0c-4399-a49b-f0f2685ca436")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "RSA")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "RSA")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:R") (at 175 165 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp yes)
-		(uuid "rsbm0001-0000-0000-0000-000000000001")
-		(property "Reference" "RSB_M" (at 178 162 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "0.68R" (at 178 168 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Resistor_SMD:R_1210_3225Metric" (at 175 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 175 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "Sense coil B, 0.68 ohm 1% 1210 (micro, DNP)" (at 175 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C3000593" (at 175 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "FRC1210F68R0TS" (at 175 165 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "UNI-ROYAL" (at 175 165 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "RSB_M") (unit 1))))
+		(lib_id "Device:R")
+		(at 175 155 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "77456eb6-16b4-4cf2-b306-10ab7bd45e62")
+		(property "Reference" "RSB"
+			(at 178 152 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0.1R"
+			(at 178 158 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1210_3225Metric"
+			(at 175 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 175 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Sense coil B, 0.1 ohm 1% 1210 (standard)"
+			(at 175 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2974119"
+			(at 175 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "FRL1210FR100TS"
+			(at 175 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 175 155 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c39b8b93-8513-4f4d-a129-40c8e78c5ece")
+		)
+		(pin "2"
+			(uuid "1ba1df13-9e2f-49b7-9f65-95981d5044b1")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "RSB")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "RSB")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:C") (at 115 150 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "cvsb0001-0000-0000-0000-000000000001")
-		(property "Reference" "C_VS_BULK" (at 118 147 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "10uF" (at 118 153 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric" (at 115 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 115 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "VS motor-rail bulk, 10 uF 50V 1210" (at 115 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C2918502" (at 115 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "CS3225X7R106K500NRL" (at 115 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Samsung" (at 115 150 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_VS_BULK") (unit 1))))
+		(lib_id "Device:R")
+		(at 170 165 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "8a1720df-ebe8-46bb-ad8d-71d96d99e8cf")
+		(property "Reference" "RSA_M"
+			(at 173 162 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0.68R"
+			(at 173 168 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1210_3225Metric"
+			(at 170 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 170 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Sense coil A, 0.68 ohm 1% 1210 (micro, DNP)"
+			(at 170 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C3000593"
+			(at 170 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "FRC1210F68R0TS"
+			(at 170 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 170 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9701a773-b0cd-40fa-9ed9-32221e2f41b9")
+		)
+		(pin "2"
+			(uuid "13f116b3-0efb-488e-9faa-9555fc15f9ae")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "RSA_M")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "RSA_M")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:C") (at 120 150 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "cvs00001-0000-0000-0000-000000000001")
-		(property "Reference" "C_VS" (at 123 147 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "100nF" (at 123 153 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 120 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 120 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "VS HF bypass, 100 nF 0402 (BASIC)" (at 120 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C1525" (at 120 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "CL05B104KO5NNNC" (at 120 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Samsung" (at 120 150 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_VS") (unit 1))))
+		(lib_id "Device:C")
+		(at 130 150 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "90b613da-bb8b-4966-a3db-b71961eed479")
+		(property "Reference" "C_CP"
+			(at 133 147 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "22nF"
+			(at 133 153 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 130 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 130 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Charge-pump flying cap CPH<->CPL, 22 nF 50V 0402 (BASIC)"
+			(at 130 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1532"
+			(at 130 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402B223K500NT"
+			(at 130 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "FH"
+			(at 130 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "1241f5fc-e520-4d7c-b2bc-4aa2b89ca6fb")
+		)
+		(pin "2"
+			(uuid "356e9402-129f-496f-b4f1-caffd50aeb69")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_CP")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_CP")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:C") (at 125 150 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "cvsa0001-0000-0000-0000-000000000001")
-		(property "Reference" "C_VSA" (at 128 147 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "100nF" (at 128 153 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 125 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 125 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "VSA filter, 100 nF 0402 (BASIC)" (at 125 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C1525" (at 125 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "CL05B104KO5NNNC" (at 125 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Samsung" (at 125 150 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_VSA") (unit 1))))
+		(lib_id "Device:C")
+		(at 150 150 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9ab96b35-8dd7-4023-be06-0fe0acb9a632")
+		(property "Reference" "C_AIN"
+			(at 153 147 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 153 153 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 150 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 150 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "AIN_IREF reference filter, 100 nF 0402 (BASIC)"
+			(at 150 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 150 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 150 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 150 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "cf2047ab-8514-4da7-bb53-10bc9eff48ae")
+		)
+		(pin "2"
+			(uuid "1085d670-f75f-4f75-8a47-d1867339ea4f")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_AIN")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_AIN")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:C") (at 130 150 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "ccp00001-0000-0000-0000-000000000001")
-		(property "Reference" "C_CP" (at 133 147 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "22nF" (at 133 153 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 130 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 130 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "Charge-pump flying cap CPH<->CPL, 22 nF 50V 0402 (BASIC)" (at 130 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C1532" (at 130 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "0402B223K500NT" (at 130 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "FH" (at 130 150 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_CP") (unit 1))))
+		(lib_id "Device:R")
+		(at 165 130 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a061c99f-537c-4cbe-bf64-b9f1e92f0aaa")
+		(property "Reference" "R_DIAG1"
+			(at 168 127 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "47k"
+			(at 168 133 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 165 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 165 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "DIAG1 open-drain pull-up to +3V3, 47 k 0402"
+			(at 165 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C93943"
+			(at 165 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RC0402FR-0747KL"
+			(at 165 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 165 130 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4846a459-e0b4-4496-83d9-c5fd8a512186")
+		)
+		(pin "2"
+			(uuid "d7283dff-dd82-43da-917d-6d44654a8042")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "R_DIAG1")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "R_DIAG1")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:C") (at 135 150 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "cvcp0001-0000-0000-0000-000000000001")
-		(property "Reference" "C_VCP" (at 138 147 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "100nF" (at 138 153 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 135 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 135 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "Charge-pump storage VCP->VS, 100 nF 50V 0402 (BASIC)" (at 135 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C1525" (at 135 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "CL05B104KO5NNNC" (at 135 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Samsung" (at 135 150 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_VCP") (unit 1))))
+		(lib_id "Device:C")
+		(at 125 150 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a9a317cf-cabc-4cbf-ab35-52155fc53c6f")
+		(property "Reference" "C_VSA"
+			(at 128 147 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 128 153 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 125 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 125 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "VSA filter, 100 nF 0402 (BASIC)"
+			(at 125 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 125 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 125 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 125 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d30c4fab-d748-4d53-a82f-21335e6b7291")
+		)
+		(pin "2"
+			(uuid "3509df09-f5cc-44e9-ade3-c89d82494d1c")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_VSA")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_VSA")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:C") (at 140 150 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "c5vout01-0000-0000-0000-000000000001")
-		(property "Reference" "C_5VOUT" (at 143 147 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "2.2uF" (at 143 153 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 140 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 140 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "Internal LDO output 5VOUT->GNDA, 2.2 uF 6.3V 0603" (at 140 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C380323" (at 140 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "TCC0603X5R226M6R3CT" (at 140 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "TDK" (at 140 150 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_5VOUT") (unit 1))))
+		(lib_id "Device:R")
+		(at 175 165 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "aa80419b-b159-4394-95d3-94e89856b97f")
+		(property "Reference" "RSB_M"
+			(at 178 162 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0.68R"
+			(at 178 168 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1210_3225Metric"
+			(at 175 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 175 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Sense coil B, 0.68 ohm 1% 1210 (micro, DNP)"
+			(at 175 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C3000593"
+			(at 175 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "FRC1210F68R0TS"
+			(at 175 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 175 165 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3143a860-cf9d-49f5-b1dc-0421cc594d7b")
+		)
+		(pin "2"
+			(uuid "7b03a58d-ec86-4c87-bf01-044cb1ccf348")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "RSB_M")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "RSB_M")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:C") (at 145 150 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "cvcc0001-0000-0000-0000-000000000001")
-		(property "Reference" "C_VCC" (at 148 147 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "100nF" (at 148 153 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 145 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 145 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "Internal digital VCC->GND, 100 nF 0402 (BASIC)" (at 145 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C1525" (at 145 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "CL05B104KO5NNNC" (at 145 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Samsung" (at 145 150 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_VCC") (unit 1))))
+		(lib_id "Device:C")
+		(at 115 150 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ab9b825a-6fdb-4b53-a733-a2f3cd224f10")
+		(property "Reference" "C_VS_BULK"
+			(at 118 147 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10uF"
+			(at 118 153 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
+			(at 115 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 115 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "VS motor-rail bulk, 10 uF 50V 1210"
+			(at 115 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2918502"
+			(at 115 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CS3225X7R106K500NRL"
+			(at 115 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 115 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "368511b0-407a-4173-a8cc-efde715c918a")
+		)
+		(pin "2"
+			(uuid "b4e6ed56-0f87-4d50-86a2-4a7275f5d9ff")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_VS_BULK")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_VS_BULK")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:C") (at 150 150 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "cainf001-0000-0000-0000-000000000001")
-		(property "Reference" "C_AIN" (at 153 147 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "100nF" (at 153 153 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 150 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 150 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "AIN_IREF reference filter, 100 nF 0402 (BASIC)" (at 150 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C1525" (at 150 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "CL05B104KO5NNNC" (at 150 150 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Samsung" (at 150 150 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_AIN") (unit 1))))
+		(lib_id "Device:C")
+		(at 120 150 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "b14ca3c0-994f-40a9-87f3-00ef5bdc34b1")
+		(property "Reference" "C_VS"
+			(at 123 147 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 123 153 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 120 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 120 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "VS HF bypass, 100 nF 0402 (BASIC)"
+			(at 120 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 120 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 120 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 120 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "46ebe23d-251d-4a19-ac47-4b7a3106470b")
+		)
+		(pin "2"
+			(uuid "f26fc26b-5b60-4af6-9b33-4c8c6ee69330")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_VS")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_VS")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
-		(lib_id "Device:R") (at 165 130 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "rdiag001-0000-0000-0000-000000000001")
-		(property "Reference" "R_DIAG1" (at 168 127 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "47k" (at 168 133 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric" (at 165 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 165 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "DIAG1 open-drain pull-up to +3V3, 47 k 0402" (at 165 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C93943" (at 165 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "RC0402FR-0747KL" (at 165 130 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Yageo" (at 165 130 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "R_DIAG1") (unit 1))))
+		(lib_id "Device:C")
+		(at 135 150 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f01bda24-e224-46b7-bef5-01453018bc06")
+		(property "Reference" "C_VCP"
+			(at 138 147 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 138 153 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 135 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 135 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Charge-pump storage VCP->VS, 100 nF 50V 0402 (BASIC)"
+			(at 135 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 135 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 135 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 135 150 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6456ed68-5f68-4891-b3a8-e5c60c977211")
+		)
+		(pin "2"
+			(uuid "9d769320-c8d4-499d-b7a2-1c23cfe8edb3")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_VCP")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_VCP")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(sheet_instances
 		(path "/"
 			(page "3")
 		)
 	)
+	(embedded_fonts no)
 )

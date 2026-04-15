@@ -2577,153 +2577,295 @@
 	(sheet
 		(at 48.26 100)
 		(size 40 30)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
 		(fields_autoplaced yes)
-		(stroke (width 0.1524) (type solid))
-		(fill (color 225 240 255 1))
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 225 240 255 1)
+		)
 		(uuid "aaaaaaaa-1111-2222-3333-000000000001")
 		(property "Sheetname" "Stepper 1"
 			(at 48.26 99.2884 0)
-			(effects (font (size 1.27 1.27)) (justify left bottom))
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
 		)
 		(property "Sheetfile" "stepper_channel.kicad_sch"
 			(at 48.26 130.8146 0)
-			(effects (font (size 1.27 1.27)) (justify left top))
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
 		)
 		(pin "SCK" input
 			(at 48.26 102.54 180)
-			(effects (font (size 1.27 1.27)) (justify left))
 			(uuid "a7d7a066-61e2-4fcf-8395-18fda2e7313e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOSI" input
-			(at 48.26 105.08000000000001 180)
-			(effects (font (size 1.27 1.27)) (justify left))
+			(at 48.26 105.08 180)
 			(uuid "4250ffbf-52fa-4c9e-b011-4d14e3e6dcd6")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MISO" output
 			(at 48.26 107.62 180)
-			(effects (font (size 1.27 1.27)) (justify left))
 			(uuid "c8927e43-896b-4755-af39-971aa83a38d3")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "CS" input
-			(at 48.26 110.16000000000001 180)
-			(effects (font (size 1.27 1.27)) (justify left))
+			(at 48.26 110.16 180)
 			(uuid "8364f468-4e15-4cc8-8f11-3dd4809cead3")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "STEP" input
 			(at 48.26 112.7 180)
-			(effects (font (size 1.27 1.27)) (justify left))
 			(uuid "5abfc3e5-7adb-47f8-86e3-5a668b0299a6")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "DIR" input
-			(at 48.26 115.24000000000001 180)
-			(effects (font (size 1.27 1.27)) (justify left))
+			(at 48.26 115.24 180)
 			(uuid "9049f57e-1973-4d9b-be34-f7137e33a1c6")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "DRV_ENN" input
 			(at 48.26 117.78 180)
-			(effects (font (size 1.27 1.27)) (justify left))
 			(uuid "ea35b497-400f-4985-a21f-4cb7d1f7489d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "DIAG1" output
-			(at 48.26 120.32000000000001 180)
-			(effects (font (size 1.27 1.27)) (justify left))
+			(at 48.26 120.32 180)
 			(uuid "7a7eecac-4690-4a9a-8295-a9f76a8c3e38")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOT_A+" output
-			(at 88.25999999999999 102.54 0)
-			(effects (font (size 1.27 1.27)) (justify right))
+			(at 88.26 102.54 0)
 			(uuid "dae56a12-e2b0-438b-b57d-09b392e31b37")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOT_A-" output
-			(at 88.25999999999999 105.08000000000001 0)
-			(effects (font (size 1.27 1.27)) (justify right))
+			(at 88.26 105.08 0)
 			(uuid "794f87e7-f1d8-47f9-b661-197663c33620")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOT_B+" output
-			(at 88.25999999999999 107.62 0)
-			(effects (font (size 1.27 1.27)) (justify right))
+			(at 88.26 107.62 0)
 			(uuid "e621365c-5ac6-4ea7-b359-7b0727585888")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOT_B-" output
-			(at 88.25999999999999 110.16000000000001 0)
-			(effects (font (size 1.27 1.27)) (justify right))
+			(at 88.26 110.16 0)
 			(uuid "0bc9762d-02c6-45f4-a084-f032a7b64877")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 	)
 	(sheet
 		(at 101.6 100)
 		(size 40 30)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
 		(fields_autoplaced yes)
-		(stroke (width 0.1524) (type solid))
-		(fill (color 225 255 225 1))
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 225 255 225 1)
+		)
 		(uuid "bbbbbbbb-1111-2222-3333-000000000002")
 		(property "Sheetname" "Stepper 2"
 			(at 101.6 99.2884 0)
-			(effects (font (size 1.27 1.27)) (justify left bottom))
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
 		)
 		(property "Sheetfile" "stepper_channel.kicad_sch"
 			(at 101.6 130.8146 0)
-			(effects (font (size 1.27 1.27)) (justify left top))
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
 		)
 		(pin "SCK" input
 			(at 101.6 102.54 180)
-			(effects (font (size 1.27 1.27)) (justify left))
 			(uuid "5863a761-54b8-4743-8e8d-d6208766f8e0")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOSI" input
-			(at 101.6 105.08000000000001 180)
-			(effects (font (size 1.27 1.27)) (justify left))
+			(at 101.6 105.08 180)
 			(uuid "23dbcd38-bceb-4803-94e4-1a2af13e4a4c")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MISO" output
 			(at 101.6 107.62 180)
-			(effects (font (size 1.27 1.27)) (justify left))
 			(uuid "8219ddb1-b75a-49f5-bf5e-b7698aae2202")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "CS" input
-			(at 101.6 110.16000000000001 180)
-			(effects (font (size 1.27 1.27)) (justify left))
+			(at 101.6 110.16 180)
 			(uuid "43f4877a-5a9e-463e-863c-94be08f4096b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "STEP" input
 			(at 101.6 112.7 180)
-			(effects (font (size 1.27 1.27)) (justify left))
 			(uuid "48be9610-5e41-4250-82aa-2127911dc7ee")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "DIR" input
-			(at 101.6 115.24000000000001 180)
-			(effects (font (size 1.27 1.27)) (justify left))
+			(at 101.6 115.24 180)
 			(uuid "b34bf849-c098-4287-8899-1528b66b9324")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "DRV_ENN" input
 			(at 101.6 117.78 180)
-			(effects (font (size 1.27 1.27)) (justify left))
 			(uuid "658f64a5-c4ec-4d2a-8d49-5fade6670289")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "DIAG1" output
-			(at 101.6 120.32000000000001 180)
-			(effects (font (size 1.27 1.27)) (justify left))
+			(at 101.6 120.32 180)
 			(uuid "0b63cc8b-d5e9-4fc9-beab-ec4cc56f1a21")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOT_A+" output
 			(at 141.6 102.54 0)
-			(effects (font (size 1.27 1.27)) (justify right))
 			(uuid "56e32ab0-7825-4c6c-b21f-5755cb10916f")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOT_A-" output
-			(at 141.6 105.08000000000001 0)
-			(effects (font (size 1.27 1.27)) (justify right))
+			(at 141.6 105.08 0)
 			(uuid "3b0e5033-8743-455e-8d41-46d0b50b632d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOT_B+" output
 			(at 141.6 107.62 0)
-			(effects (font (size 1.27 1.27)) (justify right))
 			(uuid "20470301-0416-40f3-bf61-f14df05eb7c6")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 		(pin "MOT_B-" output
-			(at 141.6 110.16000000000001 0)
-			(effects (font (size 1.27 1.27)) (justify right))
+			(at 141.6 110.16 0)
 			(uuid "50e28ab8-ed7a-4a00-ad03-d32d588b1088")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
 		)
 	)
 	(sheet
