@@ -1,0 +1,147 @@
+# Tsumikoro TMC2130 Dual Stepper Driver — Hardware
+
+4-layer PCB implementing a dual-axis stepper controller node. One
+STM32G071G8U6 MCU drives two TMC2130 stepper drivers over shared SPI,
+talks to the RS-485 bus at 1 Mbaud, and accepts motor power from either
+the bus V+ rail or an external JST-XH power input (diode-OR'd).
+
+Target MCU matches `firmware/tsumikoro-ministepper/`. Target
+manufacturing: **JLCPCB 4-layer (JLC04161H)**, Standard assembly.
+
+![3D top view](images/pcb-3d-top.png)
+
+## Block overview
+
+| Block | Part | Notes |
+|-------|------|-------|
+| MCU | STM32G071G8U6 (UFQFPN-28) | ARM Cortex-M0+ @ 64 MHz, 64 KB flash, 36 KB RAM — same as firmware target |
+| Stepper drivers | 2 × TMC2130-LA-T (QFN-36 5×6) | 2 A per phase, 46 V max, 256 microstep, shared SPI bus |
+| RS-485 transceiver | SIT3088EEUA (MSOP-8) | USART2 on PA2/PA3 (no SYSCFG remap needed on G071) |
+| 3.3 V logic PSU | TPS54061DRBT (VSON-8-EP) | ~150 mA load (MCU + 2× TMC VCC_IO + RS-485) — see `psu.kicad_sch` |
+| Motor supply | VPP — bus V+ or external JPWR | Two SS34 Schottky diodes OR the sources |
+| Bus connectors | 2 × JST-XH 4-pin RA | JBUS1, JBUS2 — daisy-chain V+/GND/A/B |
+| Motor outputs | 2 × JST-XH 4-pin | JMOT1, JMOT2 — A+ A- B+ B- per bipolar stepper |
+| External power | JST-XH 2-pin | JPWR — optional wall-wart for motor supply |
+| Sense resistors | 0.1 Ω 1% 1210 × 4 | BRA/BRB pair per TMC, ~1.6 A RMS max |
+
+## Power architecture
+
+```
+  JBUS1 pin 1 ─┬── D2 (SS34) ──┐
+  JBUS2 pin 1 ─┘                ├── VPP (motor rail, ~5-37 V)
+                                 │        │
+  JPWR pin 1 ──── D1 (SS34) ─────┘        │
+                                          ├── TMC VS (U2, U3) + decoupling
+                                          ├── TPS54061 VIN ──► +3V3 logic
+                                          │
+  (all share GND)
+
+  +3V3 ──► STM32 VDD/VDDA
+      ──► TMC VCC_IO (pin 8) on both drivers
+      ──► SIT3088E VCC
+```
+
+## STM32G071G8U6 tentative pin map
+
+Using **USART2** on PA2/PA3 so we don't need the SYSCFG PA11_RMP /
+PA12_RMP dance the servo board needed. Any pin assignment below is still
+adjustable until the ministepper firmware is updated.
+
+| Pin | MCU | Function | AF / notes |
+|-----|-----|----------|------------|
+| 1   | VDD | 3V3 | |
+| 2   | VDDA | 3V3 analog | ferrite + 100 nF recommended |
+| 3   | NRST | Reset | pull-up + 100 nF |
+| 4   | PA0 | TMC1 CS | SPI1_NSS alt or plain GPIO |
+| 5   | PA1 | RS-485 DE | GPIO out — tie DE + ~RE together |
+| 6   | PA2 | USART2 TX | AF1 → SIT3088E DI |
+| 7   | PA3 | USART2 RX | AF1 → SIT3088E RO |
+| 8   | PA4 | TMC2 CS | GPIO out |
+| 9   | PA5 | SPI1 SCK | AF0 (shared) |
+| 10  | PA6 | SPI1 MISO | AF0 (shared) |
+| 11  | PA7 | SPI1 MOSI | AF0 (shared) |
+| 12  | PA8 | TMC1 STEP | TIM1_CH1 (PWM step pulse) |
+| 13  | PA11 | TMC2 STEP | TIM1_CH4 |
+| 14  | PA12 | (spare) | available for CAN, I²C, or future |
+| 15  | PA13 | SWDIO | protected |
+| 16  | PA14 | SWCLK | protected |
+| 17  | PA15 | TMC1 DIR | GPIO out |
+| 18  | PB0 | TMC1 EN | GPIO out (active low via DRV_ENN) |
+| 19  | PB1 | TMC1 DIAG1 | GPIO in, pull-up to 3V3 via 47 k (open-drain) |
+| 20  | PB2 | TMC2 DIR | GPIO out |
+| 21  | PB3 | TMC2 EN | GPIO out |
+| 22  | PB4 | TMC2 DIAG1 | GPIO in + 47 k pull-up |
+| 23  | PB5 | Status LED | GPIO out, 1 kΩ in series |
+| 24  | PB6 | Limit switch 1 | GPIO in, pull-up (optional) |
+| 25  | PB7 | Limit switch 2 | GPIO in, pull-up (optional) |
+| 26  | PB8 | Spare | I²C1 SCL (AF6) or GPIO |
+| 27  | VSS | GND | |
+| 28  | VDD_2 | 3V3 | |
+
+## TMC2130 strapping / required external parts
+
+**This is the checklist to wire in KiCad.** For each TMC2130 (U2, U3):
+
+| Pin | Net / part | Value / note |
+|-----|-----------|--------------|
+| 8 VCC_IO | 3V3 + 100 nF | logic-level supply |
+| 10 SPI_MODE | 3V3 | hardware SPI mode |
+| 36 TST_MODE | GND | test mode off |
+| 18 DCEN, 19 DCIN | GND | dcStep unused |
+| 22 DRV_ENN | MCU GPIO (EN) | software enable |
+| 9 DNC, 11 N.C. | GND | unused |
+| 12 GNDP, 35 GNDP2, 24 GNDA, 37 EP | GND | multiple ground pins — all tied together |
+| 16 VS, 31 VSA | VPP (motor rail) + 10 µF bulk + 100 nF bypass | 4.75–46 V |
+| 13–15 OB1/BRB/OB2 | motor coil B, 0.1 Ω BRB to GND | |
+| 32–34 OA2/BRA/OA1 | motor coil A, 0.1 Ω BRA to GND | |
+| 14 BRB, 33 BRA | 0.1 Ω 1% 1210 sense resistors to GND | + 100 nF ceramic near each |
+| 28 CPI, 27 CPO | 22 nF 50V across (charge pump flying cap) | C1532 (basic) |
+| 29 VCP | 100 nF 50V to VS | charge pump storage |
+| 25 5VOUT | 2.2 µF 6.3V to GNDA | internal 5 V regulator |
+| 26 VCC | 470 nF to GND, feed from 5VOUT via 2.2–3.3 Ω | internal digital supply |
+| 23 AIN_IREF | 5VOUT through 10 k / 1 k divider, or tie to 5VOUT | current reference |
+| 20 DIAG0, 21 DIAG1 | open-drain outputs, 47 k pull-ups to 3V3 | stall/fault |
+| 1 CLK | GND | use internal 12 MHz clock |
+
+Sense resistor sizing: `I_rms = V_fs / (R_sense × √2) × (CS+1)/32`.
+With default V_fs = 0.325 V, R_sense = 0.1 Ω, CS = 31: **I_rms ≈ 2.3 A**
+(exceeds TMC2130's 1.4 A continuous rating — always run with CS reduced
+in firmware unless the motor is actively cooled).
+
+## Connectors
+
+| Ref | Connector | Function | Pinout |
+|-----|-----------|----------|--------|
+| JBUS1, JBUS2 | JST-XH 4-pin RA | RS-485 daisy-chain | 1: V+, 2: B, 3: A, 4: GND |
+| JMOT1 | JST-XH 4-pin | Stepper motor 1 | 1: A+, 2: A-, 3: B+, 4: B- |
+| JMOT2 | JST-XH 4-pin | Stepper motor 2 | same |
+| JPWR | JST-XH 2-pin RA | External motor supply | 1: V+, 2: GND |
+
+## Design rules
+
+Inherited from the servo board's `servo.kicad_pro`:
+
+| Rule | Value |
+|------|-------|
+| Min track width | 0.15 mm |
+| Min clearance | 0.15 mm |
+| Min drill | 0.3 mm |
+| Min via | 0.45 mm / 0.2 mm drill |
+| Stack-up | JLC04161H-7628 (1.6 mm FR4, 4 layers) |
+| Board edge clearance | 0.2 mm rule (0.5 mm recommended) |
+
+## Status
+
+**rev 0.1 — skeleton.** All primary ICs, connectors, and power-source
+diodes are placed. Per-TMC support circuitry (sense resistors, charge
+pump cap, VCP/5VOUT/VCC caps, DIAG pull-ups), STM32 decoupling, SIT3088E
+DE wiring, and all nets are **pending** and to be drawn in KiCad. See
+the text annotation on the schematic for the per-TMC parts checklist.
+
+## Regeneration
+
+```sh
+cd hardware
+make docs-ministepper     # schematic SVGs, PCB SVGs, 3D renders, BOM
+make jlc-ministepper      # full JLCPCB fab/assembly package
+```
