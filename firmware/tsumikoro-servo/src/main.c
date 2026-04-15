@@ -583,17 +583,17 @@ void SystemClock_Config(void)
 }
 
 /**
- * @brief Read hardware ID from PB7/PB8 pins
+ * @brief Read hardware ID from PB7/PB8 pins — DEAD CODE on rev 0.2+ hardware.
  *
- * Hardware ID is a 2-bit value (0-3) determined by:
- * - PB7: Bit 0
- * - PB8: Bit 1
+ * rev 0.1 never shipped; on rev 0.2 the G030F6P6 TSSOP20 package bonds
+ * PB7 and PB8 to the same pad (pad 1), so they can't be read as two
+ * independent straps. Pad 1 is used for I2C1 SCL (PB8); pad 2 for I2C1
+ * SDA (PB9). Per-unit addressing is expected to live in the last 2 KB
+ * flash config sector per CLAUDE.md.
  *
- * Pins are configured with pull-ups, so:
- * - Open/High = 1
- * - To GND = 0
- *
- * @return Hardware ID (0-3)
+ * This function is retained so the bus init call path still links, but
+ * it should not be relied on. Returns 0 once the call site is updated
+ * to source the device ID from flash config.
  */
 static uint8_t Read_Hardware_ID(void)
 {

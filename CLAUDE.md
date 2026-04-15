@@ -102,32 +102,50 @@ Custom PCB (`hardware/servo/`) using the STM32G030F6P6 as the servo/motor
 controller. Pin count is tight; every GPIO is assigned.
 
 | Pin | MCU         | Function       | AF / notes                                 |
-|-----|-------------|----------------|--------------------------------------------|
-| 1   | PB7         | DRV8876 nFAULT | GPIO input, 10k pull-up to 3V3 (open-drain) |
-| 2   | PB8         | I2C1 SCL       | AF6                                        |
-| 3   | PB9         | I2C1 SDA       | AF6                                        |
-| 4   | NRST        | Reset          | —                                          |
-| 5   | VDDA        | 3V3 analog     | —                                          |
-| 6   | PA0         | Servo 0        | AF1 TIM3_CH1                               |
-| 7   | PA1         | RS-485 DE      | GPIO output                                |
-| 8   | PA2         | Servo 1        | AF1 TIM3_CH3                               |
-| 9   | VSS         | GND            | —                                          |
-| 10  | VDD         | 3V3            | —                                          |
-| 11  | PA3         | Servo 2        | AF1 TIM3_CH4                               |
-| 12  | PA4         | Motor PH (DIR) | GPIO output → DRV8876 PH                   |
-| 13  | PA5         | Status LED     | GPIO output                                |
-| 14  | PA6         | Motor EN (PWM) | AF5 TIM16_CH1 → DRV8876 EN, 20 kHz          |
-| 15  | PA7         | Servo 3        | AF5 TIM17_CH1                              |
-| 16  | PA8/PB0-2   | Limit switch   | GPIO input, internal pull-up                |
-| 17  | PA9  (rmp)  | USART1 TX      | AF1, RS-485 @ 1 Mbaud                      |
-| 18  | PA10 (rmp)  | USART1 RX      | AF1                                        |
-| 19  | PA13        | SWDIO          | protected                                  |
-| 20  | PA14        | SWCLK          | protected                                  |
+**rev 0.1 of this board is NOT TO BE FABBED.** The original KiCad
+symbol had a fabricated pinout that didn't match ST DS12991 Figure 4 —
+VDD/VDDA are fused on pad 4 (not split on pads 4/5), VSS is pad 5 (not
+pad 9), NRST is pad 6 (not pad 4), and every GPIO was shifted. The
+servo wiring followed the fake symbol, so the board as drawn would
+short +3V3 to GND through pad 5 and never power the MCU. See the big
+`(text)` block on the root schematic for rework notes.
 
-**Important — SYSCFG remap:** On the TSSOP-20, pins 17/18 default to
-PA11/PA12. To reach USART1 on PA9/PA10, firmware must set
-`SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_RMP | SYSCFG_CFGR1_PA12_RMP`
-*before* configuring AF1 USART1 on those pins. See `src/main.c::GPIO_Init`.
+**Corrected pin map (rev 0.2 target, per ST DS12991 Figure 4 / Table 12).**
+Note: pads 1, 2, 15, 16, 17, 19, 20 each bond multiple die pads in
+parallel — firmware picks which die signal to drive by enabling the
+corresponding GPIO (only one at a time per pad).
+
+|Pin | MCU (selected)  | Function          | Notes |
+|----|-----------------|-------------------|-------|
+| 1  | PB8 (of PB7/PB8)| I2C1 SCL          | AF6. PB7 not used. |
+| 2  | PB9 (of PB9/PC14)| I2C1 SDA         | AF6. |
+| 3  | PC15            | Spare             | — |
+| 4  | VDD/VDDA        | +3V3              | Single pin on this package. Bulk + 100 nF at pin. |
+| 5  | VSS/VSSA        | GND               | |
+| 6  | NRST            | Reset             | 100 nF to GND; internal pull-up. |
+| 7  | PA0             | Servo 0           | AF1 TIM3_CH1 |
+| 8  | PA1             | RS-485 DE         | GPIO out |
+| 9  | PA2             | Servo 1           | AF1 TIM3_CH3 |
+| 10 | PA3             | Servo 2           | AF1 TIM3_CH4 |
+| 11 | PA4             | Motor PH (DIR)    | GPIO → DRV8876 PH |
+| 12 | PA5             | Status LED        | GPIO out, 1k in series |
+| 13 | PA6             | Motor EN (PWM)    | AF5 TIM16_CH1, 20 kHz → DRV8876 EN |
+| 14 | PA7             | Servo 3           | AF5 TIM17_CH1 |
+| 15 | PA8 (of PA8/PB0/PB1/PB2) | Limit switch | GPIO in, internal pull-up |
+| 16 | PA9 (PA11→PA9 remap) | USART1 TX    | AF1 |
+| 17 | PA10 (PA12→PA10 remap) | USART1 RX  | AF1 |
+| 18 | PA13            | SWDIO             | |
+| 19 | PA14-BOOT0 (of PA15/PA14) | SWCLK + BOOT0 | 10k pull-down + TP_BOOT0 |
+| 20 | PB3/PB4/PB5/PB6 | Spare             | — |
+
+**DROPPED from rev 0.1 design:** `PB7 DRV8876 nFAULT` — pad 1 carries
+PB7 and PB8 on the same bond, so keeping nFAULT would block I²C SCL.
+nFAULT monitoring becomes firmware-indirect (current-sense or timeout)
+instead of a dedicated GPIO.
+
+**SYSCFG remaps required at init** (BEFORE configuring AF on those pads):
+- `SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_RMP | SYSCFG_CFGR1_PA12_RMP`
+  to route PA9/PA10 (USART1) to pads 16/17.
 
 **DRV8876 strapping on this board (PH/EN mode):**
 - `PMODE` → VCC (PH/EN mode)
@@ -135,15 +153,16 @@ PA11/PA12. To reach USART1 on PA9/PA10, firmware must set
 - `IMODE` → GND (current regulation disabled)
 - `VREF` → GND (unused)
 - `IPROPI` → no connect
-- `nFAULT` → 10k pull-up to 3V3, routed to PB7
+- `nFAULT` → tied off (not monitored — was on PB7 in rev 0.1, removed in rev 0.2)
 
 Because `nSLEEP` is hard-tied high, `MOTOR_DIR_COAST` and `MOTOR_DIR_BRAKE`
 are hardware-equivalent — EN=0 gives a synchronous low-side brake. This
 is documented in `inc/motor_hbridge.h`.
 
-**Hardware ID / addressing:** There are no HW-ID strap pins on this rev.
-Per-unit addressing is expected to live in the last 2 KB flash config
-sector (0x08007800–0x08007FFF), provisioned at manufacturing time.
+**Hardware ID / addressing:** There are no HW-ID strap pins. Per-unit
+addressing lives in the last 2 KB flash config sector
+(0x08007800–0x08007FFF), provisioned at manufacturing time. Any
+`Read_Hardware_ID()` using PB7/PB8 reads is legacy and dead.
 
 ## Ministepper PCB Pin Map (STM32G071G8U6 UFQFPN-28, rev 0.1)
 
