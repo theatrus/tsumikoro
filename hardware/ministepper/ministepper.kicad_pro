@@ -706,6 +706,10 @@
     [
       "f2e3d4c5-b6a7-8901-bcde-f09876543210",
       "PSU"
+    ],
+    [
+      "c3d4e5f6-a7b8-9012-cdef-1234567890ab",
+      "stepper_channel"
     ]
   ],
   "text_variables": {},

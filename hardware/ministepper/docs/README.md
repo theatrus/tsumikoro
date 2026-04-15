@@ -155,13 +155,47 @@ Inherited from the servo board's `servo.kicad_pro`:
 | Stack-up | JLC04161H-7628 (1.6 mm FR4, 4 layers) |
 | Board edge clearance | 0.2 mm rule (0.5 mm recommended) |
 
+## Sheet architecture
+
+```
+ministepper.kicad_sch             (root)
+├── psu.kicad_sch                 (TPS54061 3.3V PSU, one instance)
+├── stepper_channel.kicad_sch     (TMC2130 + 13 passives, instance "Stepper 1")
+└── stepper_channel.kicad_sch     (same file, instance "Stepper 2")
+```
+
+`stepper_channel.kicad_sch` is a **reusable sub-sheet** — you draw one
+TMC2130 channel (driver + all its support passives, sense resistors,
+charge pump, DIAG pull-up, decoupling, strapping ties) once, and the
+root sheet instantiates it twice. KiCad automatically assigns unique
+reference designators per instance (first instance's components get one
+set of numbers, second instance's get another).
+
+### Hierarchical ports exposed by `stepper_channel.kicad_sch`
+
+| Port | Direction | Purpose |
+|------|-----------|---------|
+| SCK  | in  | SPI clock — shared across both channels |
+| MOSI | in  | SPI data out (from MCU) — shared |
+| MISO | out | SPI data in (to MCU) — shared on the bus |
+| DRV_ENN | in | active-low driver enable — shared on this board |
+| CS   | in  | per-channel chip select (TMC1_CS or TMC2_CS) |
+| STEP | in  | per-channel step pulse |
+| DIR  | in  | per-channel direction |
+| DIAG1 | out | per-channel stall/fault (open-drain + 47 k pull-up) |
+| MOT_A+, MOT_A-, MOT_B+, MOT_B- | out | bipolar motor phases to the motor connector |
+
+Power nets (`+3V3`, `VPP`, `GND`) are **global** — the sub-sheet
+references them via power symbols, no hierarchical port needed.
+
 ## Status
 
-**rev 0.1 — skeleton.** All primary ICs, connectors, and power-source
-diodes are placed. Per-TMC support circuitry (sense resistors, charge
-pump cap, VCP/5VOUT/VCC caps, DIAG pull-ups), STM32 decoupling, SIT3088E
-DE wiring, and all nets are **pending** and to be drawn in KiCad. See
-the text annotation on the schematic for the per-TMC parts checklist.
+**rev 0.1 — skeleton with reusable channel.** All primary ICs,
+connectors, power-source diodes, and one complete set of per-channel
+TMC support passives (in `stepper_channel.kicad_sch`) are placed. The
+root schematic shows the two stepper channel instances plus the PSU
+sub-sheet. **Wiring (both within the sub-sheet and between sub-sheet
+and root) is pending** — to be drawn in KiCad.
 
 ## Regeneration
 
