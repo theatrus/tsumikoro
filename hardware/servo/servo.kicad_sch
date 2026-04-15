@@ -3905,135 +3905,18 @@
 			)
 			(embedded_fonts no)
 		)
-			(symbol "Connector:TestPoint"
-			(pin_numbers
-				(hide yes)
-			)
-			(pin_names
-				(offset 0.762)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "TP"
-				(at 0 6.858 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "TestPoint"
-				(at 0 5.08 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 5.08 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 5.08 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "test point"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "test point tp"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "Pin* Test*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "TestPoint_0_1"
-				(circle
-					(center 0 3.302)
-					(radius 0.762)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "TestPoint_1_1"
-				(pin passive line
-					(at 0 0 90)
-					(length 2.54)
-					(name "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
-)
+	)
 	(junction
 		(at 369.57 210.82)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "191c9381-66eb-4447-b960-553270794e6c")
+	)
+	(junction
+		(at 203.2 163.83)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "1da8f351-d805-4fa3-9a38-281692706e94")
 	)
 	(junction
 		(at 252.73 93.98)
@@ -4277,16 +4160,6 @@
 	)
 	(wire
 		(pts
-			(xy 194.31 160.02) (xy 200.66 160.02)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1937fdf7-0ce7-444e-aeeb-d32e3ca8e9f6")
-	)
-	(wire
-		(pts
 			(xy 196.85 135.89) (xy 205.74 135.89)
 		)
 		(stroke
@@ -4364,6 +4237,26 @@
 			(type default)
 		)
 		(uuid "25b73772-1b47-44ed-9ccf-cecf8c61970f")
+	)
+	(wire
+		(pts
+			(xy 205.74 163.83) (xy 203.2 163.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "26c7a8f8-3f39-42e7-bd3a-c679ea2d4d87")
+	)
+	(wire
+		(pts
+			(xy 203.2 156.21) (xy 203.2 163.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "27279f82-136f-4af4-b352-83a0e8abf411")
 	)
 	(wire
 		(pts
@@ -4454,6 +4347,16 @@
 			(type default)
 		)
 		(uuid "31d4c072-60ec-4b5d-96fb-89c072fe0551")
+	)
+	(wire
+		(pts
+			(xy 203.2 163.83) (xy 198.12 163.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "33b65894-9671-4d65-aa10-748e36ba6028")
 	)
 	(wire
 		(pts
@@ -4637,6 +4540,16 @@
 	)
 	(wire
 		(pts
+			(xy 203.2 144.78) (xy 203.2 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5cd97c39-fd49-410e-903f-57b7e0cfa5ae")
+	)
+	(wire
+		(pts
 			(xy 369.57 210.82) (xy 369.57 196.85)
 		)
 		(stroke
@@ -4777,16 +4690,6 @@
 	)
 	(wire
 		(pts
-			(xy 201.93 161.29) (xy 205.74 161.29)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6c4d335e-bcea-4c8e-9aa4-34fd943255be")
-	)
-	(wire
-		(pts
 			(xy 53.34 223.52) (xy 53.34 218.44)
 		)
 		(stroke
@@ -4824,6 +4727,16 @@
 			(type default)
 		)
 		(uuid "6e59a3b9-f3d0-47df-bb3c-ee6e272240a4")
+	)
+	(wire
+		(pts
+			(xy 203.2 163.83) (xy 203.2 172.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "70d42166-56c1-4666-b7e5-9f482b30668e")
 	)
 	(wire
 		(pts
@@ -5087,16 +5000,6 @@
 	)
 	(wire
 		(pts
-			(xy 200.66 160.02) (xy 200.66 163.83)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8b422f9b-ec38-4387-809b-5ddef3f74f1d")
-	)
-	(wire
-		(pts
 			(xy 295.91 190.5) (xy 295.91 186.69)
 		)
 		(stroke
@@ -5154,16 +5057,6 @@
 			(type default)
 		)
 		(uuid "8f163b8e-f460-48d0-b2e3-e9fcce812632")
-	)
-	(wire
-		(pts
-			(xy 194.31 162.56) (xy 201.93 162.56)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9056bd0c-46d3-41e1-9ce5-daf59062ecd0")
 	)
 	(wire
 		(pts
@@ -5244,6 +5137,16 @@
 			(type default)
 		)
 		(uuid "95ef69c0-709a-470f-8aac-dcc7c61812ef")
+	)
+	(wire
+		(pts
+			(xy 203.2 180.34) (xy 203.2 182.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "95f38357-01b9-41b8-878f-badf7eecec50")
 	)
 	(wire
 		(pts
@@ -5487,6 +5390,16 @@
 	)
 	(wire
 		(pts
+			(xy 194.31 162.56) (xy 201.93 162.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b983541c-7fad-4d8f-acb1-4cecf75c4f66")
+	)
+	(wire
+		(pts
 			(xy 340.36 153.67) (xy 346.71 153.67)
 		)
 		(stroke
@@ -5514,6 +5427,16 @@
 			(type default)
 		)
 		(uuid "bffe18c9-5794-47fd-b27f-83e2d93b7e63")
+	)
+	(wire
+		(pts
+			(xy 194.31 160.02) (xy 198.12 160.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c04a2a78-0730-45e6-9b9f-f79747a48ae7")
 	)
 	(wire
 		(pts
@@ -5627,6 +5550,16 @@
 	)
 	(wire
 		(pts
+			(xy 201.93 162.56) (xy 201.93 161.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cc320171-7b6d-46b4-be3a-e1f477c022f8")
+	)
+	(wire
+		(pts
 			(xy 378.46 236.22) (xy 381 236.22)
 		)
 		(stroke
@@ -5727,6 +5660,16 @@
 	)
 	(wire
 		(pts
+			(xy 198.12 163.83) (xy 198.12 160.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d632b244-6547-4f3e-b4dd-05b99b7e9b31")
+	)
+	(wire
+		(pts
 			(xy 337.82 195.58) (xy 337.82 198.12)
 		)
 		(stroke
@@ -5777,6 +5720,16 @@
 	)
 	(wire
 		(pts
+			(xy 201.93 161.29) (xy 205.74 161.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "df4739c4-8a08-447d-b475-226ba86290ba")
+	)
+	(wire
+		(pts
 			(xy 162.56 203.2) (xy 165.1 203.2)
 		)
 		(stroke
@@ -5817,16 +5770,6 @@
 	)
 	(wire
 		(pts
-			(xy 200.66 163.83) (xy 205.74 163.83)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e5683783-5f4f-4886-9750-e628f496473b")
-	)
-	(wire
-		(pts
 			(xy 86.36 226.06) (xy 90.17 226.06)
 		)
 		(stroke
@@ -5834,16 +5777,6 @@
 			(type default)
 		)
 		(uuid "e5d9e9f9-7f9c-4e8c-b21f-5916e3cf7280")
-	)
-	(wire
-		(pts
-			(xy 201.93 162.56) (xy 201.93 161.29)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e7cdfc21-3b2a-4742-8543-5b4d18f46927")
 	)
 	(wire
 		(pts
@@ -6781,6 +6714,85 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "R25")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Jumper:SolderJumper_2_Open")
+		(at 203.2 151.13 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0cce4399-dc95-4959-a1f9-b3d36fc941d1")
+		(property "Reference" "JPBOOT2"
+			(at 200.66 152.146 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "BOOT"
+			(at 205.74 153.924 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm"
+			(at 203.2 151.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 210.82 151.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Solder Jumper, 2-pole, open"
+			(at 208.28 151.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d5dd6ac5-6251-4126-9c15-3efb35f518e6")
+		)
+		(pin "2"
+			(uuid "7dee4903-a48e-445f-ba62-fd770de2644d")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "JPBOOT2")
 					(unit 1)
 				)
 			)
@@ -9795,6 +9807,84 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 203.2 182.88 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4e85f903-097d-4cff-b14f-045d2856a7b0")
+		(property "Reference" "#PWR071"
+			(at 203.2 189.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 203.2 187.96 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 203.2 182.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 203.2 182.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 203.2 182.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "71ee0366-ff4d-42ec-8d2f-b72a9de56582")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR071")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 93.98 226.06 90)
 		(unit 1)
@@ -10634,6 +10724,120 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "#PWR032")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 203.2 176.53 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "667c382a-8725-4064-b503-081ac52ba034")
+		(property "Reference" "R_BOOT0"
+			(at 206.2 173.53 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 206.2 179.53 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 203.2 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 203.2 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "BOOT0 pull-down on PA14; locks cold boot to flash (BASIC)"
+			(at 203.2 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25744"
+			(at 203.2 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1002TCE"
+			(at 203.2 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 203.2 176.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ce7c682a-0f41-4170-99ec-10b1a8ca8604")
+		)
+		(pin "2"
+			(uuid "ffb638b0-1080-434c-ac51-cc677002fe5a")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "R_BOOT0")
 					(unit 1)
 				)
 			)
@@ -12133,6 +12337,84 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "#PWR042")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
+		(at 203.2 144.78 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a557590a-2a36-4f64-82eb-06746c00c3a5")
+		(property "Reference" "#PWR072"
+			(at 203.2 148.59 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 203.2 139.7 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 203.2 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 203.2 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
+			(at 203.2 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "48955dc6-ea01-4290-8598-e902add6f9e8")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR072")
 					(unit 1)
 				)
 			)
@@ -15510,196 +15792,6 @@
 					(size 1.27 1.27)
 				)
 				(justify left top)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 201.93 166.37 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "b007bb01-1111-2222-3333-00000000r1ab")
-		(property "Reference" "R_BOOT0"
-			(at 204.93 163.37 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "10k"
-			(at 204.93 169.37 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 201.93 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 201.93 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "BOOT0 pull-down on PA14; locks cold boot to flash (BASIC)"
-			(at 201.93 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C25744"
-			(at 201.93 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "0402WGF1002TCE"
-			(at 201.93 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 201.93 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "b007bb01-1111-2222-3333-00000000-pn01")
-		)
-		(pin "2"
-			(uuid "b007bb01-1111-2222-3333-00000000-pn02")
-		)
-		(instances
-			(project "servo"
-				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-					(reference "R_BOOT0")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 212.09 166.37 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "b007bb02-1111-2222-3333-00000000tpab")
-		(property "Reference" "TP_BOOT0"
-			(at 212.09 161.37 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "BOOT0"
-			(at 212.09 158.75 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_1.0x1.0mm"
-			(at 212.09 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 212.09 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Solder test point for manual BOOT0 select (short to +3V3 at reset)"
-			(at 212.09 166.37 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "b007bb02-1111-2222-3333-00000000-pn01")
-		)
-		(instances
-			(project "servo"
-				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
-					(reference "TP_BOOT0")
-					(unit 1)
-				)
 			)
 		)
 	)

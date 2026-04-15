@@ -34,11 +34,11 @@
 
 /* ===== Pin map (must match hardware/ministepper/docs/README.md) ========== */
 
-/* Status LED - pin 23 */
+/* Status LED - pin 25 */
 #define PIN_LED_PORT            GPIOB
 #define PIN_LED                 GPIO_PIN_5
 
-/* RS-485 bus (USART2, pins 5-7) */
+/* RS-485 bus (USART2, pins 7-9) */
 #define BUS_UART                USART2
 #define BUS_UART_IRQn           USART2_IRQn
 #define BUS_DMA_TX              DMA1_Channel1
@@ -47,53 +47,53 @@
 #define BUS_DMA_RX_IRQn         DMA1_Channel2_3_IRQn
 
 #define PIN_DE_PORT             GPIOA
-#define PIN_DE                  GPIO_PIN_1   /* pin 5  - RS-485 driver enable */
+#define PIN_DE                  GPIO_PIN_1   /* pin 7  - RS-485 driver enable */
 #define PIN_UART_PORT           GPIOA
-#define PIN_UART_TX             GPIO_PIN_2   /* pin 6  - USART2 TX */
-#define PIN_UART_RX             GPIO_PIN_3   /* pin 7  - USART2 RX */
+#define PIN_UART_TX             GPIO_PIN_2   /* pin 8  - USART2 TX */
+#define PIN_UART_RX             GPIO_PIN_3   /* pin 9  - USART2 RX */
 
 /* Shared SPI to TMC2130s (SPI1) */
 #define PIN_SPI_PORT            GPIOA
-#define PIN_SPI_SCK             GPIO_PIN_5   /* pin 9  - SPI1 SCK  (AF0) */
-#define PIN_SPI_MISO            GPIO_PIN_6   /* pin 10 - SPI1 MISO (AF0) */
-#define PIN_SPI_MOSI            GPIO_PIN_7   /* pin 11 - SPI1 MOSI (AF0) */
+#define PIN_SPI_SCK             GPIO_PIN_5   /* pin 11 - SPI1 SCK  (AF0) */
+#define PIN_SPI_MISO            GPIO_PIN_6   /* pin 12 - SPI1 MISO (AF0) */
+#define PIN_SPI_MOSI            GPIO_PIN_7   /* pin 13 - SPI1 MOSI (AF0) */
 
 /* TMC2130 driver 1 (U2) - axis 1 */
 #define PIN_TMC1_CS_PORT        GPIOA
-#define PIN_TMC1_CS             GPIO_PIN_4   /* pin 8  - CS1 */
+#define PIN_TMC1_CS             GPIO_PIN_4   /* pin 10 - CS1 */
 #define PIN_TMC1_STEP_PORT      GPIOA
-#define PIN_TMC1_STEP           GPIO_PIN_8   /* pin 12 - STEP1 (TIM1_CH1, AF2) */
+#define PIN_TMC1_STEP           GPIO_PIN_8   /* pin 16 - STEP1 (TIM1_CH1, AF2) */
 #define PIN_TMC1_DIR_PORT       GPIOA
-#define PIN_TMC1_DIR            GPIO_PIN_15  /* pin 17 - DIR1 */
+#define PIN_TMC1_DIR            GPIO_PIN_15  /* pin 22 - DIR1 */
 #define PIN_TMC1_DIAG_PORT      GPIOB
-#define PIN_TMC1_DIAG           GPIO_PIN_1   /* pin 19 - DIAG1 (open-drain + 47k pull-up) */
+#define PIN_TMC1_DIAG           GPIO_PIN_1   /* pin 15 - DIAG1 (open-drain + 47k pull-up) */
 
 /* TMC2130 driver 2 (U3) - axis 2 */
 #define PIN_TMC2_CS_PORT        GPIOA
-#define PIN_TMC2_CS             GPIO_PIN_12  /* pin 14 - CS2 */
+#define PIN_TMC2_CS             GPIO_PIN_12  /* pin 19 - CS2 */
 #define PIN_TMC2_STEP_PORT      GPIOA
-#define PIN_TMC2_STEP           GPIO_PIN_0   /* pin 4  - STEP2 (TIM2_CH1, AF2) */
-#define PIN_TMC2_DIR_PORT       GPIOB
-#define PIN_TMC2_DIR            GPIO_PIN_2   /* pin 20 - DIR2 */
+#define PIN_TMC2_STEP           GPIO_PIN_0   /* pin 6  - STEP2 (TIM2_CH1, AF2) */
+#define PIN_TMC2_DIR_PORT       GPIOC        /* <-- PC6 (pin 17); PB2 is not bonded out on UFQFPN28 */
+#define PIN_TMC2_DIR            GPIO_PIN_6   /* pin 17 - DIR2 */
 #define PIN_TMC2_DIAG_PORT      GPIOB
-#define PIN_TMC2_DIAG           GPIO_PIN_4   /* pin 22 - DIAG2 */
+#define PIN_TMC2_DIAG           GPIO_PIN_4   /* pin 24 - DIAG2 */
 
 /* Shared DRV_ENN for both TMC2130s (active-low enable) */
 #define PIN_DRV_ENN_PORT        GPIOA
-#define PIN_DRV_ENN             GPIO_PIN_11  /* pin 13 - active low enable */
+#define PIN_DRV_ENN             GPIO_PIN_11  /* pin 18 - active low enable */
 
 /* Per-axis limit / home switches */
 #define PIN_LIMIT1_PORT         GPIOB
-#define PIN_LIMIT1              GPIO_PIN_0   /* pin 18 - Limit / home axis 1 */
+#define PIN_LIMIT1              GPIO_PIN_0   /* pin 14 - Limit / home axis 1 */
 #define PIN_LIMIT2_PORT         GPIOB
-#define PIN_LIMIT2              GPIO_PIN_3   /* pin 21 - Limit / home axis 2 */
+#define PIN_LIMIT2              GPIO_PIN_3   /* pin 23 - Limit / home axis 2 */
 
 /* I2C1 expansion bus (AF6) */
 #define PIN_I2C_PORT            GPIOB
-#define PIN_I2C_SCL             GPIO_PIN_6   /* pin 24 - I2C1 SCL (AF6) */
-#define PIN_I2C_SDA             GPIO_PIN_7   /* pin 25 - I2C1 SDA (AF6) */
+#define PIN_I2C_SCL             GPIO_PIN_6   /* pin 26 - I2C1 SCL (AF6) */
+#define PIN_I2C_SDA             GPIO_PIN_7   /* pin 27 - I2C1 SDA (AF6) */
 
-/* PB8 (pin 26) is a spare GPIO — not used in rev 0.1 firmware */
+/* Spares on UFQFPN28: PC14 (pin 1), PC15 (pin 2), PB8 (pin 28) */
 
 /* ===== Task sizes ======================================================== */
 
@@ -188,6 +188,7 @@ static void GPIO_Init(void)
 {
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();   /* PC6 = DIR2 */
 
     GPIO_InitTypeDef gpio = {0};
 

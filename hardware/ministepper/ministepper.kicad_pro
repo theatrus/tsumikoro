@@ -695,7 +695,7 @@
         "uuid": "e1d2c3b4-a5f6-7890-abcd-ef9876543210"
       }
     ],
-    "used_designators": "J2,#PWR25-26,#PWR65,JP2",
+    "used_designators": "R5,R_BOOT1,#PWR65-70",
     "variants": []
   },
   "sheets": [
