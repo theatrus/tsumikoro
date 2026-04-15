@@ -695,7 +695,7 @@
         "uuid": "e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
       }
     ],
-    "used_designators": "JPBOOT2,JPTERM3,#PWR71-72",
+    "used_designators": "#PWR73",
     "variants": []
   },
   "sheets": [
