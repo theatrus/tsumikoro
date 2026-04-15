@@ -1,5 +1,5 @@
 JLCPCB manufacturing package for ministepper
-Generated: 2026-04-15T03:27:06Z
+Generated: 2026-04-15T03:38:54Z
 
 Files:
   gerbers/*.gbr           Gerber files (top/inner/bottom copper, mask, silk, paste)

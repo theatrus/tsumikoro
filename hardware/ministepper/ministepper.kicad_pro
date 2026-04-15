@@ -695,7 +695,7 @@
         "uuid": "e1d2c3b4-a5f6-7890-abcd-ef9876543210"
       }
     ],
-    "used_designators": "JPWR2",
+    "used_designators": "#PWR13,#PWR16-44,JPWR2",
     "variants": []
   },
   "sheets": [
