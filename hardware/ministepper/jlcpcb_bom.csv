@@ -10,7 +10,7 @@
 "9","C_CP2,C_CP3","22nF","Capacitor_SMD:C_0402_1005Metric","2","C1532","0402B223K500NT","FH"
 "10","C_VCC2,C_VCC3","470nF","Capacitor_SMD:C_0603_1608Metric","2","C1623","CL10B474KA8NNNC","Samsung"
 "11","C_VS_BULK2,C_VS_BULK3","10uF","Capacitor_SMD:C_1210_3225Metric","2","C2918502","CS3225X7R106K500NRL","Samsung"
-"12","D1,D2","SS34","Diode_SMD:D_SMA","2","C8678","SS34","Multiple"
+"12","D1,D2","SS54","Diode_SMD:D_SMA","2","C22452","SS54","Multiple"
 "13","JBUS1,JBUS2","Conn_01x04_XH","Connector_JST:JST_XH_S4B-XH-A_1x04_P2.50mm_Horizontal","2","C157925","S4B-XH-A(LF)(SN)","JST"
 "14","JMOT1","Stepper 1","Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical","1","C595709","B4B-XH-A-R(LF)(SN)","JST"
 "15","JMOT2","Stepper 2","Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical","1","C595709","B4B-XH-A-R(LF)(SN)","JST"

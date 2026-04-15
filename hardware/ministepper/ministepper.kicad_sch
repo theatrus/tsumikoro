@@ -2028,7 +2028,7 @@
 				)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SS54"
 			(at 120 214 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2059,7 +2059,7 @@
 				)
 			)
 		)
-		(property "Description" "Schottky 3A 40V SMA — reverse-polarity + diode-OR for external motor input (BASIC)"
+		(property "Description" "Schottky 5A 40V SMA — reverse-polarity + diode-OR for external motor input (BASIC)"
 			(at 120 210 0)
 			(hide yes)
 			(show_name no)
@@ -2070,7 +2070,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C8678"
+		(property "LCSC" "C22452"
 			(at 120 210 0)
 			(hide yes)
 			(show_name no)
@@ -2081,7 +2081,7 @@
 				)
 			)
 		)
-		(property "MPN" "SS34"
+		(property "MPN" "SS54"
 			(at 120 210 0)
 			(hide yes)
 			(show_name no)
@@ -2139,7 +2139,7 @@
 				)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SS54"
 			(at 180 214 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2170,7 +2170,7 @@
 				)
 			)
 		)
-		(property "Description" "Schottky 3A 40V SMA — diode-OR from bus V+ onto VPP (BASIC)"
+		(property "Description" "Schottky 5A 40V SMA — diode-OR from bus V+ onto VPP (BASIC)"
 			(at 180 210 0)
 			(hide yes)
 			(show_name no)
@@ -2181,7 +2181,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C8678"
+		(property "LCSC" "C22452"
 			(at 180 210 0)
 			(hide yes)
 			(show_name no)
@@ -2192,7 +2192,7 @@
 				)
 			)
 		)
-		(property "MPN" "SS34"
+		(property "MPN" "SS54"
 			(at 180 210 0)
 			(hide yes)
 			(show_name no)
