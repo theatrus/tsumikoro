@@ -1315,10 +1315,22 @@
 		(uuid "61a42839-8b8d-453c-b3bc-653a7bcb1035")
 	)
 	(junction
+		(at 190.5 130.81)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "2f44c178-2c39-466d-aea8-d27f6e920c7a")
+	)
+	(junction
 		(at 190.5 119.38)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "c1cdaf2c-a608-4a3c-b6a2-9567f184fdc0")
+	)
+	(junction
+		(at 190.5 96.52)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "cbe682e4-a197-4d38-be00-d9f575a8e8b9")
 	)
 	(junction
 		(at 210.82 76.2)
@@ -1331,6 +1343,16 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "dc8e85dc-42e1-41b3-b495-78c7102534c6")
+	)
+	(wire
+		(pts
+			(xy 226.06 140.97) (xy 228.6 140.97)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0de52013-b38f-40c7-b244-d8cc8f42cb12")
 	)
 	(wire
 		(pts
@@ -1404,6 +1426,16 @@
 	)
 	(wire
 		(pts
+			(xy 190.5 86.36) (xy 190.5 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "460e0108-562e-4912-b8dc-196a2d282e71")
+	)
+	(wire
+		(pts
 			(xy 156.21 151.13) (xy 156.21 154.94)
 		)
 		(stroke
@@ -1474,6 +1506,16 @@
 	)
 	(wire
 		(pts
+			(xy 207.01 92.71) (xy 207.01 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "76f43e2d-5417-4571-a7f2-2fc013b59dfd")
+	)
+	(wire
+		(pts
 			(xy 128.27 68.58) (xy 133.35 68.58)
 		)
 		(stroke
@@ -1481,6 +1523,16 @@
 			(type default)
 		)
 		(uuid "8758dfb7-76c5-4053-98ca-9c0b32764d33")
+	)
+	(wire
+		(pts
+			(xy 172.72 137.16) (xy 176.53 137.16)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8890cd52-3430-4348-8671-ed334e53608a")
 	)
 	(wire
 		(pts
@@ -1504,6 +1556,16 @@
 	)
 	(wire
 		(pts
+			(xy 172.72 129.54) (xy 172.72 137.16)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8cbb222a-6a7a-4d6a-be8e-7b817313902c")
+	)
+	(wire
+		(pts
 			(xy 127 66.04) (xy 133.35 66.04)
 		)
 		(stroke
@@ -1524,6 +1586,16 @@
 	)
 	(wire
 		(pts
+			(xy 190.5 140.97) (xy 190.5 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "96455051-28ed-4ae6-b68d-75dd65b3255c")
+	)
+	(wire
+		(pts
 			(xy 128.27 81.28) (xy 133.35 81.28)
 		)
 		(stroke
@@ -1531,6 +1603,16 @@
 			(type default)
 		)
 		(uuid "97ef82a6-f97b-4a66-9d84-f8d41f0d9daa")
+	)
+	(wire
+		(pts
+			(xy 207.01 86.36) (xy 190.5 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "99529e0c-7657-4280-bf94-42bcee86bffc")
 	)
 	(wire
 		(pts
@@ -1614,6 +1696,16 @@
 	)
 	(wire
 		(pts
+			(xy 226.06 92.71) (xy 228.6 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bc561077-7f73-4f76-b566-7cb325152d5a")
+	)
+	(wire
+		(pts
 			(xy 168.91 119.38) (xy 190.5 119.38)
 		)
 		(stroke
@@ -1621,6 +1713,36 @@
 			(type default)
 		)
 		(uuid "bd21875b-fae3-49bf-adb1-48ac6890b580")
+	)
+	(wire
+		(pts
+			(xy 218.44 92.71) (xy 207.01 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c52a0550-d5c9-49b6-8382-01d38ff5a264")
+	)
+	(wire
+		(pts
+			(xy 168.91 129.54) (xy 172.72 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c78faade-dc27-47fe-b048-500dc7e61c1c")
+	)
+	(wire
+		(pts
+			(xy 176.53 129.54) (xy 176.53 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cac56069-f49d-418b-95a6-ddb2bb1859eb")
 	)
 	(wire
 		(pts
@@ -1684,6 +1806,16 @@
 	)
 	(wire
 		(pts
+			(xy 218.44 140.97) (xy 190.5 140.97)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e439983c-6db4-45b5-ade8-a74cb2777759")
+	)
+	(wire
+		(pts
 			(xy 128.27 73.66) (xy 133.35 73.66)
 		)
 		(stroke
@@ -1691,6 +1823,26 @@
 			(type default)
 		)
 		(uuid "ee912443-b981-46b0-b4bc-1e61f1ca9566")
+	)
+	(wire
+		(pts
+			(xy 168.91 124.46) (xy 177.8 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f701cf53-7123-4de2-9ae4-a2cac608465f")
+	)
+	(wire
+		(pts
+			(xy 168.91 127) (xy 176.53 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fa647f5f-52e7-465b-9fd8-451d8ad2e65f")
 	)
 	(wire
 		(pts
@@ -1711,6 +1863,16 @@
 			(type default)
 		)
 		(uuid "ffeb7e53-c1e5-465c-9fe0-b6d0fabb81c7")
+	)
+	(label "VCP"
+		(at 173.99 124.46 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "fd868594-6c40-48a5-9bde-fa82d17018a0")
 	)
 	(hierarchical_label "DIAG1"
 		(shape output)
@@ -1843,6 +2005,124 @@
 			(justify right)
 		)
 		(uuid "792d8a2c-4454-4211-9372-219e89da1eb6")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 222.25 140.97 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0d697d57-33ca-4b35-bb08-99d64021b88e")
+		(property "Reference" "C_BRB_FILT"
+			(at 219.25 137.97 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 225.25 137.97 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 222.25 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 222.25 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "BRB sense-node filter cap, 100 nF 0402 (BASIC) — TMC2130 app note recommendation"
+			(at 222.25 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C307331"
+			(at 222.25 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KB54PNC"
+			(at 222.25 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 222.25 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "185481e8-bc23-4da0-8587-32fdc4c4c273")
+		)
+		(pin "2"
+			(uuid "ef583024-f2d6-46cf-bf66-d794dd9bb0b6")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_BRB_FILT")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_BRB_FILT")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
 		(lib_id "power:GND")
@@ -2353,7 +2633,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 91.52 177.8 0)
+		(at 81.28 177.8 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2363,7 +2643,7 @@
 		(dnp no)
 		(uuid "3be466a4-4479-474a-9464-59b44d6d3dc5")
 		(property "Reference" "C_VCC"
-			(at 94.52 174.8 0)
+			(at 84.28 174.8 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2374,7 +2654,7 @@
 			)
 		)
 		(property "Value" "100nF"
-			(at 94.52 180.8 0)
+			(at 84.28 180.8 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2385,7 +2665,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 91.52 177.8 0)
+			(at 81.28 177.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2396,7 +2676,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 91.52 177.8 0)
+			(at 81.28 177.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2407,7 +2687,7 @@
 			)
 		)
 		(property "Description" "Internal digital VCC->GND, 100 nF 0402 (BASIC)"
-			(at 91.52 177.8 0)
+			(at 81.28 177.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2417,8 +2697,8 @@
 				)
 			)
 		)
-		(property "LCSC" "C1525"
-			(at 91.52 177.8 0)
+		(property "LCSC" "C307331"
+			(at 81.28 177.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2428,8 +2708,8 @@
 				)
 			)
 		)
-		(property "MPN" "CL05B104KO5NNNC"
-			(at 91.52 177.8 0)
+		(property "MPN" "CL05B104KB54PNC"
+			(at 81.28 177.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2440,7 +2720,7 @@
 			)
 		)
 		(property "Manufacturer" "Samsung"
-			(at 91.52 177.8 0)
+			(at 81.28 177.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2672,6 +2952,89 @@
 	)
 	(symbol
 		(lib_id "power:GND")
+		(at 228.6 92.71 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "53978ed8-3506-4c2e-85c8-bfb28620a1f0")
+		(property "Reference" "#PWR045"
+			(at 234.95 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 232.41 92.7099 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 228.6 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 228.6 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 228.6 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "554a1682-651f-41d3-9b4f-cd64302b5859")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "#PWR045")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "#PWR046")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
 		(at 129.54 60.96 270)
 		(unit 1)
 		(body_style 1)
@@ -2748,6 +3111,124 @@
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
 					(reference "#PWR024")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 222.25 92.71 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "67533eff-a477-4199-8370-ebc0f72bfa3a")
+		(property "Reference" "C_BRA_FILT"
+			(at 219.25 89.71 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 225.25 89.71 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 222.25 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 222.25 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "BRA sense-node filter cap, 100 nF 0402 (BASIC) — TMC2130 app note recommendation"
+			(at 222.25 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C307331"
+			(at 222.25 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KB54PNC"
+			(at 222.25 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 222.25 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "92e676d5-6f88-4267-88ae-d046c4dfa600")
+		)
+		(pin "2"
+			(uuid "57cfb8bf-c97b-4680-b455-450295976218")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "C_BRA_FILT")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "C_BRA_FILT")
 					(unit 1)
 				)
 			)
@@ -3020,7 +3501,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "ca37c3df-0720-4e6e-9eed-6c80109b45a6")
+			(uuid "ca37c3df-0720-4e6e-9eed-6c80109b45a7")
 		)
 		(instances
 			(project "ministepper"
@@ -3102,7 +3583,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "ca37c3df-0720-4e6e-9eed-6c80109b45a6")
+			(uuid "ca37c3df-0720-4e6e-9eed-6c80109b45a8")
 		)
 		(instances
 			(project "ministepper"
@@ -3237,7 +3718,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 64.77 160.02 0)
+		(at 176.53 133.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -3247,7 +3728,7 @@
 		(dnp no)
 		(uuid "90b613da-bb8b-4966-a3db-b71961eed479")
 		(property "Reference" "C_CP"
-			(at 67.77 157.02 0)
+			(at 179.53 130.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3258,7 +3739,7 @@
 			)
 		)
 		(property "Value" "22nF"
-			(at 67.77 163.02 0)
+			(at 179.53 136.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3269,7 +3750,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 64.77 160.02 0)
+			(at 176.53 133.35 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3280,7 +3761,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 64.77 160.02 0)
+			(at 176.53 133.35 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3291,7 +3772,7 @@
 			)
 		)
 		(property "Description" "Charge-pump flying cap CPH<->CPL, 22 nF 50V 0402 (BASIC)"
-			(at 64.77 160.02 0)
+			(at 176.53 133.35 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3302,7 +3783,7 @@
 			)
 		)
 		(property "LCSC" "C1532"
-			(at 64.77 160.02 0)
+			(at 176.53 133.35 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3313,7 +3794,7 @@
 			)
 		)
 		(property "MPN" "0402B223K500NT"
-			(at 64.77 160.02 0)
+			(at 176.53 133.35 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3324,7 +3805,7 @@
 			)
 		)
 		(property "Manufacturer" "FH"
-			(at 64.77 160.02 0)
+			(at 176.53 133.35 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3419,7 +3900,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C1525"
+		(property "LCSC" "C307331"
 			(at 96.52 177.8 0)
 			(hide yes)
 			(show_name no)
@@ -3430,7 +3911,7 @@
 				)
 			)
 		)
-		(property "MPN" "CL05B104KO5NNNC"
+		(property "MPN" "CL05B104KB54PNC"
 			(at 96.52 177.8 0)
 			(hide yes)
 			(show_name no)
@@ -3738,7 +4219,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C1525"
+		(property "LCSC" "C307331"
 			(at 53.34 179.07 0)
 			(hide yes)
 			(show_name no)
@@ -3749,7 +4230,7 @@
 				)
 			)
 		)
-		(property "MPN" "CL05B104KO5NNNC"
+		(property "MPN" "CL05B104KB54PNC"
 			(at 53.34 179.07 0)
 			(hide yes)
 			(show_name no)
@@ -4093,7 +4574,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "ca37c3df-0720-4e6e-9eed-6c80109b45a6")
+			(uuid "ca37c3df-0720-4e6e-9eed-6c80109b45a9")
 		)
 		(instances
 			(project "ministepper"
@@ -4174,7 +4655,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C1525"
+		(property "LCSC" "C307331"
 			(at 53.34 166.37 0)
 			(hide yes)
 			(show_name no)
@@ -4185,7 +4666,7 @@
 				)
 			)
 		)
-		(property "MPN" "CL05B104KO5NNNC"
+		(property "MPN" "CL05B104KB54PNC"
 			(at 53.34 166.37 0)
 			(hide yes)
 			(show_name no)
@@ -4304,6 +4785,89 @@
 				)
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
 					(reference "#PWR042")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 228.6 140.97 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "cda4b10c-8e1f-470b-896b-0d89697b00d4")
+		(property "Reference" "#PWR047"
+			(at 234.95 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 232.41 140.9699 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 228.6 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 228.6 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 228.6 140.97 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d9fd9d1d-cc5a-488c-b519-887fb8232b82")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/aaaaaaaa-1111-2222-3333-000000000001"
+					(reference "#PWR047")
+					(unit 1)
+				)
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/bbbbbbbb-1111-2222-3333-000000000002"
+					(reference "#PWR048")
 					(unit 1)
 				)
 			)
@@ -4725,7 +5289,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 71.12 176.53 0)
+		(at 176.53 40.64 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -4735,7 +5299,7 @@
 		(dnp no)
 		(uuid "f01bda24-e224-46b7-bef5-01453018bc06")
 		(property "Reference" "C_VCP"
-			(at 74.12 173.53 0)
+			(at 179.53 37.64 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4746,7 +5310,7 @@
 			)
 		)
 		(property "Value" "100nF"
-			(at 74.12 179.53 0)
+			(at 179.53 43.64 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4757,7 +5321,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 71.12 176.53 0)
+			(at 176.53 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4768,7 +5332,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 71.12 176.53 0)
+			(at 176.53 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4779,7 +5343,7 @@
 			)
 		)
 		(property "Description" "Charge-pump storage VCP->VS, 100 nF 50V 0402 (BASIC)"
-			(at 71.12 176.53 0)
+			(at 176.53 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4789,8 +5353,8 @@
 				)
 			)
 		)
-		(property "LCSC" "C1525"
-			(at 71.12 176.53 0)
+		(property "LCSC" "C307331"
+			(at 176.53 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4800,8 +5364,8 @@
 				)
 			)
 		)
-		(property "MPN" "CL05B104KO5NNNC"
-			(at 71.12 176.53 0)
+		(property "MPN" "CL05B104KB54PNC"
+			(at 176.53 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4812,7 +5376,7 @@
 			)
 		)
 		(property "Manufacturer" "Samsung"
-			(at 71.12 176.53 0)
+			(at 176.53 40.64 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4841,35 +5405,6 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "Device:C") (at 180 155 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "cbraf001-0000-0000-0000-000000000001")
-		(property "Reference" "C_BRA_FILT" (at 183 152 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "100nF" (at 183 158 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 180 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 180 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "BRA sense-node filter cap, 100 nF 0402 (BASIC) — TMC2130 app note recommendation" (at 180 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C1525" (at 180 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "CL05B104KO5NNNC" (at 180 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Samsung" (at 180 155 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_BRA_FILT") (unit 1))))
-	)
-	(symbol
-		(lib_id "Device:C") (at 185 155 0) (unit 1)
-		(exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)
-		(uuid "cbrbf001-0000-0000-0000-000000000001")
-		(property "Reference" "C_BRB_FILT" (at 188 152 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Value" "100nF" (at 188 158 0) (effects (font (size 1.27 1.27)) (justify left)))
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 185 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Datasheet" "~" (at 185 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Description" "BRB sense-node filter cap, 100 nF 0402 (BASIC) — TMC2130 app note recommendation" (at 185 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "LCSC" "C1525" (at 185 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "MPN" "CL05B104KO5NNNC" (at 185 155 0) (effects (font (size 1.27 1.27)) hide))
-		(property "Manufacturer" "Samsung" (at 185 155 0) (effects (font (size 1.27 1.27)) hide))
-		(instances (project "ministepper" (path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210/c3d4e5f6-a7b8-9012-cdef-1234567890ab" (reference "C_BRB_FILT") (unit 1))))
-	)
-
 	(sheet_instances
 		(path "/"
 			(page "3")

@@ -1461,7 +1461,7 @@
 				)
 			)
 		)
-		(property "Description" "Bootstrap cap BOOT-SW 100nF 16V X7R 0402 (BASIC)"
+		(property "Description" "Bootstrap cap BOOT-SW 100nF 50V X7R 0402 (BASIC)"
 			(at 160.02 66.04 0)
 			(hide yes)
 			(show_name no)
@@ -1472,7 +1472,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C1525"
+		(property "LCSC" "C307331"
 			(at 160.02 66.04 0)
 			(hide yes)
 			(show_name no)
@@ -1483,7 +1483,7 @@
 				)
 			)
 		)
-		(property "MPN" "CL05B104KO5NNNC"
+		(property "MPN" "CL05B104KB54PNC"
 			(at 160.02 66.04 0)
 			(hide yes)
 			(show_name no)

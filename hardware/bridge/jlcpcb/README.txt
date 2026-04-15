@@ -1,5 +1,5 @@
 JLCPCB manufacturing package for bridge
-Generated: 2026-04-14T22:16:29Z
+Generated: 2026-04-15T03:45:57Z
 
 Files:
   gerbers/*.gbr           Gerber files (top/inner/bottom copper, mask, silk, paste)
