@@ -41,42 +41,67 @@ manufacturing: **JLCPCB 4-layer (JLC04161H)**, Standard assembly.
       ──► SIT3088E VCC
 ```
 
-## STM32G071G8U6 tentative pin map
+## STM32G071G8U6 pin map
 
-Using **USART2** on PA2/PA3 so we don't need the SYSCFG PA11_RMP /
-PA12_RMP dance the servo board needed. Any pin assignment below is still
-adjustable until the ministepper firmware is updated.
+Uses **USART2** on PA2/PA3 (dedicated pins, no SYSCFG remap). The
+recommended configuration fits 2 TMC2130s + shared SPI + RS-485 + I²C +
+per-axis limit + DIAG monitoring on all 12 free GPIOs, with 1 spare.
 
-| Pin | MCU | Function | AF / notes |
-|-----|-----|----------|------------|
-| 1   | VDD | 3V3 | |
-| 2   | VDDA | 3V3 analog | ferrite + 100 nF recommended |
-| 3   | NRST | Reset | pull-up + 100 nF |
-| 4   | PA0 | TMC1 CS | SPI1_NSS alt or plain GPIO |
-| 5   | PA1 | RS-485 DE | GPIO out — tie DE + ~RE together |
-| 6   | PA2 | USART2 TX | AF1 → SIT3088E DI |
-| 7   | PA3 | USART2 RX | AF1 → SIT3088E RO |
-| 8   | PA4 | TMC2 CS | GPIO out |
-| 9   | PA5 | SPI1 SCK | AF0 (shared) |
-| 10  | PA6 | SPI1 MISO | AF0 (shared) |
-| 11  | PA7 | SPI1 MOSI | AF0 (shared) |
-| 12  | PA8 | TMC1 STEP | TIM1_CH1 (PWM step pulse) |
-| 13  | PA11 | TMC2 STEP | TIM1_CH4 |
-| 14  | PA12 | (spare) | available for CAN, I²C, or future |
-| 15  | PA13 | SWDIO | protected |
-| 16  | PA14 | SWCLK | protected |
-| 17  | PA15 | TMC1 DIR | GPIO out |
-| 18  | PB0 | TMC1 EN | GPIO out (active low via DRV_ENN) |
-| 19  | PB1 | TMC1 DIAG1 | GPIO in, pull-up to 3V3 via 47 k (open-drain) |
-| 20  | PB2 | TMC2 DIR | GPIO out |
-| 21  | PB3 | TMC2 EN | GPIO out |
-| 22  | PB4 | TMC2 DIAG1 | GPIO in + 47 k pull-up |
-| 23  | PB5 | Status LED | GPIO out, 1 kΩ in series |
-| 24  | PB6 | Limit switch 1 | GPIO in, pull-up (optional) |
-| 25  | PB7 | Limit switch 2 | GPIO in, pull-up (optional) |
-| 26  | PB8 | Spare | I²C1 SCL (AF6) or GPIO |
-| 27  | VSS | GND | |
-| 28  | VDD_2 | 3V3 | |
+| Pin | MCU   | Function         | AF / notes |
+|-----|-------|------------------|------------|
+| 1   | VDD   | 3V3              | |
+| 2   | VDDA  | 3V3 analog       | ferrite + 100 nF recommended |
+| 3   | NRST  | Reset            | pull-up + 100 nF |
+| 4   | PA0   | **STEP2**        | AF2 TIM2_CH1 — driver 2 pulse |
+| 5   | PA1   | RS-485 DE        | GPIO out — tie DE + ~RE together at SIT3088E |
+| 6   | PA2   | USART2 TX        | AF1 → SIT3088E DI |
+| 7   | PA3   | USART2 RX        | AF1 → SIT3088E RO |
+| 8   | PA4   | **TMC1 CS**      | GPIO out |
+| 9   | PA5   | SPI1 SCK         | AF0 — shared |
+| 10  | PA6   | SPI1 MISO        | AF0 — shared |
+| 11  | PA7   | SPI1 MOSI        | AF0 — shared |
+| 12  | PA8   | **STEP1**        | AF2 TIM1_CH1 — driver 1 pulse |
+| 13  | PA11  | **DRV_ENN** (shared) | GPIO out, active-low. Pulls both TMC DRV_ENN lines simultaneously. |
+| 14  | PA12  | **TMC2 CS**      | GPIO out |
+| 15  | PA13  | SWDIO            | protected |
+| 16  | PA14  | SWCLK            | protected |
+| 17  | PA15  | **DIR1**         | GPIO out |
+| 18  | PB0   | **Limit 1**      | GPIO in, pull-up (switch to GND) |
+| 19  | PB1   | **DIAG1**        | GPIO in + external 47 k pull-up (TMC open-drain) |
+| 20  | PB2   | **DIR2**         | GPIO out |
+| 21  | PB3   | **Limit 2**      | GPIO in, pull-up |
+| 22  | PB4   | **DIAG2**        | GPIO in + external 47 k pull-up |
+| 23  | PB5   | Status LED       | GPIO out, 1 kΩ in series |
+| 24  | PB6   | I2C1 SCL         | AF6 |
+| 25  | PB7   | I2C1 SDA         | AF6 |
+| 26  | PB8   | Spare            | — |
+| 27  | VSS   | GND              | |
+| 28  | VDD_2 | 3V3              | second digital supply pin |
+
+Independent step timers (TIM1 for axis 1, TIM2 for axis 2) allow each
+axis to run at its own speed. The shared **DRV_ENN** on PA11 puts both
+drivers in/out of enable together — acceptable for most motion-control
+use cases where both axes are either live or shut down in sync. If you
+need independent enable per axis, reclaim PB8 (the spare) and the design
+still fits.
+
+## Sense-resistor assembly variants
+
+Single PCB, two BOM variants. Firmware switches via `CHOPCONF.VSENSE`:
+
+| Variant | R_SENSE | VSENSE bit | Full-scale (CS=31) | Best for |
+|---------|---------|-----------|--------------------|----------|
+| **Standard** | 0.1 Ω 1% 1210 (LCSC C137091 family) | 0 | ~2.3 A RMS | NEMA17-class steppers, ≥500 mA |
+| **Micro** | 0.68 Ω 1% 1210 (LCSC C3000593) | 1 | ~200 mA RMS | 28BYJ-48 (bipolar mode), micro geared steppers, 50–200 mA |
+
+The 0.68 Ω option is placed on the schematic as **DNP** alternates next
+to the 0.1 Ω standard parts; for the micro assembly, swap the DNP flag
+in the BOM and firmware sets VSENSE=1.
+
+**28BYJ-48 wiring note**: the 28BYJ-48 is a 5-wire unipolar motor. To
+drive with the TMC2130 (bipolar only), leave the **red** center-tap
+wire disconnected and wire Orange → A+, Yellow → A-, Pink → B+,
+Blue → B- at the JMOT connector.
 
 ## TMC2130 strapping / required external parts
 

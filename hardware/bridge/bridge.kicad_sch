@@ -3630,7 +3630,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "1d063b03-5fb7-4700-8917-dc23a825aa3d")
-		(property "Reference" "SW_RESET"
+		(property "Reference" "SW_RESET2"
 			(at 40.64 125.73 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3725,7 +3725,7 @@
 		(instances
 			(project "bridge"
 				(path "/c1d2e3f4-a5b6-7890-1234-567890abcdef"
-					(reference "SW_RESET")
+					(reference "SW_RESET2")
 					(unit 1)
 				)
 			)
@@ -3742,7 +3742,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "3bc76698-5b28-4fe7-b1df-6a60a499512f")
-		(property "Reference" "J_USB"
+		(property "Reference" "J_USB2"
 			(at 280.67 152.4 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3882,7 +3882,7 @@
 		(instances
 			(project "bridge"
 				(path "/c1d2e3f4-a5b6-7890-1234-567890abcdef"
-					(reference "J_USB")
+					(reference "J_USB2")
 					(unit 1)
 				)
 			)
@@ -4752,7 +4752,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "a957a135-5e68-4266-bbc8-25966f752bb5")
-		(property "Reference" "R_BOOT"
+		(property "Reference" "R_BOOT2"
 			(at 28.194 134.62 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4846,7 +4846,7 @@
 		(instances
 			(project "bridge"
 				(path "/c1d2e3f4-a5b6-7890-1234-567890abcdef"
-					(reference "R_BOOT")
+					(reference "R_BOOT2")
 					(unit 1)
 				)
 			)
@@ -4863,7 +4863,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b16cccd3-2b6d-4368-958f-636271a70e3c")
-		(property "Reference" "R_EN"
+		(property "Reference" "R_EN2"
 			(at 28.194 120.65 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4957,7 +4957,7 @@
 		(instances
 			(project "bridge"
 				(path "/c1d2e3f4-a5b6-7890-1234-567890abcdef"
-					(reference "R_EN")
+					(reference "R_EN2")
 					(unit 1)
 				)
 			)
@@ -5201,7 +5201,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "c8596295-870e-494b-a6bb-766145211260")
-		(property "Reference" "SW_BOOT"
+		(property "Reference" "SW_BOOT2"
 			(at 40.64 111.76 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5296,7 +5296,7 @@
 		(instances
 			(project "bridge"
 				(path "/c1d2e3f4-a5b6-7890-1234-567890abcdef"
-					(reference "SW_BOOT")
+					(reference "SW_BOOT2")
 					(unit 1)
 				)
 			)

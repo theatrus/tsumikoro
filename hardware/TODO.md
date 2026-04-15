@@ -24,53 +24,33 @@
 
 ## ministepper (rev 0.1) — TMC2130 dual stepper driver
 
-Target MCU: **STM32G071G8U6** (UFQFPN-28) — matches existing `firmware/tsumikoro-ministepper/` target.
+Target MCU: **STM32G071G8U6** (UFQFPN-28) — matches `firmware/tsumikoro-ministepper/`.
 
-- [ ] Project structure: `bridge.kicad_pro` → copy layout/stackup from servo
-- [ ] Root schematic with 2 × TMC2130, STM32G071, SIT3088E, 2 × JBUS, 2 × stepper output, optional external motor supply
-- [ ] Reuse TPS54061 PSU sub-sheet (3.3V for logic)
-- [ ] Motor supply select: bus V+ or external via a DC jack / XH connector, protected with Schottky
-- [ ] Per-TMC support: sense resistors (2 × 0.1Ω 1210), charge pump cap 22nF, VCP cap 100nF, 5VOUT cap 2.2µF, VCC cap, DIAG pull-ups
-- [ ] STM32 pin assignments (below — open to revision once firmware is written)
+- [x] Project structure and 4-layer JLC04161H stackup (copy of servo)
+- [x] Root schematic with 2 × TMC2130, STM32G071, SIT3088E, 2 × JBUS,
+      2 × stepper output, external motor supply + Schottky OR-gating
+- [x] TPS54061 PSU sub-sheet (3.3V for logic) — inherited from servo
+- [x] Final pin map (see CLAUDE.md and `docs/README.md`); selected
+      recommended config (2 drivers + shared EN + per-axis limit + DIAG
+      + I²C + RS-485 + LED, 1 spare GPIO)
+- [x] Firmware `main.c` updated: USART2 on PA2/PA3 (no remap dance),
+      all PIN_* defines matched to schematic, LED moved to PB5
+- [ ] **Nets/wiring in the schematic** (placed but not yet connected)
+- [ ] Per-TMC support placements: 2 × 0.1 Ω 1210 sense resistors
+      (standard variant) + 2 × 0.68 Ω 1210 DNP alternates (micro /
+      28BYJ-48 variant). Plus 22 nF charge pump cap, 100 nF VCP,
+      2.2 µF 5VOUT, 470 nF VCC, 47 k DIAG pull-ups × 2 drivers.
+- [ ] STM32 decoupling on each VDD rail (100 nF + bulk 10 µF)
 - [ ] PCB layout
-- [ ] Docs + BOM + JLCPCB package
-- [ ] Firmware pin map update in `firmware/tsumikoro-ministepper/` + `CLAUDE.md`
+- [ ] Firmware: actual SPI driver for TMC2130 register writes
+- [ ] Firmware: TIM1_CH1 / TIM2_CH1 step-pulse generation (one-shot or
+      DMA-driven variable-rate)
+- [ ] Firmware: tsumikoro bus command handlers for per-axis move/status
 
-### Tentative pin map (STM32G071G8U6, UFQFPN-28)
-
-Using **USART2** on PA2/PA3 for RS-485 (dedicated pins, no SYSCFG remap
-needed — avoids the PA11/PA12 shared-pad issue the servo hit on G030).
-
-| Pin | MCU | Function | Notes |
-|-----|-----|----------|-------|
-| 1 | VDD | 3V3 | |
-| 2 | VDDA | 3V3 analog | |
-| 3 | NRST | Reset | |
-| 4 | PA0 | TMC1 CS | SPI1 NSS alt |
-| 5 | PA1 | RS-485 DE | GPIO out |
-| 6 | PA2 | USART2 TX | AF1 — RS-485 |
-| 7 | PA3 | USART2 RX | AF1 |
-| 8 | PA4 | TMC2 CS | GPIO out |
-| 9 | PA5 | SPI1 SCK | AF0 — shared by both TMCs |
-| 10 | PA6 | SPI1 MISO | AF0 |
-| 11 | PA7 | SPI1 MOSI | AF0 |
-| 12 | PA8 | TMC1 STEP | timer PWM for high-rate step (TIM1_CH1) |
-| 13 | PA11 | TMC2 STEP | TIM1_CH4 |
-| 14 | PA12 | Motor DIR mux | or individual DIR; TBD |
-| 15 | PA13 | SWDIO | |
-| 16 | PA14 | SWCLK | |
-| 17 | PA15 | TMC1 DIR | |
-| 18 | PB0 | TMC1 EN | |
-| 19 | PB1 | TMC1 DIAG1 | stallguard interrupt |
-| 20 | PB2 | TMC2 DIR | |
-| 21 | PB3 | TMC2 EN | |
-| 22 | PB4 | TMC2 DIAG1 | |
-| 23 | PB5 | Status LED | |
-| 24 | PB6 | Limit 1 | optional |
-| 25 | PB7 | Limit 2 | optional |
-| 26 | PB8 | Spare | I²C or future expansion |
-| 27 | VSS | GND | |
-| 28 | VDD_2 | 3V3 | |
+### Pin map: see `CLAUDE.md > Ministepper PCB Pin Map` (authoritative)
+and `hardware/ministepper/docs/README.md`. Firmware `PIN_*` defines in
+`firmware/tsumikoro-ministepper/src/main.c` are the tie-breaker if docs
+drift — rule of thumb: update both or neither.
 
 ## light-sensor (rev 0.1) — I²C RGB + illuminator
 

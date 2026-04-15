@@ -3949,6 +3949,12 @@
 		(uuid "a85efe78-d614-4204-ae0e-3699be9bc975")
 	)
 	(junction
+		(at 196.85 146.05)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d0a1e5a7-dd6d-4404-ab1a-954594a7dafb")
+	)
+	(junction
 		(at 288.29 205.74)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4065,6 +4071,16 @@
 			(type default)
 		)
 		(uuid "0cfba5f5-f74b-4d0e-a5da-df9bc5d73b0f")
+	)
+	(wire
+		(pts
+			(xy 189.23 146.05) (xy 196.85 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0d194d85-5468-4bc1-a40d-99a9a7cb82c7")
 	)
 	(wire
 		(pts
@@ -4205,6 +4221,16 @@
 			(type default)
 		)
 		(uuid "235fb9eb-c19e-443c-8fe2-edc658a84b9f")
+	)
+	(wire
+		(pts
+			(xy 189.23 143.51) (xy 189.23 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "24e2c049-2218-4962-8fe8-db0e936d1225")
 	)
 	(wire
 		(pts
@@ -4865,6 +4891,16 @@
 			(type default)
 		)
 		(uuid "869b17dc-fa23-4447-9a53-7d7582f799e2")
+	)
+	(wire
+		(pts
+			(xy 189.23 134.62) (xy 189.23 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "885ed126-436c-4281-b13d-1f5277181653")
 	)
 	(wire
 		(pts
@@ -5648,7 +5684,7 @@
 	)
 	(wire
 		(pts
-			(xy 196.85 154.94) (xy 196.85 135.89)
+			(xy 196.85 154.94) (xy 196.85 146.05)
 		)
 		(stroke
 			(width 0)
@@ -5735,6 +5771,16 @@
 			(type default)
 		)
 		(uuid "edf442b4-435a-4466-8d7d-4c47a04f033a")
+	)
+	(wire
+		(pts
+			(xy 196.85 146.05) (xy 196.85 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ee729749-5a62-4279-8bdc-b441e066e5a0")
 	)
 	(wire
 		(pts
@@ -6498,6 +6544,120 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "#PWR056")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 189.23 139.7 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0c227b2a-b9c4-4506-80a9-ef01cc98a81a")
+		(property "Reference" "R25"
+			(at 191.77 137.16 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 191.77 142.24 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 189.23 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 189.23 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Feedback divider bottom resistor (BASIC)"
+			(at 189.23 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25744"
+			(at 189.23 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1002TCE"
+			(at 189.23 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 189.23 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "1c04a439-269a-46f8-b732-25429be1af37")
+		)
+		(pin "2"
+			(uuid "dbd97a54-2a92-4a87-89f0-ecd78989bf00")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "R25")
 					(unit 1)
 				)
 			)
@@ -8369,6 +8529,84 @@
 			(project "servo"
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "#PWR034")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
+		(at 189.23 134.62 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "37e1d9b8-654d-48c1-94bd-de8972482fda")
+		(property "Reference" "#PWR053"
+			(at 189.23 138.43 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 189.23 129.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 189.23 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 189.23 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
+			(at 189.23 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "1be4f22e-f81f-4fe0-aadb-9225e1e0160e")
+		)
+		(instances
+			(project "servo"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR053")
 					(unit 1)
 				)
 			)

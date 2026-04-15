@@ -145,6 +145,59 @@ is documented in `inc/motor_hbridge.h`.
 Per-unit addressing is expected to live in the last 2 KB flash config
 sector (0x08007800–0x08007FFF), provisioned at manufacturing time.
 
+## Ministepper PCB Pin Map (STM32G071G8U6 UFQFPN-28, rev 0.1)
+
+Custom PCB (`hardware/ministepper/`). Dual TMC2130 stepper driver node.
+Uses **USART2 on PA2/PA3** — dedicated pins, no SYSCFG remap needed
+(unlike the servo's G030 where PA11/PA12 shared pads with PA9/PA10).
+
+| Pin | MCU      | Function           | AF / notes |
+|-----|----------|--------------------|------------|
+| 1   | VDD      | 3V3                | — |
+| 2   | VDDA     | 3V3 analog         | ferrite + 100 nF |
+| 3   | NRST     | Reset              | — |
+| 4   | PA0      | STEP2              | AF2 TIM2_CH1 — driver 2 step pulse |
+| 5   | PA1      | RS-485 DE          | GPIO output |
+| 6   | PA2      | USART2 TX          | AF1 — RS-485 |
+| 7   | PA3      | USART2 RX          | AF1 |
+| 8   | PA4      | TMC1 CS            | GPIO output (manual SPI CS) |
+| 9   | PA5      | SPI1 SCK           | AF0 — shared by both TMCs |
+| 10  | PA6      | SPI1 MISO          | AF0 |
+| 11  | PA7      | SPI1 MOSI          | AF0 |
+| 12  | PA8      | STEP1              | AF2 TIM1_CH1 — driver 1 step pulse |
+| 13  | PA11     | DRV_ENN (shared)   | GPIO out, active-low enable for both TMCs |
+| 14  | PA12     | TMC2 CS            | GPIO output |
+| 15  | PA13     | SWDIO              | protected |
+| 16  | PA14     | SWCLK              | protected |
+| 17  | PA15     | DIR1               | GPIO output |
+| 18  | PB0      | Limit 1            | GPIO input, internal pull-up (switch to GND) |
+| 19  | PB1      | DIAG1              | GPIO input + 47k pull-up (open-drain from TMC) |
+| 20  | PB2      | DIR2               | GPIO output |
+| 21  | PB3      | Limit 2            | GPIO input, internal pull-up |
+| 22  | PB4      | DIAG2              | GPIO input + 47k pull-up |
+| 23  | PB5      | Status LED         | GPIO output |
+| 24  | PB6      | I2C1 SCL           | AF6 |
+| 25  | PB7      | I2C1 SDA           | AF6 |
+| 26  | PB8      | Spare              | — |
+| 27  | VSS      | GND                | — |
+| 28  | VDD_2    | 3V3                | second digital supply pin |
+
+STEP1 and STEP2 use **independent timers** (TIM1 vs TIM2) so each axis
+can run at its own rate. CS lines are software-managed GPIOs — the SPI
+peripheral is shared across both TMC2130s, so firmware asserts the
+target CS low before each transaction.
+
+**Sense-resistor variants** (assembly-time choice, same PCB):
+- **Standard**: 0.1 Ω 1% 1210, `CHOPCONF.VSENSE = 0` → up to ~1.5 A RMS
+  per phase for NEMA17-class steppers.
+- **Micro**: 0.68 Ω 1% 1210, `CHOPCONF.VSENSE = 1` → ~50–200 mA range
+  for small geared steppers including 28BYJ-48 run in bipolar mode
+  (disconnect the red center tap wire).
+
+Keep the `PIN_*` defines in `firmware/tsumikoro-ministepper/src/main.c`
+in sync with this table. They are the source of truth for firmware pin
+assignments and must match the schematic in `hardware/ministepper/`.
+
 ## GDB Debugging
 
 ### Standard debugging:
