@@ -1,7 +1,7 @@
 # Tsumikoro TMC2130 Dual Stepper Driver — Hardware
 
 4-layer PCB implementing a dual-axis stepper controller node. One
-STM32G071G8U6 MCU drives two TMC2130 stepper drivers over shared SPI,
+STM32G0B1KBU6 MCU drives two TMC2130 stepper drivers over shared SPI,
 talks to the RS-485 bus at 1 Mbaud, and accepts motor power from either
 the bus V+ rail or an external JST-XH power input (diode-OR'd).
 
@@ -14,7 +14,7 @@ manufacturing: **JLCPCB 4-layer (JLC04161H)**, Standard assembly.
 
 | Block | Part | Notes |
 |-------|------|-------|
-| MCU | STM32G071G8U6 (UFQFPN-28) | ARM Cortex-M0+ @ 64 MHz, 64 KB flash, 36 KB RAM — same as firmware target |
+| MCU | STM32G0B1KBU6 (UFQFPN-32) | ARM Cortex-M0+ @ 64 MHz, 64 KB flash, 36 KB RAM — same as firmware target |
 | Stepper drivers | 2 × TMC2130-LA-T (QFN-36 5×6) | 2 A per phase, 46 V max, 256 microstep, shared SPI bus |
 | RS-485 transceiver | SIT3088EEUA (MSOP-8) | USART2 on PA2/PA3 (no SYSCFG remap needed on G071) |
 | 3.3 V logic PSU | TPS54061DRBT (VSON-8-EP) | ~150 mA load (MCU + 2× TMC VCC_IO + RS-485) — see `psu.kicad_sch` |
@@ -41,50 +41,53 @@ manufacturing: **JLCPCB 4-layer (JLC04161H)**, Standard assembly.
       ──► SIT3088E VCC
 ```
 
-## STM32G071G8U6 pin map
+## STM32G0B1KBU6 pin map
 
-Uses **USART2** on PA2/PA3 (dedicated pins, no SYSCFG remap). The
-recommended configuration fits 2 TMC2130s + shared SPI + RS-485 + I²C +
-per-axis limit + DIAG monitoring on all 12 free GPIOs, with 1 spare.
+Uses **USART2** on PA2/PA3 for RS-485 and **PA11/PA12 for USB D−/D+**.
+The UFQFPN-32 package gives PA9 and PA10 as separate pins from PA11/PA12,
+allowing USB and the TMC SPI/enable lines to coexist without conflict.
 
-Authoritative pinout is ST DS12232 Figure 9 (STM32G071GxU UFQFPN28).
-On this package VDD and VDDA are **internally merged** on pin 3 —
-there is no separate VDDA pin, no VDD_2, and **PB2 is not bonded out**.
+Authoritative pinout per EasyEDA C5159549 / ST G0B1 datasheet UFQFPN-32.
+VDD and VDDA fused on pin 4. PA9/PA10 are separate pins from PA11/PA12.
 
-| Pin | MCU           | Function         | AF / notes |
-|-----|---------------|------------------|------------|
-| 1   | PC14/OSC32_IN | Spare            | (LSE input reserve; GPIO otherwise) |
-| 2   | PC15/OSC32_OUT| Spare            | (LSE output reserve; GPIO otherwise) |
-| 3   | VDD/VDDA      | 3V3 (merged)     | 100 nF + 4.7 µF bulk close to pin; ferrite on VDDA branch recommended |
-| 4   | VSS/VSSA      | GND              | |
-| 5   | PF2/NRST      | Reset            | 100 nF to GND + internal pull-up |
-| 6   | PA0           | **STEP2**        | AF2 TIM2_CH1 — driver 2 pulse |
-| 7   | PA1           | RS-485 DE        | GPIO out |
-| 8   | PA2           | USART2 TX        | AF1 → SIT3088E DI |
-| 9   | PA3           | USART2 RX        | AF1 → SIT3088E RO |
-| 10  | PA4           | **TMC1 CS**      | GPIO out |
-| 11  | PA5           | SPI1 SCK         | AF0 — shared |
-| 12  | PA6           | SPI1 MISO        | AF0 — shared |
-| 13  | PA7           | SPI1 MOSI        | AF0 — shared |
-| 14  | PB0           | **Limit 1**      | GPIO in, pull-up (switch to GND) |
-| 15  | PB1           | **DIAG1**        | GPIO in + external 47 k pull-up (TMC open-drain) |
-| 16  | PA8           | **STEP1**        | AF2 TIM1_CH1 — driver 1 pulse |
-| 17  | **PC6**       | **DIR2**         | GPIO out — replaces non-existent PB2 |
-| 18  | PA11 [PA9]    | **DRV_ENN** (shared) | GPIO out, active-low. Drives both TMC DRV_ENN lines. |
-| 19  | PA12 [PA10]   | **TMC2 CS**      | GPIO out |
-| 20  | PA13          | SWDIO            | protected |
-| 21  | PA14-BOOT0    | SWCLK + BOOT0    | 10k pull-down R_BOOT0 + TP_BOOT0 test pad |
-| 22  | PA15          | **DIR1**         | GPIO out |
-| 23  | PB3           | **Limit 2**      | GPIO in, pull-up |
-| 24  | PB4           | **DIAG2**        | GPIO in + external 47 k pull-up |
-| 25  | PB5           | Status LED       | GPIO out, 1 kΩ in series |
-| 26  | PB6           | I2C1 SCL         | AF6 |
-| 27  | PB7           | I2C1 SDA         | AF6 |
-| 28  | PB8           | Spare            | — |
-| EP  | VSS           | GND (exposed pad) | stitch vias into inner GND plane |
+| Pin | MCU           | Function           | AF / notes |
+|-----|---------------|--------------------|------------|
+| 1   | PB9           | Spare              | — |
+| 2   | PC14/OSC32_IN | Spare              | (LSE reserve) |
+| 3   | PC15/OSC32_OUT| Spare              | (LSE reserve) |
+| 4   | VDD/VDDA      | 3V3 (merged)       | 100 nF + 4.7 µF bulk |
+| 5   | VSS/VSSA      | GND                | |
+| 6   | PF2/NRST      | Reset              | 100 nF to GND |
+| 7   | PA0           | **STEP2**          | AF2 TIM2_CH1 |
+| 8   | PA1           | RS-485 DE          | GPIO out |
+| 9   | PA2           | USART2 TX          | AF1 → SIT3088E DI |
+| 10  | PA3           | USART2 RX          | AF1 → SIT3088E RO |
+| 11  | PA4           | **TMC1 CS**        | GPIO out |
+| 12  | PA5           | SPI1 SCK           | AF0 — shared |
+| 13  | PA6           | SPI1 MISO          | AF0 — shared |
+| 14  | PA7           | SPI1 MOSI          | AF0 — shared |
+| 15  | PB0           | **Limit 1**        | GPIO in, pull-up |
+| 16  | PB1           | **DIAG1**          | GPIO in + 47 k pull-up |
+| 17  | **PB2**       | **DRV_ENN (shared)**| GPIO out, active-low (moved from PA11) |
+| 18  | PA8           | **STEP1**          | AF2 TIM1_CH1 |
+| 19  | **PA9**       | **TMC2 CS**        | GPIO out (moved from PA12) |
+| 20  | PC6           | **DIR2**           | GPIO out |
+| 21  | PA10          | Spare              | — |
+| 22  | **PA11**      | **USB D−**         | USB peripheral |
+| 23  | **PA12**      | **USB D+**         | USB peripheral |
+| 24  | PA13          | SWDIO              | protected |
+| 25  | PA14-BOOT0    | SWCLK + BOOT0      | 10k pull-down R_BOOT0 + TP_BOOT0 |
+| 26  | PA15          | **DIR1**           | GPIO out |
+| 27  | PB3           | **Limit 2**        | GPIO in, pull-up |
+| 28  | PB4           | **DIAG2**          | GPIO in + 47 k pull-up |
+| 29  | PB5           | Status LED         | GPIO out, 1 kΩ in series |
+| 30  | PB6           | I2C1 SCL           | AF6 |
+| 31  | PB7           | I2C1 SDA           | AF6 |
+| 32  | PB8           | Spare              | — |
+| EP  | VSS           | GND (exposed pad)  | stitch vias into inner GND plane |
 
 Independent step timers (TIM1 for axis 1, TIM2 for axis 2) allow each
-axis to run at its own speed. The shared **DRV_ENN** on PA11 puts both
+axis to run at its own speed. The shared **DRV_ENN** on PB2 puts both
 drivers in/out of enable together — acceptable for most motion-control
 use cases where both axes are either live or shut down in sync. If you
 need independent enable per axis, reclaim PB8 or PC14/PC15 and the

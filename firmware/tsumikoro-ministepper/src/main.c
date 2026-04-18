@@ -2,7 +2,7 @@
  * @file main.c
  * @brief Tsumikoro ministepper controller (dual TMC2130 axis driver)
  *
- * Target hardware: hardware/ministepper rev 0.1 (STM32G071G8U6 UFQFPN-28).
+ * Target hardware: hardware/ministepper rev 0.2 (STM32G0B1KBU6 UFQFPN-32, USB).
  * See hardware/ministepper/docs/README.md for the schematic pin map —
  * the `PIN_*` defines below MUST stay in sync with that document.
  *
@@ -70,7 +70,7 @@
 
 /* TMC2130 driver 2 (U3) - axis 2 */
 #define PIN_TMC2_CS_PORT        GPIOA
-#define PIN_TMC2_CS             GPIO_PIN_12  /* pin 19 - CS2 */
+#define PIN_TMC2_CS             GPIO_PIN_9   /* pin 19 - CS2 (was PA12, moved for USB) */
 #define PIN_TMC2_STEP_PORT      GPIOA
 #define PIN_TMC2_STEP           GPIO_PIN_0   /* pin 6  - STEP2 (TIM2_CH1, AF2) */
 #define PIN_TMC2_DIR_PORT       GPIOC        /* <-- PC6 (pin 17); PB2 is not bonded out on UFQFPN28 */
@@ -79,8 +79,8 @@
 #define PIN_TMC2_DIAG           GPIO_PIN_4   /* pin 24 - DIAG2 */
 
 /* Shared DRV_ENN for both TMC2130s (active-low enable) */
-#define PIN_DRV_ENN_PORT        GPIOA
-#define PIN_DRV_ENN             GPIO_PIN_11  /* pin 18 - active low enable */
+#define PIN_DRV_ENN_PORT        GPIOB
+#define PIN_DRV_ENN             GPIO_PIN_2   /* pin 17 - active low enable (was PA11, moved for USB) */
 
 /* Per-axis limit / home switches */
 #define PIN_LIMIT1_PORT         GPIOB
@@ -93,7 +93,8 @@
 #define PIN_I2C_SCL             GPIO_PIN_6   /* pin 26 - I2C1 SCL (AF6) */
 #define PIN_I2C_SDA             GPIO_PIN_7   /* pin 27 - I2C1 SDA (AF6) */
 
-/* Spares on UFQFPN28: PC14 (pin 1), PC15 (pin 2), PB8 (pin 28) */
+/* USB (PA11=D-, PA12=D+ on UFQFPN-32 pins 22/23) — handled by USB peripheral, not GPIO */
+/* Spares on UFQFPN32: PB9 (pin 1), PC14 (pin 2), PC15 (pin 3), PA10 (pin 21), PB8 (pin 32) */
 
 /* ===== Task sizes ======================================================== */
 

@@ -164,47 +164,55 @@ addressing lives in the last 2 KB flash config sector
 (0x08007800–0x08007FFF), provisioned at manufacturing time. Any
 `Read_Hardware_ID()` using PB7/PB8 reads is legacy and dead.
 
-## Ministepper PCB Pin Map (STM32G071G8U6 UFQFPN-28, rev 0.1)
+## Ministepper PCB Pin Map (STM32G0B1KBU6 UFQFPN-32, rev 0.2)
 
-Custom PCB (`hardware/ministepper/`). Dual TMC2130 stepper driver node.
-Uses **USART2 on PA2/PA3** — dedicated pins, no SYSCFG remap needed
-(unlike the servo's G030 where PA11/PA12 shared pads with PA9/PA10).
+Custom PCB (`hardware/ministepper/`). Dual TMC2130 stepper driver node
+with USB 2.0 FS device. Uses **USART2 on PA2/PA3** for RS-485 bus and
+**PA11/PA12 for USB D−/D+** (HSI48 + CRS, no external crystal).
 
-Authoritative pinout is ST DS12232 Figure 9 (STM32G071GxU UFQFPN28).
-On this package, VDD and VDDA are **internally merged** on pin 3 —
-there is no separate VDDA pin, no VDD_2, and PB2 is not bonded out.
+Pinout per EasyEDA C5159549 / ST G0B1 datasheet. VDD and VDDA are
+fused on pin 4. PA9/PA10 are now **separate pins** from PA11/PA12
+(unlike the G071 UFQFPN-28 where they were bonded together).
 
-| Pin | MCU         | Function           | AF / notes |
-|-----|-------------|--------------------|------------|
-| 1   | PC14/OSC32_IN | Spare            | (LSE input if later needed; GPIO otherwise) |
-| 2   | PC15/OSC32_OUT| Spare            | (LSE output if later needed; GPIO otherwise) |
-| 3   | VDD/VDDA    | 3V3 (merged)       | 100 nF + bulk close to pin; optional ferrite on VDDA path |
-| 4   | VSS/VSSA    | GND                | — |
-| 5   | PF2/NRST    | Reset              | 10 k pull-up (internal) + 100 nF to GND |
-| 6   | PA0         | STEP2              | AF2 TIM2_CH1 — driver 2 step pulse |
-| 7   | PA1         | RS-485 DE          | GPIO output |
-| 8   | PA2         | USART2 TX          | AF1 — RS-485 |
-| 9   | PA3         | USART2 RX          | AF1 |
-| 10  | PA4         | TMC1 CS            | GPIO output (manual SPI CS) |
-| 11  | PA5         | SPI1 SCK           | AF0 — shared by both TMCs |
-| 12  | PA6         | SPI1 MISO          | AF0 |
-| 13  | PA7         | SPI1 MOSI          | AF0 |
-| 14  | PB0         | Limit 1            | GPIO input, internal pull-up (switch to GND) |
-| 15  | PB1         | DIAG1              | GPIO input + 47k pull-up (open-drain from TMC) |
-| 16  | PA8         | STEP1              | AF2 TIM1_CH1 — driver 1 step pulse |
-| 17  | **PC6**     | **DIR2**           | GPIO output — replaces the non-existent PB2 |
-| 18  | PA11 [PA9]  | DRV_ENN (shared)   | GPIO out, active-low enable for both TMCs |
-| 19  | PA12 [PA10] | TMC2 CS            | GPIO output |
-| 20  | PA13        | SWDIO              | protected |
-| 21  | PA14-BOOT0  | SWCLK + BOOT0      | 10 k pull-down + test pad; see "BOOT0 handling" |
-| 22  | PA15        | DIR1               | GPIO output |
-| 23  | PB3         | Limit 2            | GPIO input, internal pull-up |
-| 24  | PB4         | DIAG2              | GPIO input + 47k pull-up |
-| 25  | PB5         | Status LED         | GPIO output |
-| 26  | PB6         | I2C1 SCL           | AF6 |
-| 27  | PB7         | I2C1 SDA           | AF6 |
-| 28  | PB8         | Spare              | — |
-| EP  | VSS         | GND (exposed pad)  | via stitching to inner GND plane |
+| Pin | MCU           | Function           | AF / notes |
+|-----|---------------|--------------------|------------|
+| 1   | PB9           | Spare              | — |
+| 2   | PC14/OSC32_IN | Spare              | (LSE if needed) |
+| 3   | PC15/OSC32_OUT| Spare              | (LSE if needed) |
+| 4   | VDD/VDDA      | 3V3 (merged)       | 100 nF + 4.7 µF bulk |
+| 5   | VSS/VSSA      | GND                | — |
+| 6   | PF2/NRST      | Reset              | 100 nF to GND |
+| 7   | PA0           | STEP2              | AF2 TIM2_CH1 |
+| 8   | PA1           | RS-485 DE          | GPIO output |
+| 9   | PA2           | USART2 TX          | AF1 — RS-485 |
+| 10  | PA3           | USART2 RX          | AF1 |
+| 11  | PA4           | TMC1 CS            | GPIO output |
+| 12  | PA5           | SPI1 SCK           | AF0 — shared by both TMCs |
+| 13  | PA6           | SPI1 MISO          | AF0 |
+| 14  | PA7           | SPI1 MOSI          | AF0 |
+| 15  | PB0           | Limit 1            | GPIO input, internal pull-up |
+| 16  | PB1           | DIAG1              | GPIO in + 47k pull-up |
+| 17  | **PB2**       | **DRV_ENN (shared)**| GPIO out, active-low (was PA11 on G071) |
+| 18  | PA8           | STEP1              | AF2 TIM1_CH1 |
+| 19  | **PA9**       | **TMC2 CS**        | GPIO output (was PA12 on G071) |
+| 20  | PC6           | DIR2               | GPIO output |
+| 21  | PA10          | Spare              | — |
+| 22  | **PA11**      | **USB D−**         | USB peripheral |
+| 23  | **PA12**      | **USB D+**         | USB peripheral |
+| 24  | PA13          | SWDIO              | protected |
+| 25  | PA14-BOOT0    | SWCLK + BOOT0      | 10 k pull-down + test pad |
+| 26  | PA15          | DIR1               | GPIO output |
+| 27  | PB3           | Limit 2            | GPIO input, internal pull-up |
+| 28  | PB4           | DIAG2              | GPIO in + 47k pull-up |
+| 29  | PB5           | Status LED         | GPIO output |
+| 30  | PB6           | I2C1 SCL           | AF6 |
+| 31  | PB7           | I2C1 SDA           | AF6 |
+| 32  | PB8           | Spare              | — |
+| EP  | VSS           | GND (exposed pad)  | via stitching to inner GND plane |
+
+**USB-C**: J_USB (GCT USB4105, C2927039) with R_CC1/R_CC2 5.1k
+pull-downs for device/sink mode. No external crystal — G0B1 uses
+HSI48 trimmed by CRS (Clock Recovery System) from USB SOF frames.
 
 STEP1 and STEP2 use **independent timers** (TIM1 vs TIM2) so each axis
 can run at its own rate. CS lines are software-managed GPIOs — the SPI

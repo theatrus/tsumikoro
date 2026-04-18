@@ -8,7 +8,7 @@
 		(title "Tsumikoro TMC2130 Dual Stepper Driver")
 		(date "2026-04-14")
 		(rev "0.1")
-		(comment 1 "STM32G071G8U6 + 2x TMC2130 + SIT3088E + TPS54061 3V3 PSU")
+		(comment 1 "STM32G0B1KBU6 + 2x TMC2130 + SIT3088E + TPS54061 3V3 PSU")
 		(comment 2 "Motor supply: bus V+ or external DC jack")
 	)
 	(lib_symbols
@@ -1599,7 +1599,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "tsumikoro:STM32G071G8U6"
+		(symbol "tsumikoro:STM32G0B1KBU6"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -1615,7 +1615,7 @@
 					)
 				)
 			)
-			(property "Value" "STM32G071G8U6"
+			(property "Value" "STM32G0B1KBU6"
 				(at 0 -35.56 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1625,7 +1625,7 @@
 					)
 				)
 			)
-			(property "Footprint" "tsumikoro:UFQFPN-28"
+			(property "Footprint" "tsumikoro:UFQFPN-32"
 				(at 0 -38.1 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1647,7 +1647,7 @@
 					)
 				)
 			)
-			(property "Description" "ARM Cortex-M0+ 64MHz, 64KB Flash, 36KB RAM, UFQFPN-28"
+			(property "Description" "ARM Cortex-M0+ 64MHz, 128KB Flash, 144KB RAM, USB, UFQFPN-32"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1658,7 +1658,7 @@
 					)
 				)
 			)
-			(property "LCSC" "C724080"
+			(property "LCSC" "C5159549"
 				(at 0 -40.64 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1669,7 +1669,7 @@
 					)
 				)
 			)
-			(property "MPN" "STM32G071G8U6"
+			(property "MPN" "STM32G0B1KBU6"
 				(at 0 -43.18 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1680,419 +1680,343 @@
 					)
 				)
 			)
-			(symbol "STM32G071G8U6_0_1"
+			(symbol "STM32G0B1KBU6_0_1"
 			(rectangle
-				(start -15.24 -20.32)
-				(end 15.24 20.32)
+				(start -17.78 -25.4)
+				(end 17.78 25.4)
 				(stroke (width 0.254) (type default))
 				(fill (type background))
 			)
 		)
-		(symbol "STM32G071G8U6_1_1"
+		(symbol "STM32G0B1KBU6_1_1"
 			(pin bidirectional line
-				(at 15.24 17.78 180)
+				(at -17.78 20.32 0)
 				(length 2.54)
-				(name "PC14/OSC32_IN"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PB9"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "1"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 15.24 180)
+				(at -17.78 17.78 0)
 				(length 2.54)
-				(name "PC15/OSC32_OUT"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PC14/OSC32_IN"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "2"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
-			(pin power_in line
-				(at 0 22.86 270)
+			(pin bidirectional line
+				(at -17.78 15.24 0)
 				(length 2.54)
-				(name "VDD"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PC15/OSC32_OUT"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "3"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin power_in line
-				(at -2.54 -22.86 90)
+				(at 0 27.94 270)
 				(length 2.54)
-				(name "VSS"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "VDD/VDDA"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "4"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
+				)
+			)
+			(pin power_in line
+				(at -2.54 -27.94 90)
+				(length 2.54)
+				(name "VSS/VSSA"
+					(effects (font (size 1.27 1.27)))
+				)
+				(number "5"
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin input line
-				(at -15.24 17.78 0)
+				(at -17.78 10.16 0)
 				(length 2.54)
 				(name "PF2/NRST"
-					(effects
-						(font (size 1.27 1.27))
-					)
-				)
-				(number "5"
-					(effects
-						(font (size 1.27 1.27))
-					)
-				)
-			)
-			(pin bidirectional line
-				(at -15.24 15.24 0)
-				(length 2.54)
-				(name "PA0"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "6"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 12.7 0)
+				(at -17.78 7.62 0)
 				(length 2.54)
-				(name "PA1"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA0"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "7"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 10.16 0)
+				(at -17.78 5.08 0)
 				(length 2.54)
-				(name "PA2"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA1"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "8"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 7.62 0)
+				(at -17.78 2.54 0)
 				(length 2.54)
-				(name "PA3"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA2"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "9"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 5.08 0)
+				(at -17.78 0 0)
 				(length 2.54)
-				(name "PA4"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA3"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "10"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 2.54 0)
+				(at -17.78 -2.54 0)
 				(length 2.54)
-				(name "PA5"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA4"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "11"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 0 0)
+				(at -17.78 -5.08 0)
 				(length 2.54)
-				(name "PA6"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA5"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "12"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 -2.54 0)
+				(at -17.78 -7.62 0)
 				(length 2.54)
-				(name "PA7"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA6"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "13"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 12.7 180)
+				(at -17.78 -10.16 0)
 				(length 2.54)
-				(name "PB0"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA7"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "14"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 10.16 180)
+				(at 17.78 20.32 180)
 				(length 2.54)
-				(name "PB1"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PB0"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "15"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 -5.08 0)
+				(at 17.78 17.78 180)
 				(length 2.54)
-				(name "PA8"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PB1"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "16"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 7.62 180)
+				(at 17.78 15.24 180)
 				(length 2.54)
-				(name "PC6"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PB2"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "17"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 -7.62 0)
+				(at -17.78 -12.7 0)
 				(length 2.54)
-				(name "PA11/PA9"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA8"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "18"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 -10.16 0)
+				(at 17.78 12.7 180)
 				(length 2.54)
-				(name "PA12/PA10"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA9"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "19"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 -12.7 0)
+				(at 17.78 10.16 180)
 				(length 2.54)
-				(name "PA13/SWDIO"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PC6"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "20"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 -15.24 0)
+				(at 17.78 7.62 180)
 				(length 2.54)
-				(name "PA14/SWCLK/BOOT0"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA10"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "21"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at -15.24 -17.78 0)
+				(at -17.78 -17.78 0)
 				(length 2.54)
-				(name "PA15"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA11"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "22"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 5.08 180)
+				(at -17.78 -20.32 0)
 				(length 2.54)
-				(name "PB3"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA12"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "23"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 2.54 180)
+				(at -17.78 -15.24 0)
 				(length 2.54)
-				(name "PB4"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA13/SWDIO"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "24"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 0 180)
+				(at 17.78 -20.32 180)
 				(length 2.54)
-				(name "PB5"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA14/SWCLK/BOOT0"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "25"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 -2.54 180)
+				(at 17.78 5.08 180)
 				(length 2.54)
-				(name "PB6"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PA15"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "26"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 -5.08 180)
+				(at 17.78 2.54 180)
 				(length 2.54)
-				(name "PB7"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PB3"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "27"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin bidirectional line
-				(at 15.24 -7.62 180)
+				(at 17.78 0 180)
 				(length 2.54)
-				(name "PB8"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(name "PB4"
+					(effects (font (size 1.27 1.27)))
 				)
 				(number "28"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
+				)
+			)
+			(pin bidirectional line
+				(at 17.78 -2.54 180)
+				(length 2.54)
+				(name "PB5"
+					(effects (font (size 1.27 1.27)))
+				)
+				(number "29"
+					(effects (font (size 1.27 1.27)))
+				)
+			)
+			(pin bidirectional line
+				(at 17.78 -5.08 180)
+				(length 2.54)
+				(name "PB6"
+					(effects (font (size 1.27 1.27)))
+				)
+				(number "30"
+					(effects (font (size 1.27 1.27)))
+				)
+			)
+			(pin bidirectional line
+				(at 17.78 -7.62 180)
+				(length 2.54)
+				(name "PB7"
+					(effects (font (size 1.27 1.27)))
+				)
+				(number "31"
+					(effects (font (size 1.27 1.27)))
+				)
+			)
+			(pin bidirectional line
+				(at 17.78 -10.16 180)
+				(length 2.54)
+				(name "PB8"
+					(effects (font (size 1.27 1.27)))
+				)
+				(number "32"
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 			(pin power_in line
-				(at 2.54 -22.86 90)
+				(at 2.54 -27.94 90)
 				(length 2.54)
 				(name "VSS"
-					(effects
-						(font (size 1.27 1.27))
-					)
+					(effects (font (size 1.27 1.27)))
 				)
-				(number "29"
-					(effects
-						(font (size 1.27 1.27))
-					)
+				(number "33"
+					(effects (font (size 1.27 1.27)))
 				)
 			)
 		)
@@ -2252,8 +2176,721 @@
 				)
 			)
 			(embedded_fonts no)
-		))
-	(text "Tsumikoro TMC2130 Dual Stepper Controller — rev 0.1\n\nMCU: STM32G071G8U6 (UFQFPN-28, same as firmware/tsumikoro-ministepper target)\nLogic supply: 3.3V from TPS54061 PSU sub-sheet (sized for ~100mA logic + 2x TMC2130 VCC_IO)\nMotor supply: VPP — from bus V+ (via JBUS1/JBUS2 pin 1) or external JPWR DC jack,\n             Schottky-OR'd so whichever source is highest wins.\nSense resistors: 0.1 ohm 1% 1210 (2x per TMC) -> ~1.6A RMS max with VFS=325mV\nRS-485 bus: USART2 on PA2/PA3 (no SYSCFG remap needed unlike servo's G030)\n\nComponents placed but NOT wired — wiring pending in KiCad editor."
+		)		(symbol "Connector:USB_C_Receptacle_USB2.0_16P"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 22.225 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "USB_C_Receptacle_USB2.0_16P"
+				(at 0 19.685 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 3.81 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.usb.org/sites/default/files/documents/usb_type-c.zip"
+				(at 3.81 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "USB 2.0-only 16P Type-C Receptacle connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "usb universal serial bus type-C USB2.0"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "USB*C*Receptacle*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "USB_C_Receptacle_USB2.0_16P_0_0"
+				(rectangle
+					(start -0.254 -17.78)
+					(end 0.254 -16.764)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 15.494)
+					(end 9.144 14.986)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 10.414)
+					(end 9.144 9.906)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 7.874)
+					(end 9.144 7.366)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 2.794)
+					(end 9.144 2.286)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 0.254)
+					(end 9.144 -0.254)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 -2.286)
+					(end 9.144 -2.794)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 -4.826)
+					(end 9.144 -5.334)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 -12.446)
+					(end 9.144 -12.954)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 -14.986)
+					(end 9.144 -15.494)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "USB_C_Receptacle_USB2.0_16P_0_1"
+				(rectangle
+					(start -10.16 17.78)
+					(end 10.16 -17.78)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy -8.89 -3.81) (xy -8.89 3.81)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -7.62 -3.81)
+					(end -6.35 3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(arc
+					(start -7.62 3.81)
+					(mid -6.985 4.4423)
+					(end -6.35 3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -7.62 3.81)
+					(mid -6.985 4.4423)
+					(end -6.35 3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(arc
+					(start -8.89 3.81)
+					(mid -6.985 5.7067)
+					(end -5.08 3.81)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -5.08 -3.81)
+					(mid -6.985 -5.7067)
+					(end -8.89 -3.81)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -6.35 -3.81)
+					(mid -6.985 -4.4423)
+					(end -7.62 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -6.35 -3.81)
+					(mid -6.985 -4.4423)
+					(end -7.62 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy -5.08 3.81) (xy -5.08 -3.81)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center -2.54 1.143)
+					(radius 0.635)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 4.318) (xy 0 6.858) (xy 1.27 4.318) (xy -1.27 4.318)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -2.032) (xy 2.54 0.508) (xy 2.54 1.778)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -3.302) (xy -2.54 -0.762) (xy -2.54 0.508)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -5.842) (xy 0 4.318)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 0 -5.842)
+					(radius 1.27)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 1.905 1.778)
+					(end 3.175 3.048)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+			)
+			(symbol "USB_C_Receptacle_USB2.0_16P_1_1"
+				(pin passive line
+					(at 0 -22.86 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 15.24 15.24 180)
+					(length 5.08)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 10.16 180)
+					(length 5.08)
+					(name "CC1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 -2.54 180)
+					(length 5.08)
+					(name "D+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 2.54 180)
+					(length 5.08)
+					(name "D-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 -12.7 180)
+					(length 5.08)
+					(name "SBU1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 15.24 15.24 180)
+					(length 5.08)
+					(hide yes)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -22.86 90)
+					(length 5.08)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -22.86 90)
+					(length 5.08)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 15.24 15.24 180)
+					(length 5.08)
+					(hide yes)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 7.62 180)
+					(length 5.08)
+					(name "CC2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 -5.08 180)
+					(length 5.08)
+					(name "D+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 0 180)
+					(length 5.08)
+					(name "D-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 -15.24 180)
+					(length 5.08)
+					(name "SBU2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 15.24 15.24 180)
+					(length 5.08)
+					(hide yes)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -22.86 90)
+					(length 5.08)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 -22.86 90)
+					(length 5.08)
+					(name "SHIELD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "SH"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+)
+	(text "Tsumikoro TMC2130 Dual Stepper Controller — rev 0.1\n\nMCU: STM32G0B1KBU6 (UFQFPN-32, USB, same as firmware/tsumikoro-ministepper target)\nLogic supply: 3.3V from TPS54061 PSU sub-sheet (sized for ~100mA logic + 2x TMC2130 VCC_IO)\nMotor supply: VPP — from bus V+ (via JBUS1/JBUS2 pin 1) or external JPWR DC jack,\n             Schottky-OR'd so whichever source is highest wins.\nSense resistors: 0.1 ohm 1% 1210 (2x per TMC) -> ~1.6A RMS max with VFS=325mV\nRS-485 bus: USART2 on PA2/PA3 (no SYSCFG remap needed unlike servo's G030)\n\nComponents placed but NOT wired — wiring pending in KiCad editor.\n\nUSB-C: J_USB with R_CC1/R_CC2 (5.1k to GND) for device/sink mode.\nPA11 = USB D-, PA12 = USB D+. No external crystal needed (HSI48 + CRS).\nDRV_ENN moved from PA11 to PB2 (pin 17). TMC2_CS moved from PA12 to PA9 (pin 19)."
 		(exclude_from_sim no)
 		(at 20 20 0)
 		(effects
@@ -3063,7 +3700,7 @@
 		)
 	)
 	(symbol
-		(lib_id "tsumikoro:STM32G071G8U6")
+		(lib_id "tsumikoro:STM32G0B1KBU6")
 		(at 299.72 86.36 0)
 		(unit 1)
 		(body_style 1)
@@ -3083,7 +3720,7 @@
 				)
 			)
 		)
-		(property "Value" "STM32G071G8U6"
+		(property "Value" "STM32G0B1KBU6"
 			(at 313.69 112.522 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3093,7 +3730,7 @@
 				)
 			)
 		)
-		(property "Footprint" "tsumikoro:UFQFPN-28"
+		(property "Footprint" "tsumikoro:UFQFPN-32"
 			(at 299.72 86.36 0)
 			(hide yes)
 			(show_name no)
@@ -3115,7 +3752,7 @@
 				)
 			)
 		)
-		(property "Description" "ARM Cortex-M0+ 64MHz, 64KB Flash, 36KB RAM, UFQFPN-28"
+		(property "Description" "ARM Cortex-M0+ 64MHz, 128KB Flash, 144KB RAM, USB, UFQFPN-32"
 			(at 299.72 86.36 0)
 			(hide yes)
 			(show_name no)
@@ -3126,7 +3763,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C724080"
+		(property "LCSC" "C5159549"
 			(at 299.72 86.36 0)
 			(hide yes)
 			(show_name no)
@@ -3137,7 +3774,7 @@
 				)
 			)
 		)
-		(property "MPN" "STM32G071G8U6"
+		(property "MPN" "STM32G0B1KBU6"
 			(at 299.72 86.36 0)
 			(hide yes)
 			(show_name no)
@@ -5063,6 +5700,393 @@
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210"
 					(reference "C_NRST")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:USB_C_Receptacle_USB2.0_16P")
+		(at 320 120 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2e55def2-5e32-4092-b7f8-4a76d255b723")
+		(property "Reference" "J_USB"
+			(at 320 95 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "USB-TYPE-C-019"
+			(at 320 97 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_USB:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal"
+			(at 320 120 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 320 120 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "16-pin USB-C receptacle for USB 2.0 device (programming/debug)"
+			(at 320 120 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2927039"
+			(at 320 120 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "USB-TYPE-C-019"
+			(at 320 120 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Generic"
+			(at 320 120 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "A1"
+			(uuid "7620fa4a-c6f5-4a11-824b-a46587613394")
+		)
+		(pin "A4"
+			(uuid "d7db6bbf-c59c-4102-8751-389ab383f5cf")
+		)
+		(pin "A5"
+			(uuid "3188d15c-43ac-449a-9f88-9e3085127970")
+		)
+		(pin "A6"
+			(uuid "ec5b2e3b-7e88-4ea8-b957-f683167fa725")
+		)
+		(pin "A7"
+			(uuid "ec1bbe69-3b45-486b-905e-084c4779f6ff")
+		)
+		(pin "A8"
+			(uuid "309cb003-c737-41c7-8c80-78f10d2708f5")
+		)
+		(pin "A9"
+			(uuid "4c3c0f3d-4252-49bc-82b0-51ce27e53767")
+		)
+		(pin "A12"
+			(uuid "cf209136-0d04-40ee-a684-ed2fe94b6e92")
+		)
+		(pin "B1"
+			(uuid "1324e525-272d-4a1d-938a-a459cbd94b6f")
+		)
+		(pin "B4"
+			(uuid "fce17d3f-028c-48ba-91a4-b4fb300db730")
+		)
+		(pin "B5"
+			(uuid "dfd552e6-a0bb-48e7-8d1a-bfd3e5fb02ec")
+		)
+		(pin "B6"
+			(uuid "156c35b9-490d-48fd-852a-1f6543c775e8")
+		)
+		(pin "B7"
+			(uuid "96ac32f8-51bb-495a-a662-95390242b449")
+		)
+		(pin "B8"
+			(uuid "9585a875-9b35-44ff-8b35-34ebf33fac45")
+		)
+		(pin "B9"
+			(uuid "fd0cee0f-dd48-46ee-b729-e409530d6f0e")
+		)
+		(pin "B12"
+			(uuid "52c871b7-ac15-40fb-b134-e72652066d2c")
+		)
+		(pin "S1"
+			(uuid "4cc8e5a3-7bba-49a6-b76b-1c59a5150b43")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210"
+					(reference "J_USB")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 345 135 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "b4f29eec-5da4-4084-a55a-3496204adf3c")
+		(property "Reference" "R_CC1"
+			(at 348 132 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "5.1k"
+			(at 348 138 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 345 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 345 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "USB-C CC pull-down for device/sink mode (BASIC)"
+			(at 345 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25905"
+			(at 345 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF5101TCE"
+			(at 345 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 345 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f2d1c1e4-f42a-4d13-be45-7606a543d320")
+		)
+		(pin "2"
+			(uuid "adc2e717-3cee-43f6-bf21-fbce14437940")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210"
+					(reference "R_CC1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 355 135 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2334fd65-4616-4147-84e0-d5a165a8fd01")
+		(property "Reference" "R_CC2"
+			(at 358 132 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "5.1k"
+			(at 358 138 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 355 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 355 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "USB-C CC pull-down for device/sink mode (BASIC)"
+			(at 355 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25905"
+			(at 355 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF5101TCE"
+			(at 355 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 355 135 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "860417f2-271e-4205-8e91-dfa8eed90d5c")
+		)
+		(pin "2"
+			(uuid "c4f33eae-52c3-4bcc-8ef0-fba7094cb0e0")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210"
+					(reference "R_CC2")
 					(unit 1)
 				)
 			)
