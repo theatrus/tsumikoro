@@ -2889,8 +2889,172 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Switch:SW_Push"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "SW"
+				(at 1.27 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "SW_Push"
+				(at 0 -1.524 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Push button switch, generic, two pins"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "switch normally-open pushbutton push-button"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "SW_Push_0_1"
+				(circle
+					(center -2.032 0)
+					(radius 0.508)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 1.27) (xy 0 3.048)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 2.032 0)
+					(radius 0.508)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 2.54 1.27) (xy -2.54 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 2.54)
+					(name "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 )
-	(text "Tsumikoro TMC2130 Dual Stepper Controller — rev 0.1\n\nMCU: STM32G0B1KBU6 (UFQFPN-32, USB, same as firmware/tsumikoro-ministepper target)\nLogic supply: 3.3V from TPS54061 PSU sub-sheet (sized for ~100mA logic + 2x TMC2130 VCC_IO)\nMotor supply: VPP — from bus V+ (via JBUS1/JBUS2 pin 1) or external JPWR DC jack,\n             Schottky-OR'd so whichever source is highest wins.\nSense resistors: 0.1 ohm 1% 1210 (2x per TMC) -> ~1.6A RMS max with VFS=325mV\nRS-485 bus: USART2 on PA2/PA3 (no SYSCFG remap needed unlike servo's G030)\n\nComponents placed but NOT wired — wiring pending in KiCad editor.\n\nUSB-C: J_USB with R_CC1/R_CC2 (5.1k to GND) for device/sink mode.\nPA11 = USB D-, PA12 = USB D+. No external crystal needed (HSI48 + CRS).\nDRV_ENN moved from PA11 to PB2 (pin 17). TMC2_CS moved from PA12 to PA9 (pin 19)."
+	(text "Tsumikoro TMC2130 Dual Stepper Controller — rev 0.1\n\nMCU: STM32G0B1KBU6 (UFQFPN-32, USB, same as firmware/tsumikoro-ministepper target)\nLogic supply: 3.3V from TPS54061 PSU sub-sheet (sized for ~100mA logic + 2x TMC2130 VCC_IO)\nMotor supply: VPP — from bus V+ (via JBUS1/JBUS2 pin 1) or external JPWR DC jack,\n             Schottky-OR'd so whichever source is highest wins.\nSense resistors: 0.1 ohm 1% 1210 (2x per TMC) -> ~1.6A RMS max with VFS=325mV\nRS-485 bus: USART2 on PA2/PA3 (no SYSCFG remap needed unlike servo's G030)\n\nComponents placed but NOT wired — wiring pending in KiCad editor.\n\nUSB-C: J_USB with R_CC1/R_CC2 (5.1k to GND) for device/sink mode.\nPA11 = USB D-, PA12 = USB D+. No external crystal needed (HSI48 + CRS).\nSW_BOOT (TS-1187A) connects PA14/BOOT0 to +3V3 when pressed — hold\nduring reset to enter system bootloader (USART2 / I2C1 / SPI1 / USB DFU).\nDRV_ENN moved from PA11 to PB2 (pin 17). TMC2_CS moved from PA12 to PA9 (pin 19)."
 		(exclude_from_sim no)
 		(at 20 20 0)
 		(effects
@@ -6087,6 +6251,120 @@
 			(project "ministepper"
 				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210"
 					(reference "R_CC2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Switch:SW_Push")
+		(at 275 106.68 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "c29a2380-6a4a-4baa-8184-92113151a481")
+		(property "Reference" "SW_BOOT"
+			(at 280 103.68 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TS-1187A"
+			(at 280 109.68 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "tsumikoro:SW_Push_1P1T_XKB_TS-1187A"
+			(at 275 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 275 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "BOOT0 button: press during reset to enter system bootloader"
+			(at 275 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C318884"
+			(at 275 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TS-1187A-B-A-B"
+			(at 275 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "XKB"
+			(at 275 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "59053741-8df4-499c-92c5-716de9e6bd31")
+		)
+		(pin "2"
+			(uuid "1d821dba-ccf3-4620-be86-0d7001638659")
+		)
+		(instances
+			(project "ministepper"
+				(path "/e1d2c3b4-a5f6-7890-abcd-ef9876543210"
+					(reference "SW_BOOT")
 					(unit 1)
 				)
 			)
