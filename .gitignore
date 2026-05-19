@@ -1,0 +1,20 @@
+.DS_Store
+
+# KiCad lock / autosave / backups
+*~*.lck
+~*.lck
+*-backups/
+_autosave-*
+fp-info-cache
+*.kicad_pcb-bak
+*.kicad_sch-bak
+
+# KiCad local project settings (user-specific UI state)
+*.kicad_prl
+
+# Editor history / temp
+.history/
+
+# JLCPCB: track the staging directory (gerbers/drill/BOM/CPL) for versioning,
+# but not the zip — it's regenerable from the directory by `make jlc`.
+hardware/*/*-jlcpcb.zip

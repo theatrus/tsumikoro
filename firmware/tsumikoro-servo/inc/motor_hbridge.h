@@ -26,18 +26,25 @@
 typedef enum {
     MOTOR_DIR_FORWARD = 0,   /**< Forward direction */
     MOTOR_DIR_REVERSE = 1,   /**< Reverse direction */
-    MOTOR_DIR_BRAKE   = 2,   /**< Active brake (both high or both low) */
-    MOTOR_DIR_COAST   = 3    /**< Coast/free-running (both low, PWM disabled) */
+    MOTOR_DIR_BRAKE   = 2,   /**< Synchronous brake (DRV EN=0) */
+    MOTOR_DIR_COAST   = 3    /**< Coast request. NOTE: hardware-equivalent
+                                  to BRAKE on this board because nSLEEP is
+                                  hard-tied high. See motor_hbridge.c. */
 } motor_direction_t;
 
 /**
  * @brief Initialize H-bridge motor driver
  *
- * Sets up TIM1_CH4 for PWM speed control and GPIO pins for direction.
- * Pin mapping:
- * - PA11: TIM1_CH4 (PWM speed control)
- * - PA12: IN1 (direction control)
- * - PB9: IN2 (direction control)
+ * Sets up TIM16_CH1 for PWM speed control and a GPIO for direction.
+ * Hardware: DRV8876 in PH/EN mode (PMODE tied to VCC on the board).
+ *
+ * Pin mapping (STM32G030F6P6 TSSOP-20):
+ * - PA6: TIM16_CH1 (AF5) -> DRV8876 EN (pin 1)  - PWM speed
+ * - PA4: GPIO            -> DRV8876 PH (pin 2)  - direction
+ *
+ * Earlier revisions used PA11/PA12/PB9 with TIM1_CH4. Those pins now host
+ * USART1 (PA9/PA10 via SYSCFG remap) for RS-485 comms, and I2C1 (PB8/PB9)
+ * for external peripherals. See CLAUDE.md for the full pin map.
  *
  * @return true if initialization successful, false otherwise
  */

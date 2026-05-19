@@ -96,6 +96,140 @@ The NUCLEO board has two serial ports:
 
 User should monitor USART2 for debug output using their preferred serial tool.
 
+## Servo PCB Pin Map (STM32G030F6P6 TSSOP-20, rev 0.1)
+
+Custom PCB (`hardware/servo/`) using the STM32G030F6P6 as the servo/motor
+controller. Pin count is tight; every GPIO is assigned.
+
+| Pin | MCU         | Function       | AF / notes                                 |
+**rev 0.1 of this board is NOT TO BE FABBED.** The original KiCad
+symbol had a fabricated pinout that didn't match ST DS12991 Figure 4 —
+VDD/VDDA are fused on pad 4 (not split on pads 4/5), VSS is pad 5 (not
+pad 9), NRST is pad 6 (not pad 4), and every GPIO was shifted. The
+servo wiring followed the fake symbol, so the board as drawn would
+short +3V3 to GND through pad 5 and never power the MCU. See the big
+`(text)` block on the root schematic for rework notes.
+
+**Corrected pin map (rev 0.2 target, per ST DS12991 Figure 4 / Table 12).**
+Note: pads 1, 2, 15, 16, 17, 19, 20 each bond multiple die pads in
+parallel — firmware picks which die signal to drive by enabling the
+corresponding GPIO (only one at a time per pad).
+
+|Pin | MCU (selected)  | Function          | Notes |
+|----|-----------------|-------------------|-------|
+| 1  | PB8 (of PB7/PB8)| I2C1 SCL          | AF6. PB7 not used. |
+| 2  | PB9 (of PB9/PC14)| I2C1 SDA         | AF6. |
+| 3  | PC15            | Spare             | — |
+| 4  | VDD/VDDA        | +3V3              | Single pin on this package. Bulk + 100 nF at pin. |
+| 5  | VSS/VSSA        | GND               | |
+| 6  | NRST            | Reset             | 100 nF to GND; internal pull-up. |
+| 7  | PA0             | Servo 0           | AF1 TIM3_CH1 |
+| 8  | PA1             | RS-485 DE         | GPIO out |
+| 9  | PA2             | Servo 1           | AF1 TIM3_CH3 |
+| 10 | PA3             | Servo 2           | AF1 TIM3_CH4 |
+| 11 | PA4             | Motor PH (DIR)    | GPIO → DRV8876 PH |
+| 12 | PA5             | Status LED        | GPIO out, 1k in series |
+| 13 | PA6             | Motor EN (PWM)    | AF5 TIM16_CH1, 20 kHz → DRV8876 EN |
+| 14 | PA7             | Servo 3           | AF5 TIM17_CH1 |
+| 15 | PA8 (of PA8/PB0/PB1/PB2) | Limit switch | GPIO in, internal pull-up |
+| 16 | PA9 (PA11→PA9 remap) | USART1 TX    | AF1 |
+| 17 | PA10 (PA12→PA10 remap) | USART1 RX  | AF1 |
+| 18 | PA13            | SWDIO             | |
+| 19 | PA14-BOOT0 (of PA15/PA14) | SWCLK + BOOT0 | 10k pull-down + TP_BOOT0 |
+| 20 | PB3/PB4/PB5/PB6 | Spare             | — |
+
+**DROPPED from rev 0.1 design:** `PB7 DRV8876 nFAULT` — pad 1 carries
+PB7 and PB8 on the same bond, so keeping nFAULT would block I²C SCL.
+nFAULT monitoring becomes firmware-indirect (current-sense or timeout)
+instead of a dedicated GPIO.
+
+**SYSCFG remaps required at init** (BEFORE configuring AF on those pads):
+- `SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_RMP | SYSCFG_CFGR1_PA12_RMP`
+  to route PA9/PA10 (USART1) to pads 16/17.
+
+**DRV8876 strapping on this board (PH/EN mode):**
+- `PMODE` → VCC (PH/EN mode)
+- `nSLEEP` → VCC (always enabled; no software shutdown)
+- `IMODE` → GND (current regulation disabled)
+- `VREF` → GND (unused)
+- `IPROPI` → no connect
+- `nFAULT` → tied off (not monitored — was on PB7 in rev 0.1, removed in rev 0.2)
+
+Because `nSLEEP` is hard-tied high, `MOTOR_DIR_COAST` and `MOTOR_DIR_BRAKE`
+are hardware-equivalent — EN=0 gives a synchronous low-side brake. This
+is documented in `inc/motor_hbridge.h`.
+
+**Hardware ID / addressing:** There are no HW-ID strap pins. Per-unit
+addressing lives in the last 2 KB flash config sector
+(0x08007800–0x08007FFF), provisioned at manufacturing time. Any
+`Read_Hardware_ID()` using PB7/PB8 reads is legacy and dead.
+
+## Ministepper PCB Pin Map (STM32G0B1KBU6 UFQFPN-32, rev 0.2)
+
+Custom PCB (`hardware/ministepper/`). Dual TMC2130 stepper driver node
+with USB 2.0 FS device. Uses **USART2 on PA2/PA3** for RS-485 bus and
+**PA11/PA12 for USB D−/D+** (HSI48 + CRS, no external crystal).
+
+Pinout per EasyEDA C5159549 / ST G0B1 datasheet. VDD and VDDA are
+fused on pin 4. PA9/PA10 are now **separate pins** from PA11/PA12
+(unlike the G071 UFQFPN-28 where they were bonded together).
+
+| Pin | MCU           | Function           | AF / notes |
+|-----|---------------|--------------------|------------|
+| 1   | PB9           | Spare              | — |
+| 2   | PC14/OSC32_IN | Spare              | (LSE if needed) |
+| 3   | PC15/OSC32_OUT| Spare              | (LSE if needed) |
+| 4   | VDD/VDDA      | 3V3 (merged)       | 100 nF + 4.7 µF bulk |
+| 5   | VSS/VSSA      | GND                | — |
+| 6   | PF2/NRST      | Reset              | 100 nF to GND |
+| 7   | PA0           | STEP2              | AF2 TIM2_CH1 |
+| 8   | PA1           | RS-485 DE          | GPIO output |
+| 9   | PA2           | USART2 TX          | AF1 — RS-485 |
+| 10  | PA3           | USART2 RX          | AF1 |
+| 11  | PA4           | TMC1 CS            | GPIO output |
+| 12  | PA5           | SPI1 SCK           | AF0 — shared by both TMCs |
+| 13  | PA6           | SPI1 MISO          | AF0 |
+| 14  | PA7           | SPI1 MOSI          | AF0 |
+| 15  | PB0           | Limit 1            | GPIO input, internal pull-up |
+| 16  | PB1           | DIAG1              | GPIO in + 47k pull-up |
+| 17  | **PB2**       | **DRV_ENN (shared)**| GPIO out, active-low (was PA11 on G071) |
+| 18  | PA8           | STEP1              | AF2 TIM1_CH1 |
+| 19  | **PA9**       | **TMC2 CS**        | GPIO output (was PA12 on G071) |
+| 20  | PC6           | DIR2               | GPIO output |
+| 21  | PA10          | Spare              | — |
+| 22  | **PA11**      | **USB D−**         | USB peripheral |
+| 23  | **PA12**      | **USB D+**         | USB peripheral |
+| 24  | PA13          | SWDIO              | protected |
+| 25  | PA14-BOOT0    | SWCLK + BOOT0      | 10 k pull-down + test pad |
+| 26  | PA15          | DIR1               | GPIO output |
+| 27  | PB3           | Limit 2            | GPIO input, internal pull-up |
+| 28  | PB4           | DIAG2              | GPIO in + 47k pull-up |
+| 29  | PB5           | Status LED         | GPIO output |
+| 30  | PB6           | I2C1 SCL           | AF6 |
+| 31  | PB7           | I2C1 SDA           | AF6 |
+| 32  | PB8           | Spare              | — |
+| EP  | VSS           | GND (exposed pad)  | via stitching to inner GND plane |
+
+**USB-C**: J_USB (GCT USB4105, C2927039) with R_CC1/R_CC2 5.1k
+pull-downs for device/sink mode. No external crystal — G0B1 uses
+HSI48 trimmed by CRS (Clock Recovery System) from USB SOF frames.
+
+STEP1 and STEP2 use **independent timers** (TIM1 vs TIM2) so each axis
+can run at its own rate. CS lines are software-managed GPIOs — the SPI
+peripheral is shared across both TMC2130s, so firmware asserts the
+target CS low before each transaction.
+
+**Sense-resistor variants** (assembly-time choice, same PCB):
+- **Standard**: 0.1 Ω 1% 1210, `CHOPCONF.VSENSE = 0` → up to ~1.5 A RMS
+  per phase for NEMA17-class steppers.
+- **Micro**: 0.68 Ω 1% 1210, `CHOPCONF.VSENSE = 1` → ~50–200 mA range
+  for small geared steppers including 28BYJ-48 run in bipolar mode
+  (disconnect the red center tap wire).
+
+Keep the `PIN_*` defines in `firmware/tsumikoro-ministepper/src/main.c`
+in sync with this table. They are the source of truth for firmware pin
+assignments and must match the schematic in `hardware/ministepper/`.
+
 ## GDB Debugging
 
 ### Standard debugging:

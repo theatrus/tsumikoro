@@ -1,10 +1,22 @@
 /**
  * @file main.c
- * @brief Tsumikoro ministepper controller with bus communication
+ * @brief Tsumikoro ministepper controller (dual TMC2130 axis driver)
  *
- * Example showing how to use the Tsumikoro bus protocol on STM32G071
- * with FreeRTOS threading. This peripheral device responds to commands
- * from the bus controller using interrupt-driven RTOS message passing.
+ * Target hardware: hardware/ministepper rev 0.2 (STM32G0B1KBU6 UFQFPN-32, USB).
+ * See hardware/ministepper/docs/README.md for the schematic pin map —
+ * the `PIN_*` defines below MUST stay in sync with that document.
+ *
+ * Peripheral allocation:
+ *   USART2 (PA2/PA3)          - RS-485 bus @ 1 Mbaud
+ *   SPI1   (PA5/PA6/PA7)      - shared SPI to both TMC2130s
+ *   TIM1_CH1 (PA8)            - STEP1 pulse generator
+ *   TIM2_CH1 (PA0)            - STEP2 pulse generator
+ *   I2C1   (PB6/PB7)          - expansion bus (AF6)
+ *
+ * USART2 is used instead of USART1 to avoid the PA11/PA12 vs PA9/PA10
+ * shared-pad trap that hit the servo firmware on STM32G030F6P6 — on
+ * the G071 UFQFPN-28 PA2/PA3 are dedicated pins so no SYSCFG remap is
+ * needed.
  */
 
 #include "stm32g0xx_hal.h"
@@ -14,49 +26,103 @@
 #include "task.h"
 #include <string.h>
 
-/* Configuration */
+/* ===== Configuration ===================================================== */
+
 #define DEVICE_ID               0x01        /**< This device's bus ID (peripheral) */
 #define BUS_BAUD_RATE           1000000     /**< 1 Mbaud */
 #define TURNAROUND_DELAY_BYTES  3           /**< 3 byte intervals turnaround delay */
 
-/* UART configuration (adjust for your hardware) */
-#define BUS_UART                USART1
-#define BUS_UART_IRQn           USART1_IRQn
+/* ===== Pin map (must match hardware/ministepper/docs/README.md) ========== */
+
+/* Status LED - pin 25 */
+#define PIN_LED_PORT            GPIOB
+#define PIN_LED                 GPIO_PIN_5
+
+/* RS-485 bus (USART2, pins 7-9) */
+#define BUS_UART                USART2
+#define BUS_UART_IRQn           USART2_IRQn
 #define BUS_DMA_TX              DMA1_Channel1
 #define BUS_DMA_RX              DMA1_Channel2
 #define BUS_DMA_TX_IRQn         DMA1_Channel1_IRQn
 #define BUS_DMA_RX_IRQn         DMA1_Channel2_3_IRQn
 
-/* GPIO for RS-485 transceiver control (adjust for your hardware) */
-#define BUS_DE_PORT             GPIOA
-#define BUS_DE_PIN              GPIO_PIN_1
-#define BUS_RE_PORT             NULL        /**< Optional, can tie RE to DE */
-#define BUS_RE_PIN              0
+#define PIN_DE_PORT             GPIOA
+#define PIN_DE                  GPIO_PIN_1   /* pin 7  - RS-485 driver enable */
+#define PIN_UART_PORT           GPIOA
+#define PIN_UART_TX             GPIO_PIN_2   /* pin 8  - USART2 TX */
+#define PIN_UART_RX             GPIO_PIN_3   /* pin 9  - USART2 RX */
 
-/* Task stack sizes (in words) */
+/* Shared SPI to TMC2130s (SPI1) */
+#define PIN_SPI_PORT            GPIOA
+#define PIN_SPI_SCK             GPIO_PIN_5   /* pin 11 - SPI1 SCK  (AF0) */
+#define PIN_SPI_MISO            GPIO_PIN_6   /* pin 12 - SPI1 MISO (AF0) */
+#define PIN_SPI_MOSI            GPIO_PIN_7   /* pin 13 - SPI1 MOSI (AF0) */
+
+/* TMC2130 driver 1 (U2) - axis 1 */
+#define PIN_TMC1_CS_PORT        GPIOA
+#define PIN_TMC1_CS             GPIO_PIN_4   /* pin 10 - CS1 */
+#define PIN_TMC1_STEP_PORT      GPIOA
+#define PIN_TMC1_STEP           GPIO_PIN_8   /* pin 16 - STEP1 (TIM1_CH1, AF2) */
+#define PIN_TMC1_DIR_PORT       GPIOA
+#define PIN_TMC1_DIR            GPIO_PIN_15  /* pin 22 - DIR1 */
+#define PIN_TMC1_DIAG_PORT      GPIOB
+#define PIN_TMC1_DIAG           GPIO_PIN_1   /* pin 15 - DIAG1 (open-drain + 47k pull-up) */
+
+/* TMC2130 driver 2 (U3) - axis 2 */
+#define PIN_TMC2_CS_PORT        GPIOA
+#define PIN_TMC2_CS             GPIO_PIN_9   /* pin 19 - CS2 (was PA12, moved for USB) */
+#define PIN_TMC2_STEP_PORT      GPIOA
+#define PIN_TMC2_STEP           GPIO_PIN_0   /* pin 6  - STEP2 (TIM2_CH1, AF2) */
+#define PIN_TMC2_DIR_PORT       GPIOC        /* <-- PC6 (pin 17); PB2 is not bonded out on UFQFPN28 */
+#define PIN_TMC2_DIR            GPIO_PIN_6   /* pin 17 - DIR2 */
+#define PIN_TMC2_DIAG_PORT      GPIOB
+#define PIN_TMC2_DIAG           GPIO_PIN_4   /* pin 24 - DIAG2 */
+
+/* Shared DRV_ENN for both TMC2130s (active-low enable) */
+#define PIN_DRV_ENN_PORT        GPIOB
+#define PIN_DRV_ENN             GPIO_PIN_2   /* pin 17 - active low enable (was PA11, moved for USB) */
+
+/* Per-axis limit / home switches */
+#define PIN_LIMIT1_PORT         GPIOB
+#define PIN_LIMIT1              GPIO_PIN_0   /* pin 14 - Limit / home axis 1 */
+#define PIN_LIMIT2_PORT         GPIOB
+#define PIN_LIMIT2              GPIO_PIN_3   /* pin 23 - Limit / home axis 2 */
+
+/* I2C1 expansion bus (AF6) */
+#define PIN_I2C_PORT            GPIOB
+#define PIN_I2C_SCL             GPIO_PIN_6   /* pin 26 - I2C1 SCL (AF6) */
+#define PIN_I2C_SDA             GPIO_PIN_7   /* pin 27 - I2C1 SDA (AF6) */
+
+/* USB (PA11=D-, PA12=D+ on UFQFPN-32 pins 22/23) — handled by USB peripheral, not GPIO */
+/* Spares on UFQFPN32: PB9 (pin 1), PC14 (pin 2), PC15 (pin 3), PA10 (pin 21), PB8 (pin 32) */
+
+/* ===== Task sizes ======================================================== */
+
 #define MAIN_TASK_STACK_SIZE    256
 
-/* Private variables */
+/* ===== Private state ===================================================== */
+
 static tsumikoro_bus_handle_t g_bus_handle = NULL;
 static tsumikoro_hal_handle_t g_hal_handle = NULL;
 
-/* STM32 HAL configuration - shared between UART_Init and Bus_Init */
+/* STM32 HAL configuration - USART2 + DMAMUX requests for USART2 on DMA1
+ * channels 1 (TX) and 2 (RX). */
 static const tsumikoro_hal_stm32_config_t g_stm32_config = {
     .uart_instance = BUS_UART,
     .dma_tx = BUS_DMA_TX,
     .dma_rx = BUS_DMA_RX,
-    .dma_tx_request = DMA_REQUEST_USART1_TX,
-    .dma_rx_request = DMA_REQUEST_USART1_RX,
-    .de_port = BUS_DE_PORT,
-    .de_pin = BUS_DE_PIN,
-    .re_port = BUS_RE_PORT,
-    .re_pin = BUS_RE_PIN,
+    .dma_tx_request = DMA_REQUEST_USART2_TX,
+    .dma_rx_request = DMA_REQUEST_USART2_RX,
+    .de_port = PIN_DE_PORT,
+    .de_pin = PIN_DE,
+    .re_port = NULL,            /* ~RE hard-tied to DE on the board */
+    .re_pin = 0,
     .uart_irq = BUS_UART_IRQn,
     .dma_tx_irq = BUS_DMA_TX_IRQn,
     .dma_rx_irq = BUS_DMA_RX_IRQn
 };
 
-/* Stepper state */
+/* Stepper state (minimal — expand when implementing real step generation) */
 typedef struct {
     int32_t current_position;
     int32_t target_position;
@@ -65,15 +131,11 @@ typedef struct {
     uint16_t acceleration;
 } stepper_state_t;
 
-static stepper_state_t g_stepper_state = {
-    .current_position = 0,
-    .target_position = 0,
-    .moving = false,
-    .speed = 1000,
-    .acceleration = 500
-};
+static stepper_state_t g_axis1 = { .speed = 1000, .acceleration = 500 };
+static stepper_state_t g_axis2 = { .speed = 1000, .acceleration = 500 };
 
-/* Private function prototypes */
+/* ===== Forward decls ===================================================== */
+
 void SystemClock_Config(void);
 static void Error_Handler(void);
 static void GPIO_Init(void);
@@ -82,139 +144,143 @@ static void Bus_Init(void);
 static void Stepper_Init(void);
 static void Stepper_Process(void);
 
-/* Bus callback functions */
 static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data);
 
-/**
- * @brief Main application task (FreeRTOS)
- *
- * This task handles stepper motor control. The bus protocol is handled
- * by dedicated threads created by tsumikoro_bus_init().
- */
+/* ===== Main task ========================================================= */
+
 static void MainTask(void *argument)
 {
     (void)argument;
 
-    /* Initialize peripherals (HAL already initialized) */
     GPIO_Init();
     UART_Init();
     Stepper_Init();
     Bus_Init();
 
-    /* Main stepper control loop */
-    while (1)
-    {
-        /* Process stepper motor control */
+    while (1) {
         Stepper_Process();
-
-        /* Yield to other tasks every 10ms */
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
-/**
- * @brief The application entry point.
- */
 int main(void)
 {
-    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
     HAL_Init();
-
-    /* Configure the system clock */
     SystemClock_Config();
 
-    /* Create main application task */
     BaseType_t result = xTaskCreate(
-        MainTask,
-        "Main",
-        MAIN_TASK_STACK_SIZE,
-        NULL,
-        tskIDLE_PRIORITY + 1,
-        NULL
-    );
+        MainTask, "Main", MAIN_TASK_STACK_SIZE, NULL,
+        tskIDLE_PRIORITY + 1, NULL);
 
     if (result != pdPASS) {
         Error_Handler();
     }
 
-    /* Start the FreeRTOS scheduler */
     vTaskStartScheduler();
 
-    /* Should never reach here */
-    while (1)
-    {
+    while (1) {
         Error_Handler();
     }
 }
 
-/**
- * @brief GPIO initialization
- */
+/* ===== Peripheral init =================================================== */
+
 static void GPIO_Init(void)
 {
-    /* Enable GPIO clocks */
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();   /* PC6 = DIR2 */
 
-    /* Configure LED pin (example: PA5) */
-    GPIO_InitTypeDef gpio_init = {0};
-    gpio_init.Pin = GPIO_PIN_5;
-    gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
-    gpio_init.Pull = GPIO_NOPULL;
-    gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOA, &gpio_init);
+    GPIO_InitTypeDef gpio = {0};
 
-    /* Configure UART pins (TX=PA9, RX=PA10 for USART1) */
-    gpio_init.Pin = GPIO_PIN_9 | GPIO_PIN_10;
-    gpio_init.Mode = GPIO_MODE_AF_PP;
-    gpio_init.Pull = GPIO_PULLUP;
-    gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
-    gpio_init.Alternate = GPIO_AF1_USART1;
-    HAL_GPIO_Init(GPIOA, &gpio_init);
+    /* LED - push-pull output, low speed */
+    gpio.Pin = PIN_LED;
+    gpio.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio.Pull = GPIO_NOPULL;
+    gpio.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(PIN_LED_PORT, &gpio);
 
-    /* DE/RE pins configured by HAL */
+    /* USART2 AF1 on PA2/PA3 (pins 6/7) */
+    gpio.Pin = PIN_UART_TX | PIN_UART_RX;
+    gpio.Mode = GPIO_MODE_AF_PP;
+    gpio.Pull = GPIO_PULLUP;
+    gpio.Speed = GPIO_SPEED_FREQ_HIGH;
+    gpio.Alternate = GPIO_AF1_USART2;
+    HAL_GPIO_Init(PIN_UART_PORT, &gpio);
+
+    /* RS-485 DE on PA1 - the HAL module manages this pin explicitly */
+    gpio.Pin = PIN_DE;
+    gpio.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio.Pull = GPIO_NOPULL;
+    gpio.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(PIN_DE_PORT, &gpio);
+    HAL_GPIO_WritePin(PIN_DE_PORT, PIN_DE, GPIO_PIN_RESET);  /* start in RX */
+
+    /* TMC1 CS (PA4), TMC2 CS (PA12), DRV_ENN (PA11), DIR1 (PA15) — all GPIO outputs.
+     * Hold CS high (inactive) and DRV_ENN high (outputs disabled) at boot. */
+    gpio.Pin = PIN_TMC1_CS | PIN_TMC2_CS | PIN_DRV_ENN;
+    gpio.Mode = GPIO_MODE_OUTPUT_PP;
+    gpio.Pull = GPIO_NOPULL;
+    gpio.Speed = GPIO_SPEED_FREQ_MEDIUM;
+    HAL_GPIO_Init(GPIOA, &gpio);
+    HAL_GPIO_WritePin(GPIOA, PIN_TMC1_CS | PIN_TMC2_CS, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(PIN_DRV_ENN_PORT, PIN_DRV_ENN, GPIO_PIN_SET);  /* drivers off */
+
+    gpio.Pin = PIN_TMC1_DIR;
+    HAL_GPIO_Init(PIN_TMC1_DIR_PORT, &gpio);
+
+    gpio.Pin = PIN_TMC2_DIR;
+    HAL_GPIO_Init(PIN_TMC2_DIR_PORT, &gpio);
+
+    /* DIAG inputs (open-drain, external 47k pull-ups on board — don't enable internal) */
+    gpio.Mode = GPIO_MODE_INPUT;
+    gpio.Pull = GPIO_NOPULL;
+    gpio.Pin = PIN_TMC1_DIAG;
+    HAL_GPIO_Init(PIN_TMC1_DIAG_PORT, &gpio);
+    gpio.Pin = PIN_TMC2_DIAG;
+    HAL_GPIO_Init(PIN_TMC2_DIAG_PORT, &gpio);
+
+    /* Limit switches — inputs with internal pull-up (switch closes to GND) */
+    gpio.Mode = GPIO_MODE_INPUT;
+    gpio.Pull = GPIO_PULLUP;
+    gpio.Pin = PIN_LIMIT1;
+    HAL_GPIO_Init(PIN_LIMIT1_PORT, &gpio);
+    gpio.Pin = PIN_LIMIT2;
+    HAL_GPIO_Init(PIN_LIMIT2_PORT, &gpio);
+
+    /* STEP1 (PA8) will be configured as TIM1_CH1 AF2 by Stepper_Init.
+     * STEP2 (PA0) will be configured as TIM2_CH1 AF2 by Stepper_Init.
+     * SPI1 (PA5/6/7) will be configured when the SPI driver is added. */
 }
 
-/**
- * @brief UART peripheral initialization
- */
 static void UART_Init(void)
 {
-    /* Enable clocks */
-    __HAL_RCC_USART1_CLK_ENABLE();
+    __HAL_RCC_USART2_CLK_ENABLE();
     __HAL_RCC_DMA1_CLK_ENABLE();
 
-    /* Initialize UART peripheral (clocks and GPIO only) */
     if (!tsumikoro_hal_stm32_init_peripheral(&g_stm32_config)) {
         Error_Handler();
     }
 }
 
-/**
- * @brief Bus protocol initialization
- */
 static void Bus_Init(void)
 {
-    /* HAL configuration */
     tsumikoro_hal_config_t hal_config = {
         .baud_rate = BUS_BAUD_RATE,
         .device_id = DEVICE_ID,
-        .is_controller = false,  /* This is a peripheral device */
+        .is_controller = false,
         .turnaround_delay_bytes = TURNAROUND_DELAY_BYTES,
         .platform_data = (void *)&g_stm32_config
     };
 
-    /* Initialize HAL (initially without RX callback) */
     g_hal_handle = tsumikoro_hal_init(&hal_config, NULL, NULL);
     if (g_hal_handle == NULL) {
         Error_Handler();
     }
 
-    /* Bus configuration */
     tsumikoro_bus_config_t bus_config = TSUMIKORO_BUS_DEFAULT_CONFIG();
-    bus_config.response_timeout_ms = 50;   /* Respond within 50ms */
+    bus_config.response_timeout_ms = 50;
 
-    /* Initialize bus handler (creates RTOS threads) */
     g_bus_handle = tsumikoro_bus_init(g_hal_handle, &bus_config,
                                        bus_unsolicited_callback, NULL);
     if (g_bus_handle == NULL) {
@@ -222,7 +288,6 @@ static void Bus_Init(void)
     }
 
 #if TSUMIKORO_BUS_USE_RTOS
-    /* In RTOS mode, re-initialize HAL with RX callback for interrupt-driven operation */
     tsumikoro_hal_deinit(g_hal_handle);
     tsumikoro_hal_rx_callback_t rx_callback = tsumikoro_bus_get_hal_rx_callback();
     g_hal_handle = tsumikoro_hal_init(&hal_config, rx_callback, g_bus_handle);
@@ -232,146 +297,139 @@ static void Bus_Init(void)
 #endif
 }
 
-/**
- * @brief Stepper motor initialization
- */
+/* ===== Stepper control =================================================== */
+
 static void Stepper_Init(void)
 {
-    /* TODO: Initialize stepper motor driver */
-    /* - Configure step/direction pins */
-    /* - Configure enable pin */
-    /* - Set up timer for step generation */
+    /* TODO:
+     *  - Configure SPI1 on PA5/6/7 (AF0) for shared TMC2130 bus
+     *  - Configure TIM1_CH1 (PA8) and TIM2_CH1 (PA0) for STEP pulse
+     *    generation (one-pulse mode or free-running with DMA-driven ARR)
+     *  - Reset TMC2130s (hold DRV_ENN, write GCONF/CHOPCONF/IHOLD_IRUN
+     *    via SPI)
+     *  - For 0.1 ohm sense resistor variant: leave CHOPCONF.VSENSE = 0
+     *  - For 0.68 ohm sense resistor variant (micro-stepper / 28BYJ-48):
+     *    set CHOPCONF.VSENSE = 1, use lower IRUN (e.g. 7 for 50 mA)
+     */
 
-    g_stepper_state.current_position = 0;
-    g_stepper_state.target_position = 0;
-    g_stepper_state.moving = false;
+    g_axis1.current_position = 0;
+    g_axis1.target_position = 0;
+    g_axis1.moving = false;
+    g_axis2.current_position = 0;
+    g_axis2.target_position = 0;
+    g_axis2.moving = false;
 }
 
-/**
- * @brief Stepper motor processing
- */
 static void Stepper_Process(void)
 {
-    /* TODO: Implement stepper motor control logic */
-    /* - Generate step pulses */
-    /* - Handle acceleration/deceleration */
-    /* - Update position */
-
-    if (g_stepper_state.moving) {
-        // Simulate movement
-        if (g_stepper_state.current_position < g_stepper_state.target_position) {
-            g_stepper_state.current_position++;
-        } else if (g_stepper_state.current_position > g_stepper_state.target_position) {
-            g_stepper_state.current_position--;
-        } else {
-            g_stepper_state.moving = false;
-        }
+    /* TODO: real step generation via TIM1/TIM2 — this is a stub */
+    if (g_axis1.moving) {
+        if (g_axis1.current_position < g_axis1.target_position)      g_axis1.current_position++;
+        else if (g_axis1.current_position > g_axis1.target_position) g_axis1.current_position--;
+        else                                                          g_axis1.moving = false;
+    }
+    if (g_axis2.moving) {
+        if (g_axis2.current_position < g_axis2.target_position)      g_axis2.current_position++;
+        else if (g_axis2.current_position > g_axis2.target_position) g_axis2.current_position--;
+        else                                                          g_axis2.moving = false;
     }
 }
 
-/**
- * @brief Bus unsolicited message callback
- *
- * Called when a message is received that's addressed to this device.
- * This is where peripheral devices handle commands from the controller.
- */
+/* ===== Bus callback ====================================================== */
+
 static void bus_unsolicited_callback(const tsumikoro_packet_t *packet, void *user_data)
 {
     (void)user_data;
 
-    if (packet == NULL) {
+    if (packet == NULL || packet->device_id != DEVICE_ID) {
         return;
     }
 
-    /* Only process commands addressed to us */
-    if (packet->device_id != DEVICE_ID) {
-        return;
-    }
-
-    /* Prepare response packet */
     tsumikoro_packet_t response = {
-        .device_id = 0x00,  /* Send response to controller (ID 0x00) */
+        .device_id = 0x00,
         .command = packet->command,
         .data_len = 0
     };
 
-    /* Handle commands based on command type */
     switch (packet->command) {
         case TSUMIKORO_CMD_PING:
-            /* Simple ping response - no data needed */
             break;
 
         case TSUMIKORO_CMD_GET_VERSION:
-            /* Return firmware version */
-            response.data[0] = 1;  /* Major version */
-            response.data[1] = 0;  /* Minor version */
-            response.data[2] = 0;  /* Patch version */
-            response.data[3] = 0;  /* Reserved */
+            response.data[0] = 1;
+            response.data[1] = 0;
+            response.data[2] = 0;
+            response.data[3] = 0;
             response.data_len = 4;
             break;
 
         case TSUMIKORO_CMD_GET_STATUS:
-            /* Return device status */
-            response.data[0] = g_stepper_state.moving ? 0x01 : 0x00;
-            response.data[1] = (uint8_t)(g_stepper_state.current_position >> 24);
-            response.data[2] = (uint8_t)(g_stepper_state.current_position >> 16);
-            response.data[3] = (uint8_t)(g_stepper_state.current_position >> 8);
-            response.data[4] = (uint8_t)(g_stepper_state.current_position);
-            response.data_len = 5;
+            response.data[0] = (g_axis1.moving ? 0x01 : 0x00)
+                             | (g_axis2.moving ? 0x02 : 0x00);
+            response.data[1] = (uint8_t)(g_axis1.current_position >> 24);
+            response.data[2] = (uint8_t)(g_axis1.current_position >> 16);
+            response.data[3] = (uint8_t)(g_axis1.current_position >> 8);
+            response.data[4] = (uint8_t)(g_axis1.current_position);
+            response.data[5] = (uint8_t)(g_axis2.current_position >> 24);
+            response.data[6] = (uint8_t)(g_axis2.current_position >> 16);
+            response.data[7] = (uint8_t)(g_axis2.current_position >> 8);
+            response.data[8] = (uint8_t)(g_axis2.current_position);
+            response.data_len = 9;
             break;
 
         case TSUMIKORO_CMD_STEPPER_MOVE:
-            /* Move to absolute position */
-            if (packet->data_len >= 4) {
-                g_stepper_state.target_position =
-                    ((int32_t)packet->data[0] << 24) |
-                    ((int32_t)packet->data[1] << 16) |
-                    ((int32_t)packet->data[2] << 8) |
-                    ((int32_t)packet->data[3]);
-                g_stepper_state.moving = true;
-
-                /* Acknowledge */
-                response.data[0] = 0x00;  /* Success */
-                response.data_len = 1;
+            /* byte 0: axis selector (0 = axis 1, 1 = axis 2)
+             * bytes 1..4: signed 32-bit absolute target */
+            if (packet->data_len >= 5) {
+                stepper_state_t *axis = (packet->data[0] == 0) ? &g_axis1 : &g_axis2;
+                axis->target_position =
+                    ((int32_t)packet->data[1] << 24) |
+                    ((int32_t)packet->data[2] << 16) |
+                    ((int32_t)packet->data[3] << 8)  |
+                    ((int32_t)packet->data[4]);
+                axis->moving = true;
+                response.data[0] = 0x00;
             } else {
-                /* Invalid data length */
-                response.data[0] = 0xFF;  /* Error */
-                response.data_len = 1;
+                response.data[0] = 0xFF;
             }
+            response.data_len = 1;
             break;
 
         case TSUMIKORO_CMD_STEPPER_STOP:
-            /* Emergency stop */
-            g_stepper_state.moving = false;
-            g_stepper_state.target_position = g_stepper_state.current_position;
-
-            /* Acknowledge */
-            response.data[0] = 0x00;  /* Success */
+            /* byte 0: axis selector (0 = axis 1, 1 = axis 2, 0xFF = both) */
+            if (packet->data_len >= 1) {
+                uint8_t sel = packet->data[0];
+                if (sel == 0 || sel == 0xFF) {
+                    g_axis1.moving = false;
+                    g_axis1.target_position = g_axis1.current_position;
+                }
+                if (sel == 1 || sel == 0xFF) {
+                    g_axis2.moving = false;
+                    g_axis2.target_position = g_axis2.current_position;
+                }
+                response.data[0] = 0x00;
+            } else {
+                response.data[0] = 0xFF;
+            }
             response.data_len = 1;
             break;
 
         default:
-            /* Unknown command - send NAK */
             return;
     }
 
-    /* Send response */
     tsumikoro_bus_send_no_response(g_bus_handle, &response);
 }
 
-/**
- * @brief System Clock Configuration
- * @note Configured for 64 MHz using HSI and PLL
- */
+/* ===== Clocks + error handler ============================================ */
+
 void SystemClock_Config(void)
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-    /* Configure the main internal regulator output voltage */
     HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-    /* Initializes the RCC Oscillators according to the specified parameters */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
     RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
@@ -383,90 +441,62 @@ void SystemClock_Config(void)
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
     RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
     RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-    {
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         Error_Handler();
     }
 
-    /* Initializes the CPU, AHB and APB buses clocks */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
                                   | RCC_CLOCKTYPE_PCLK1;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-    {
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
         Error_Handler();
     }
 }
 
-/**
- * @brief This function is executed in case of error occurrence.
- */
 static void Error_Handler(void)
 {
-    /* Disable interrupts */
     __disable_irq();
-
-    /* Flash LED rapidly */
-    while (1)
-    {
-        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    while (1) {
+        HAL_GPIO_TogglePin(PIN_LED_PORT, PIN_LED);
         for (volatile int i = 0; i < 100000; i++);
     }
 }
 
-/**
- * @brief Interrupt handlers
- */
+/* ===== Interrupt handlers ================================================ */
 
-/* UART interrupt handler */
-void USART1_IRQHandler(void)
+void USART2_IRQHandler(void)
 {
     tsumikoro_hal_stm32_uart_irq_handler(g_hal_handle);
 }
 
-/* DMA TX interrupt handler */
 void DMA1_Channel1_IRQHandler(void)
 {
     tsumikoro_hal_stm32_dma_tx_irq_handler(g_hal_handle);
 }
 
-/* DMA RX interrupt handler */
 void DMA1_Channel2_3_IRQHandler(void)
 {
     tsumikoro_hal_stm32_dma_rx_irq_handler(g_hal_handle);
 }
 
+/* ===== FreeRTOS hooks ==================================================== */
+
 #ifdef USE_FULL_ASSERT
-/**
- * @brief Reports the name of the source file and the source line number
- *        where the assert_param error has occurred.
- * @param file: pointer to the source file name
- * @param line: assert_param error line source number
- */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-    /* User can add implementation to report the file name and line number */
-    (void)file;
-    (void)line;
+    (void)file; (void)line;
 }
-#endif /* USE_FULL_ASSERT */
+#endif
 
-/**
- * @brief FreeRTOS stack overflow hook
- */
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 {
-    (void)xTask;
-    (void)pcTaskName;
+    (void)xTask; (void)pcTaskName;
     Error_Handler();
 }
 
-/**
- * @brief FreeRTOS malloc failed hook
- */
 void vApplicationMallocFailedHook(void)
 {
     Error_Handler();
